@@ -1,0 +1,50 @@
+{
+  "name": "perfekt",
+  "version": "0.0.1",
+  "author": "Kornel Dubieniecki",
+  "description": "Release and version your packages with perfe(k)t ease",
+  "main": "dist/index.js",
+  "bin": {
+    "perfekt": "./bin/perfekt.js"
+  },
+  "scripts": {
+    "build": "webpack",
+    "dev": "webpack --progress --colors --watch",
+    "prepare": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lekterable/perfekt"
+  },
+  "bugs": {
+    "url": "https://github.com/lekterable/perfekt/issues"
+  },
+  "keywords": [
+    "perfekt",
+    "perfect",
+    "release",
+    "version",
+    "manager",
+    "cli",
+    "semver"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
+    "@commitlint/cli": "^8.3.5",
+    "@commitlint/config-conventional": "^8.3.4",
+    "babel-loader": "^8.1.0",
+    "eslint": "^6.8.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.1.6",
+    "prettier": "^2.0.4",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
+  }
+}

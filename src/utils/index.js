@@ -24,9 +24,10 @@ export const getCommitDetails = commit => {
   const {
     groups: { hash, title }
   } = commit.match(/(?<hash>.{40}) (?<title>.*)/)
+
   const {
     groups: { scope, message }
-  } = title.match(/(\w*)(?:\((?<scope>.*)\))?: (?<message>.*)/)
+  } = title.match(/(\w*)(?:\((?<scope>.*)\))?:? (?<message>.*)/)
 
   return { hash, title, scope, message }
 }

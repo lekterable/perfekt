@@ -14,7 +14,7 @@ export const changelog = async version => {
     const isReleaseNext = nextCommit && nextCommit.scope === 'release'
 
     if (scope === 'release') return (changelog += `## ${message}\n\n`)
-    if (scope !== 'changelog') {
+    if (scope !== 'changelog' && scope !== 'CHANGELOG') {
       return (changelog += `- ${title} ${hash.slice(0, 8)}\n${
         isReleaseNext ? '\n' : ''
       }`)

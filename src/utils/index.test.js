@@ -14,12 +14,13 @@ describe('utils', () => {
   beforeEach(() => jest.resetAllMocks())
 
   describe('commitRelease', () => {
-    it('should commit release', () => {
+    it('should commit release', async () => {
+      exec.mockImplementation((_, cb) => cb(null))
       const version = '2.2.2'
+      await commitRelease(version)
 
-      commitRelease(version)
-
-      expect(exec).toBeCalledTimes(1)
+      expect(exec).toBeCalledTimes(2)
+      expect(exec).toBeCalledWith('git add CHANGELOG.md', expect.any(Function))
       expect(exec).toBeCalledWith(
         `git commit -m 'chore(release): ${version}'`,
         expect.any(Function)
@@ -30,7 +31,7 @@ describe('utils', () => {
   describe('getCommits', () => {
     it('should reject if receives an error', async () => {
       const error = 'error'
-      exec.mockImplementation((_, b) => b(error))
+      exec.mockImplementation((_, cb) => cb(error))
 
       expect(getCommits()).rejects.toMatch(error)
     })
@@ -46,7 +47,7 @@ describe('utils', () => {
         '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature'
       ]
 
-      exec.mockImplementation((_, b) => b(null, mockedInput))
+      exec.mockImplementation((_, cb) => cb(null, mockedInput))
       const commits = await getCommits()
 
       expect(exec).toBeCalledTimes(1)

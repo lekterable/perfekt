@@ -8,8 +8,10 @@ const execAsync = command =>
     })
   )
 
-export const commitRelease = version =>
-  execAsync(`git commit -m 'chore(release): ${version}'`)
+export const commitRelease = async version => {
+  await execAsync('git add CHANGELOG.md')
+  await execAsync(`git commit -m 'chore(release): ${version}'`)
+}
 
 export const getCommits = async () => {
   const commits = await execAsync('git log --format="%H %s"')

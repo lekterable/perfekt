@@ -1,7 +1,8 @@
 ## Latest
 
-- refactor: extract line generating logic to function and promisify exec bffc2f9e
-- feat: add option to write to local CHANGELOG file aa805ce7
+- test: add utils tests 217b25d0
+- refactor: extract line generating logic to function and promisify exec e69a284b
+- feat: add option to write to local CHANGELOG file 51ef458b
 
 ## 0.1.0
 

@@ -28,15 +28,15 @@ export const changelog = async (version, options) => {
     : process.stdout.write(changelog)
 }
 
-export const release = version => {
+export const release = async version => {
   const newVersion = semver.valid(semver.coerce(version))
   if (!newVersion) {
     return console.error(`Version '${version}' doesnt look right`)
   }
 
   try {
-    changelog(newVersion)
-    commitRelease(newVersion)
+    await changelog(newVersion, { write: true })
+    await commitRelease(newVersion)
   } catch (error) {
     console.error(error)
   }

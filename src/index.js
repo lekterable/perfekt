@@ -4,7 +4,8 @@ import {
   commitRelease,
   generateLine,
   getCommitDetails,
-  getCommits
+  getCommits,
+  updateVersion
 } from './utils'
 
 export const changelog = async (version, options) => {
@@ -35,6 +36,7 @@ export const release = async version => {
   }
 
   try {
+    await updateVersion(newVersion)
     await changelog(newVersion, { write: true })
     await commitRelease(newVersion)
   } catch (error) {

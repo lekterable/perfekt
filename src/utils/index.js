@@ -9,8 +9,9 @@ const execAsync = command =>
   )
 
 export const commitRelease = async version => {
-  await execAsync('git add CHANGELOG.md')
+  await execAsync('git add CHANGELOG.md package.json package-lock.json')
   await execAsync(`git commit -m 'chore(release): ${version}'`)
+  await execAsync(`git tag ${version}`)
 }
 
 export const getCommits = async () => {
@@ -46,3 +47,6 @@ export const generateLine = (
   if (normalizedScope === 'release') return `## ${message}\n\n`
   return `- ${title} ${hash.slice(0, 8)}${lineSpace}`
 }
+
+export const updateVersion = version =>
+  execAsync(`npm version ${version} --no-git-tag-version`)

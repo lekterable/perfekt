@@ -3,7 +3,8 @@ import {
   commitRelease,
   generateLine,
   getCommitDetails,
-  getCommits
+  getCommits,
+  updateVersion
 } from './index'
 
 jest.mock('child_process', () => ({
@@ -19,12 +20,16 @@ describe('utils', () => {
       const version = '2.2.2'
       await commitRelease(version)
 
-      expect(exec).toBeCalledTimes(2)
-      expect(exec).toBeCalledWith('git add CHANGELOG.md', expect.any(Function))
+      expect(exec).toBeCalledTimes(3)
+      expect(exec).toBeCalledWith(
+        'git add CHANGELOG.md package.json package-lock.json',
+        expect.any(Function)
+      )
       expect(exec).toBeCalledWith(
         `git commit -m 'chore(release): ${version}'`,
         expect.any(Function)
       )
+      expect(exec).toBeCalledWith(`git tag ${version}`, expect.any(Function))
     })
   })
 
@@ -138,6 +143,20 @@ describe('utils', () => {
       const line = generateLine(mockedInput, true)
 
       expect(line).toEqual(mockedOutput)
+    })
+  })
+
+  describe('updateVersion', () => {
+    it('should update version', async () => {
+      exec.mockImplementation((_, cb) => cb(null))
+      const version = '3.3.3'
+      await updateVersion(version)
+
+      expect(exec).toBeCalledTimes(1)
+      expect(exec).toBeCalledWith(
+        `npm version ${version} --no-git-tag-version`,
+        expect.any(Function)
+      )
     })
   })
 })

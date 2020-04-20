@@ -1,5 +1,6 @@
-## Latest
+## 0.2.0
 
+- feat: include changelog in the releases 2da21c56
 - test: add utils tests 217b25d0
 - refactor: extract line generating logic to function and promisify exec e69a284b
 - feat: add option to write to local CHANGELOG file 51ef458b

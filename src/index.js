@@ -1,6 +1,11 @@
 import { writeFileSync } from 'fs'
 import semver from 'semver'
-import { commitRelease, getCommitDetails, getCommits } from './utils'
+import {
+  commitRelease,
+  generateLine,
+  getCommitDetails,
+  getCommits
+} from './utils'
 
 export const changelog = async (version, options) => {
   const title = version || 'Latest'
@@ -10,16 +15,12 @@ export const changelog = async (version, options) => {
   let changelog = isReleaseLatest ? '' : `## ${title}\n\n`
 
   commits.forEach((commit, index) => {
-    const { title, scope, hash, message } = getCommitDetails(commit)
+    const commitDetails = getCommitDetails(commit)
     const nextCommit = getCommitDetails(commits[index + 1])
     const isReleaseNext = nextCommit && nextCommit.scope === 'release'
+    const line = generateLine(commitDetails, isReleaseNext)
 
-    if (scope === 'release') return (changelog += `## ${message}\n\n`)
-    if (scope !== 'changelog' && scope !== 'CHANGELOG') {
-      return (changelog += `- ${title} ${hash.slice(0, 8)}\n${
-        isReleaseNext ? '\n' : ''
-      }`)
-    }
+    if (line) changelog += line
   })
 
   return options && options.write

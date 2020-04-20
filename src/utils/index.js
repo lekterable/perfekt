@@ -1,22 +1,21 @@
 import { exec } from 'child_process'
 
-export const commitRelease = version =>
+const execAsync = command =>
   new Promise((resolve, reject) => {
-    exec(`git commit -m 'chore(release): ${version}'`, (err, res) => {
+    exec(command, (err, res) => {
       if (err) return reject(err)
-      resolve()
+      resolve(res)
     })
   })
 
-export const getCommits = () =>
-  new Promise((resolve, reject) =>
-    exec('git log --format="%H %s"', (err, res) => {
-      if (err) return reject(err)
+export const commitRelease = version =>
+  execAsync(`git commit -m 'chore(release): ${version}'`)
 
-      const commits = res.split('\n').filter(commit => commit)
-      resolve(commits)
-    })
-  )
+export const getCommits = async () => {
+  const commits = await execAsync('git log --format="%H %s"')
+
+  return commits.split('\n').filter(commit => commit)
+}
 
 export const getCommitDetails = commit => {
   if (!commit) return null
@@ -30,4 +29,18 @@ export const getCommitDetails = commit => {
   } = title.match(/(\w*)(?:\((?<scope>.*)\))?:? (?<message>.*)/)
 
   return { hash, title, scope, message }
+}
+
+export const generateLine = (
+  { title, scope, hash, message },
+  isReleaseNext
+) => {
+  const normalizedScope = scope && scope.toLowerCase()
+
+  if (normalizedScope === 'changelog') return null
+
+  const lineSpace = isReleaseNext ? '\n\n' : '\n'
+
+  if (normalizedScope === 'release') return `## ${message}\n\n`
+  return `- ${title} ${hash.slice(0, 8)}${lineSpace}`
 }

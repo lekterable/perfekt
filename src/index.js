@@ -1,21 +1,39 @@
-import { exec } from 'child_process'
+import semver from 'semver'
+import { commitRelease, getCommitDetails, getCommits } from './utils'
 
-const changelog = () =>
-  exec('git log --format="%H %s"', (_, res) => {
-    let changelog = '## Latest\n\n'
-    const commits = res.split('\n').filter(commit => commit)
-    commits.forEach(commit => {
-      const {
-        groups: { hash, title }
-      } = commit.match(/(?<hash>.{40}) (?<title>.*)/)
-      const {
-        groups: { scope }
-      } = title.match(/(\w*)(?:\((?<scope>.*)\))?:/)
+export const changelog = async version => {
+  const title = version || 'Latest'
+  const commits = await getCommits()
+  const latestCommit = getCommitDetails(commits[0])
+  const isReleaseLatest = latestCommit.scope === 'release'
+  let changelog = isReleaseLatest ? '' : `## ${title}\n\n`
 
-      if (scope !== 'changelog') changelog += `- ${title} ${hash.slice(0, 8)}\n`
-    })
+  commits.forEach((commit, index) => {
+    const { title, scope, hash, message } = getCommitDetails(commit)
+    const nextCommit = getCommitDetails(commits[index + 1])
+    const isReleaseNext = nextCommit && nextCommit.scope === 'release'
 
-    return process.stdout.write(changelog)
+    if (scope === 'release') return (changelog += `## ${message}\n\n`)
+    if (scope !== 'changelog') {
+      return (changelog += `- ${title} ${hash.slice(0, 8)}\n${
+        isReleaseNext ? '\n' : ''
+      }`)
+    }
   })
 
-export default { changelog }
+  return process.stdout.write(changelog)
+}
+
+export const release = version => {
+  const newVersion = semver.valid(semver.coerce(version))
+  if (!newVersion) {
+    return console.error(`Version '${version}' doesnt look right`)
+  }
+
+  try {
+    changelog(newVersion)
+    commitRelease(newVersion)
+  } catch (error) {
+    console.error(error)
+  }
+}

@@ -4,9 +4,10 @@ const { program } = require('commander')
 const { changelog, release } = require('../dist')
 
 program
-  .command('changelog')
+  .command('changelog [version]')
   .description('generate package changelog')
-  .action(() => changelog())
+  .option('--write', 'write the output to file')
+  .action((version, options) => changelog(version, options))
 
 program
   .command('release <version>')

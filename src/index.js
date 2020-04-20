@@ -1,7 +1,8 @@
+import { writeFileSync } from 'fs'
 import semver from 'semver'
 import { commitRelease, getCommitDetails, getCommits } from './utils'
 
-export const changelog = async version => {
+export const changelog = async (version, options) => {
   const title = version || 'Latest'
   const commits = await getCommits()
   const latestCommit = getCommitDetails(commits[0])
@@ -21,7 +22,9 @@ export const changelog = async version => {
     }
   })
 
-  return process.stdout.write(changelog)
+  return options && options.write
+    ? writeFileSync('CHANGELOG.md', changelog)
+    : process.stdout.write(changelog)
 }
 
 export const release = version => {

@@ -1,3 +1,8 @@
+## Latest
+
+- refactor: extract line generating logic to function and promisify exec bffc2f9e
+- feat: add option to write to local CHANGELOG file aa805ce7
+
 ## 0.1.0
 
 - fix: support other conventions b2f59019

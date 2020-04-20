@@ -10,7 +10,9 @@
   "scripts": {
     "build": "webpack",
     "dev": "webpack --progress --colors --watch",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "repository": {
     "type": "git",
@@ -47,6 +49,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "husky": "^4.2.5",
+    "jest": "^25.4.0",
     "lint-staged": "^10.1.6",
     "prettier": "^2.0.4",
     "webpack": "^4.42.1",

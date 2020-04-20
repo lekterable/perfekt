@@ -1,12 +1,12 @@
 import { exec } from 'child_process'
 
 const execAsync = command =>
-  new Promise((resolve, reject) => {
+  new Promise((resolve, reject) =>
     exec(command, (err, res) => {
       if (err) return reject(err)
       resolve(res)
     })
-  })
+  )
 
 export const commitRelease = version =>
   execAsync(`git commit -m 'chore(release): ${version}'`)

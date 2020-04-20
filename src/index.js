@@ -8,8 +8,11 @@ const changelog = () =>
       const {
         groups: { hash, title }
       } = commit.match(/(?<hash>.{40}) (?<title>.*)/)
+      const {
+        groups: { scope }
+      } = title.match(/(\w*)(?:\((?<scope>.*)\))?:/)
 
-      changelog += `- ${title} ${hash.slice(0, 8)}\n`
+      if (scope !== 'changelog') changelog += `- ${title} ${hash.slice(0, 8)}\n`
     })
 
     return process.stdout.write(changelog)

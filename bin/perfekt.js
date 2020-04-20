@@ -1,5 +1,11 @@
 #!/usr/bin/env node
 
-const perfekt = require('../dist').default
+const { program } = require('commander')
+const { changelog } = require('../dist').default
 
-perfekt()
+program
+  .command('changelog')
+  .description('generate package changelog')
+  .action(() => changelog())
+
+program.parse(process.argv)

@@ -3,17 +3,22 @@ import semver from 'semver'
 import {
   commitRelease,
   generateLine,
+  generateReleased,
   getCommitDetails,
   getCommits,
+  getLatestTag,
   updateVersion
 } from './utils'
 
 export const changelog = async (version, options) => {
   const title = version || 'Latest'
-  const commits = await getCommits()
+  const latestTag = await getLatestTag()
+  const commits = await getCommits(latestTag)
   const latestCommit = getCommitDetails(commits[0])
   const isReleaseLatest = latestCommit.scope === 'release'
   let changelog = isReleaseLatest ? '' : `## ${title}\n\n`
+
+  const released = latestTag && (await generateReleased(latestTag))
 
   commits.forEach((commit, index) => {
     const commitDetails = getCommitDetails(commit)
@@ -24,9 +29,11 @@ export const changelog = async (version, options) => {
     if (line) changelog += line
   })
 
-  return options && options.write
-    ? writeFileSync('CHANGELOG.md', changelog)
-    : process.stdout.write(changelog)
+  if (!options || !options.write) return process.stdout.write(changelog)
+
+  const newChangelog = released ? changelog + '\n' + released : changelog
+
+  return writeFileSync('CHANGELOG.md', newChangelog)
 }
 
 export const release = async version => {

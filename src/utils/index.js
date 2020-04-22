@@ -1,4 +1,5 @@
 import { exec } from 'child_process'
+import { readFile } from 'fs'
 
 const execAsync = command =>
   new Promise((resolve, reject) =>
@@ -14,10 +15,52 @@ export const commitRelease = async version => {
   await execAsync(`git tag ${version}`)
 }
 
-export const getCommits = async () => {
-  const commits = await execAsync('git log --format="%H %s"')
+export const getCommits = async tag => {
+  const query = tag
+    ? `git log --format="%H %s" ${tag}..`
+    : 'git log --format="%H %s"'
+  const commits = await execAsync(query)
 
   return commits.split('\n').filter(commit => commit)
+}
+
+export const generateReleased = previousVersion =>
+  new Promise((resolve, reject) =>
+    readFile('CHANGELOG.md', 'utf8', (err, data) => {
+      if (err) return reject(err)
+
+      let isLatest = false
+      const released = data
+        .split('\n')
+        .filter(line => {
+          if (line === '## Latest') {
+            isLatest = true
+
+            return false
+          }
+
+          if (isLatest && line === `## ${previousVersion}`) {
+            isLatest = false
+
+            return true
+          }
+
+          return !isLatest
+        })
+        .join('\n')
+
+      if (isLatest) {
+        return reject(new Error('Previous release not found in CHANGELOG'))
+      }
+
+      return resolve(released)
+    })
+  )
+
+export const getLatestTag = async () => {
+  const latestTag = await execAsync('git tag | tail -n 1')
+
+  return latestTag ? latestTag.replace('\n', '') : null
 }
 
 export const getCommitDetails = commit => {

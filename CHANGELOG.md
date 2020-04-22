@@ -1,3 +1,7 @@
+## Latest
+
+- feat: add update version feature fdef971e
+
 ## 0.2.0
 
 - feat: include changelog in the releases 2da21c56

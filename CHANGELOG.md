@@ -1,4 +1,4 @@
-## Latest
+## 1.0.0
 
 ### BREAKING
 
@@ -14,6 +14,7 @@
 
 ### Misc
 
+- move util tests to separate files db810d58
 - move commands to separate files dbd5fa05
 
 ## 0.2.0

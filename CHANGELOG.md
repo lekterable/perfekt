@@ -1,5 +1,6 @@
 ## Latest
 
+- feat: add initialize config feature 187e9201
 - feat: add package version b9108801
 - feat: prepend the CHANGELOG file instead of rewriting it 960ea6f5
 - feat: add update version feature fdef971e

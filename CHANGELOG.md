@@ -1,5 +1,9 @@
 ## Latest
 
+### BREAKING
+
+- group changelog entries by type c5f11dab
+
 ### Features
 
 - add --root option b813606b

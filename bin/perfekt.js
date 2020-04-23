@@ -2,6 +2,7 @@
 
 const { program } = require('commander')
 const { changelog, release } = require('../dist')
+const { version } = require('../package.json')
 
 program
   .command('changelog [version]')
@@ -14,4 +15,4 @@ program
   .description('execute a new release')
   .action(version => release(version))
 
-program.parse(process.argv)
+program.version(version).parse(process.argv)

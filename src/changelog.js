@@ -9,7 +9,7 @@ import {
 
 export const changelog = async (version, options) => {
   const title = version || 'Latest'
-  const latestTag = await getLatestTag()
+  const latestTag = !options.root && (await getLatestTag())
   const commits = await getCommits(latestTag)
   const latestCommit = getCommitDetails(commits[0])
   const isReleaseLatest = latestCommit.scope === 'release'

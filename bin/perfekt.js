@@ -8,6 +8,7 @@ program
   .command('changelog [version]')
   .description('generate package changelog')
   .option('--write', 'write the output to file')
+  .option('--root', 'generate changelog for the entire history')
   .action((version, options) => changelog(version, options))
 
 program

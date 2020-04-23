@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const { program } = require('commander')
-const { changelog, release } = require('../dist')
+const { changelog, release, initialize } = require('../dist')
 const { version } = require('../package.json')
 
 program
@@ -9,6 +9,11 @@ program
   .description('generate package changelog')
   .option('--write', 'write the output to file')
   .action((version, options) => changelog(version, options))
+
+program
+  .command('init')
+  .description('initialize config')
+  .action(() => initialize())
 
 program
   .command('release <version>')

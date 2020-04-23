@@ -1,5 +1,7 @@
 ## Latest
 
+- feat: add package version b9108801
+- feat: prepend the CHANGELOG file instead of rewriting it 960ea6f5
 - feat: add update version feature fdef971e
 
 ## 0.2.0

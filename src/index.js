@@ -1,4 +1,5 @@
 import { writeFileSync } from 'fs'
+import inquirer from 'inquirer'
 import semver from 'semver'
 import {
   commitRelease,
@@ -34,6 +35,27 @@ export const changelog = async (version, options) => {
   const newChangelog = released ? changelog + '\n' + released : changelog
 
   return writeFileSync('CHANGELOG.md', newChangelog)
+}
+
+const questions = [
+  {
+    type: 'list',
+    name: 'configFormat',
+    message: 'What format do you want to use for your your config?',
+    choices: [
+      '.perfektrc',
+      'perfekt.config.js',
+      'perfekt.yaml',
+      'perfekt.json'
+    ],
+    default: '.perfektrc'
+  }
+]
+
+export const initialize = async () => {
+  const { configFormat } = await inquirer.prompt(questions)
+
+  writeFileSync(configFormat, '')
 }
 
 export const release = async version => {

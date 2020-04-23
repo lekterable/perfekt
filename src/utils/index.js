@@ -70,26 +70,101 @@ export const getCommitDetails = commit => {
     groups: { hash, title }
   } = commit.match(/(?<hash>.{40}) (?<title>.*)/)
 
+  const commitDetails = title.match(
+    /(?<type>[\w ]*)(?:\((?<scope>[\w ]*)\))?(?<breaking>!)?: (?<message>.*)/
+  )
+
+  if (!commitDetails) return title
+
   const {
-    groups: { scope, message }
-  } = title.match(/(\w*)(?:\((?<scope>.*)\))?:? (?<message>.*)/)
+    groups: { type, scope, message, breaking }
+  } = commitDetails
 
-  return { hash, title, scope, message }
+  return { hash, title, type, scope, message, breaking }
 }
 
-export const generateLine = (
-  { title, scope, hash, message },
-  isReleaseNext
-) => {
-  const normalizedScope = scope && scope.toLowerCase()
+export const groupCommits = commits =>
+  commits.reduce(
+    (grouped, commit) => {
+      const group = grouped[grouped.length - 1]
+      const rest = grouped.slice(0, -1)
+      const commitDetails = getCommitDetails(commit)
+      const normalizedScope =
+        commitDetails.scope && commitDetails.scope.toLowerCase()
 
-  if (normalizedScope === 'changelog') return null
+      if (normalizedScope === 'changelog') return [...grouped]
+      if (normalizedScope === 'release') {
+        return [...grouped, { release: commit }]
+      }
 
-  const lineSpace = isReleaseNext ? '\n\n' : '\n'
+      if (commitDetails.breaking) {
+        const existing = group.breaking ? group.breaking : []
+        return [...rest, { ...group, breaking: [...existing, commit] }]
+      }
 
-  if (normalizedScope === 'release') return `## ${message}\n\n`
-  return `- ${title} ${hash.slice(0, 8)}${lineSpace}`
+      switch (commitDetails.type) {
+        case 'feat': {
+          const existing = group.feat ? group.feat : []
+          return [...rest, { ...group, feat: [...existing, commit] }]
+        }
+        case 'fix': {
+          const existing = group.fix ? group.fix : []
+          return [...rest, { ...group, fix: [...existing, commit] }]
+        }
+        default: {
+          const existing = group.misc ? group.misc : []
+          return [...rest, { ...group, misc: [...existing, commit] }]
+        }
+      }
+    },
+    [{}]
+  )
+
+export const generateChangelog = (version, groups) => {
+  const changelog = groups.map(group => {
+    const release = getCommitDetails(group.release)
+    const title = version || 'Latest'
+    let groupChangelog = `## ${release ? release.message : title}\n\n`
+
+    const entries = Object.entries(group)
+
+    entries.sort().forEach(([title, commits]) => {
+      if (title === 'release') return
+
+      switch (title) {
+        case 'breaking':
+          groupChangelog += '### BREAKING\n\n'
+          break
+        case 'feat':
+          groupChangelog += '### Features\n\n'
+          break
+        case 'fix':
+          groupChangelog += '### Fixes\n\n'
+          break
+        default:
+          groupChangelog += '### Misc\n\n'
+          break
+      }
+
+      return commits.forEach((commit, index) => {
+        const { message, hash } = getCommitDetails(commit)
+
+        const isLastLine = index + 1 === commits.length
+        const space = isLastLine ? '\n\n' : '\n'
+        const line = generateLine({ message, hash }) + space
+
+        return (groupChangelog += line)
+      })
+    })
+
+    return groupChangelog
+  })
+
+  return changelog.join('')
 }
+
+export const generateLine = ({ message, hash }) =>
+  `- ${message} ${hash.slice(0, 8)}`
 
 export const updateVersion = version =>
   execAsync(`npm version ${version} --no-git-tag-version`)

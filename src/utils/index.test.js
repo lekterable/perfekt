@@ -2,11 +2,13 @@ import { exec } from 'child_process'
 import { readFile } from 'fs'
 import {
   commitRelease,
+  generateChangelog,
   generateLine,
   generateReleased,
   getCommitDetails,
   getCommits,
   getLatestTag,
+  groupCommits,
   updateVersion
 } from './index'
 
@@ -129,8 +131,19 @@ describe('utils', () => {
         hash: 'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb',
         scope: 'release',
         title: 'chore(release): 0.1.0',
-        message: '0.1.0'
+        message: '0.1.0',
+        type: 'chore'
       }
+
+      const commitDetails = getCommitDetails(mockedInput)
+
+      expect(commitDetails).toEqual(mockedOutput)
+    })
+
+    it('should return title for non conventional commits', () => {
+      const mockedInput =
+        'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb Add some old feature'
+      const mockedOutput = 'Add some old feature'
 
       const commitDetails = getCommitDetails(mockedInput)
 
@@ -166,57 +179,189 @@ describe('utils', () => {
     })
   })
 
+  describe('groupCommits', () => {
+    it('should group commits with no releases', async () => {
+      const mockedInput = [
+        'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
+        'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+        'b2f5901922505efbfb6dd684252e8df0cdffeeb2 fix: support other conventions',
+        'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 fix: a bug',
+        '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature',
+        'b2f5901922505efbfb6dd684252e8df0cdffeeb2 tests: add core tests',
+        '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore: update dependencies'
+      ]
+      const mockedOutput = [
+        {
+          fix: [
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 fix: support other conventions',
+            'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 fix: a bug'
+          ],
+          feat: [
+            'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+            '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature'
+          ],
+          misc: [
+            'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 tests: add core tests',
+            '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore: update dependencies'
+          ]
+        }
+      ]
+      const grouped = await groupCommits(mockedInput)
+
+      expect(grouped).toEqual(mockedOutput)
+    })
+
+    it('should group commits', async () => {
+      const mockedInput = [
+        'b2f5901922505efbfb6dd684252e8df0cdffeeb2 chore!: generate changelog',
+        '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore!: version releases',
+        'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
+        'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+        'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
+        'b2f5901922505efbfb6dd684252e8df0cdffeeb2 fix: support other conventions',
+        '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature'
+      ]
+      const mockedOutput = [
+        {
+          breaking: [
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 chore!: generate changelog',
+            '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore!: version releases'
+          ],
+          feat: [
+            'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file'
+          ],
+          misc: [
+            'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec'
+          ]
+        },
+        {
+          release:
+            'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
+          fix: [
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 fix: support other conventions'
+          ],
+          feat: [
+            '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature'
+          ]
+        }
+      ]
+      const grouped = await groupCommits(mockedInput)
+
+      expect(grouped).toEqual(mockedOutput)
+    })
+
+    it('should skip changelog scope', async () => {
+      const mockedInput = [
+        'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
+        'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+        'b2f5901922505efbfb6dd684252e8df0cdffeeb2 fix: support other conventions',
+        'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 fix: a bug',
+        '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature',
+        'b2f5901922505efbfb6dd684252e8df0cdffeeb2 tests: add core tests',
+        '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore(changelog): update CHANGELOG'
+      ]
+      const mockedOutput = [
+        {
+          fix: [
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 fix: support other conventions',
+            'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 fix: a bug'
+          ],
+          feat: [
+            'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+            '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature'
+          ],
+          misc: [
+            'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 tests: add core tests'
+          ]
+        }
+      ]
+      const grouped = await groupCommits(mockedInput)
+
+      expect(grouped).toEqual(mockedOutput)
+    })
+  })
+
+  describe('generateChangelog', () => {
+    it('should generate changelog', () => {
+      const mockedInput = [
+        {
+          breaking: [
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 feat!: add new api',
+            '2ea04355c1e81c5088eeabc6e242fb1ade978524 feat!: deprecate function'
+          ],
+          feat: [
+            'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file'
+          ],
+          misc: [
+            'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec'
+          ]
+        },
+        {
+          release:
+            'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
+          fix: [
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 fix: support other conventions'
+          ],
+          feat: [
+            '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature'
+          ],
+          misc: [
+            '4e02179cae1234d7083036024080a3f25fcb52c2 chore: update dependencies'
+          ]
+        }
+      ]
+      const mockedOutput =
+        '## Latest\n\n### BREAKING\n\n- add new api b2f59019\n- deprecate function 2ea04355\n\n### Features\n\n- add option to write to local CHANGELOG file aa805ce7\n\n### Misc\n\n- extract line generating logic to function and promisify exec bffc2f9e\n\n## 0.1.0\n\n### Features\n\n- add execute release feature 4e02179c\n\n### Fixes\n\n- support other conventions b2f59019\n\n### Misc\n\n- update dependencies 4e02179c\n\n'
+
+      expect(generateChangelog(null, mockedInput)).toBe(mockedOutput)
+    })
+
+    it('should generate changelog with version', () => {
+      const mockedInput = [
+        {
+          breaking: [
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 feat!: add new api',
+            '2ea04355c1e81c5088eeabc6e242fb1ade978524 feat!: deprecate function'
+          ],
+          feat: [
+            'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file'
+          ],
+          misc: [
+            'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec'
+          ]
+        },
+        {
+          release:
+            'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
+          fix: [
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 fix: support other conventions'
+          ],
+          feat: [
+            '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature'
+          ],
+          misc: [
+            '4e02179cae1234d7083036024080a3f25fcb52c2 chore: update dependencies'
+          ]
+        }
+      ]
+      const mockedOutput =
+        '## 2.0.0\n\n### BREAKING\n\n- add new api b2f59019\n- deprecate function 2ea04355\n\n### Features\n\n- add option to write to local CHANGELOG file aa805ce7\n\n### Misc\n\n- extract line generating logic to function and promisify exec bffc2f9e\n\n## 0.1.0\n\n### Features\n\n- add execute release feature 4e02179c\n\n### Fixes\n\n- support other conventions b2f59019\n\n### Misc\n\n- update dependencies 4e02179c\n\n'
+
+      expect(generateChangelog('2.0.0', mockedInput)).toBe(mockedOutput)
+    })
+  })
+
   describe('generateLine', () => {
-    it('should generate release line', () => {
+    it('should generate line', () => {
       const mockedInput = {
-        hash: 'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb',
-        scope: 'release',
-        title: 'chore(release): 0.1.0',
-        message: '0.1.0'
+        message: 'generate changelog',
+        hash: 'b2f5901922505efbfb6dd684252e8df0cdffeeb2'
       }
-      const mockedOutput = '## 0.1.0\n\n'
+      const mockedOutput = '- generate changelog b2f59019'
 
       const line = generateLine(mockedInput)
-
-      expect(line).toEqual(mockedOutput)
-    })
-
-    it('should skip changelog line', () => {
-      const mockedInput = {
-        hash: 'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb',
-        scope: 'changelog',
-        title: 'chore(changelog): update changelog',
-        message: 'update changelog'
-      }
-      const mockedOutput = null
-
-      const line = generateLine(mockedInput)
-
-      expect(line).toEqual(mockedOutput)
-    })
-
-    it('should generate common line', () => {
-      const mockedInput = {
-        hash: 'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb',
-        title: 'feat: add feature',
-        message: 'add feature'
-      }
-      const mockedOutput = '- feat: add feature f2191200\n'
-
-      const line = generateLine(mockedInput)
-
-      expect(line).toEqual(mockedOutput)
-    })
-
-    it('should add extra space when release line is next', () => {
-      const mockedInput = {
-        hash: 'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb',
-        title: 'feat: add feature',
-        message: 'add feature'
-      }
-      const mockedOutput = '- feat: add feature f2191200\n\n'
-
-      const line = generateLine(mockedInput, true)
 
       expect(line).toEqual(mockedOutput)
     })

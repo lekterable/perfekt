@@ -20,7 +20,10 @@ export const groupCommits = commits =>
 
       if (normalizedScope === 'changelog') return [...grouped]
       if (normalizedScope === 'release') {
-        return [...grouped, { release: commit }]
+        const isLatest = isObjectEmpty(group)
+        const release = { release: commit }
+
+        return isLatest ? [release] : [...grouped, release]
       }
 
       if (commitDetails.breaking) {
@@ -45,6 +48,8 @@ export const groupCommits = commits =>
     },
     [{}]
   )
+
+export const isObjectEmpty = object => Object.keys(object).length === 0
 
 export const updateVersion = version =>
   execAsync(`npm version ${version} --no-git-tag-version`)

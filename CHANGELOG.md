@@ -1,3 +1,9 @@
+# Latest
+
+## Features
+
+- use higher level of headers for changelog eea23d95
+
 # 1.0.0
 
 ## BREAKING

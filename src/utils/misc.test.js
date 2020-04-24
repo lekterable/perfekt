@@ -1,5 +1,5 @@
 import { exec } from 'child_process'
-import { groupCommits, updateVersion } from './misc'
+import { groupCommits, isObjectEmpty, updateVersion } from './misc'
 
 jest.mock('child_process', () => ({
   exec: jest.fn()
@@ -109,6 +109,42 @@ describe('misc', () => {
       const grouped = await groupCommits(mockedInput)
 
       expect(grouped).toEqual(mockedOutput)
+    })
+
+    it('should group commits with no unreleased', async () => {
+      const mockedInput = [
+        'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
+        'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+        '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature',
+        'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
+        '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore(changelog): update CHANGELOG'
+      ]
+      const mockedOutput = [
+        {
+          feat: [
+            'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+            '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature'
+          ],
+          misc: [
+            'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec'
+          ],
+          release:
+            'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0'
+        }
+      ]
+      const grouped = await groupCommits(mockedInput)
+
+      expect(grouped).toEqual(mockedOutput)
+    })
+  })
+
+  describe('isObjectEmpty', () => {
+    it('should return false if object is not empty', () => {
+      expect(isObjectEmpty({ key: 'value' })).toBe(false)
+    })
+
+    it('should return true if object is empty', () => {
+      expect(isObjectEmpty({})).toBe(true)
     })
   })
 

@@ -1,10 +1,10 @@
-## 1.0.0
+# 1.0.0
 
-### BREAKING
+## BREAKING
 
 - group changelog entries by type c5f11dab
 
-### Features
+## Features
 
 - add --root option b813606b
 - add initialize config feature 187e9201
@@ -12,36 +12,36 @@
 - prepend the CHANGELOG file instead of rewriting it 960ea6f5
 - add update version feature fdef971e
 
-### Misc
+## Misc
 
 - move util tests to separate files db810d58
 - move commands to separate files dbd5fa05
 
-## 0.2.0
+# 0.2.0
 
-### Features
+## Features
 
 - include changelog in the releases 2da21c56
 - add option to write to local CHANGELOG file 51ef458b
 
-### Misc
+## Misc
 
 - add utils tests 217b25d0
 - extract line generating logic to function and promisify exec e69a284b
 
-## 0.1.0
+# 0.1.0
 
-### Features
+## Features
 
 - add execute release feature 4e02179c
 - exclude CHANGELOG scoped entries 847282e9
 - add generate changelog feature 7b907d9d
 - init :seedling: c681eb22
 
-### Fixes
+## Fixes
 
 - support other conventions b2f59019
 
-### Misc
+## Misc
 
 - add CHANGELOG.md f14c2848

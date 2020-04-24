@@ -10,13 +10,13 @@ export const generateReleased = previousVersion =>
       const released = data
         .split('\n')
         .filter(line => {
-          if (line === '## Latest') {
+          if (line === '# Latest') {
             isLatest = true
 
             return false
           }
 
-          if (isLatest && line === `## ${previousVersion}`) {
+          if (isLatest && line === `# ${previousVersion}`) {
             isLatest = false
 
             return true
@@ -38,7 +38,7 @@ export const generateChangelog = (version, groups) => {
   const changelog = groups.map(group => {
     const release = getCommitDetails(group.release)
     const title = version || 'Latest'
-    let groupChangelog = `## ${release ? release.message : title}\n\n`
+    let groupChangelog = `# ${release ? release.message : title}\n\n`
 
     const entries = Object.entries(group)
 
@@ -47,16 +47,16 @@ export const generateChangelog = (version, groups) => {
 
       switch (title) {
         case 'breaking':
-          groupChangelog += '### BREAKING\n\n'
+          groupChangelog += '## BREAKING\n\n'
           break
         case 'feat':
-          groupChangelog += '### Features\n\n'
+          groupChangelog += '## Features\n\n'
           break
         case 'fix':
-          groupChangelog += '### Fixes\n\n'
+          groupChangelog += '## Fixes\n\n'
           break
         default:
-          groupChangelog += '### Misc\n\n'
+          groupChangelog += '## Misc\n\n'
           break
       }
 

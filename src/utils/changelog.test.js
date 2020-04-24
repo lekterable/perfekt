@@ -19,7 +19,7 @@ describe('changelog', () => {
     it('should reject if there is no released but tag provided', async () => {
       const error = 'Previous release not found in CHANGELOG'
       const mockedInput =
-        '## Latest\n- feat: include changelog in the releases 2da21c56\n- test: add utils tests 217b25d0'
+        '# Latest\n- feat: include changelog in the releases 2da21c56\n- test: add utils tests 217b25d0'
       readFile.mockImplementation((_, __, cb) => cb(null, mockedInput))
 
       expect(generateReleased('2.2.2')).rejects.toThrow(error)
@@ -27,8 +27,8 @@ describe('changelog', () => {
 
     it('should generate released', async () => {
       const mockedInput =
-        '## Latest\n- feat: include changelog in the releases 2da21c56\n- test: add utils tests 217b25d0\n## 2.2.2\n- feat: add feature 2da21c56'
-      const mockedOutput = '## 2.2.2\n- feat: add feature 2da21c56'
+        '# Latest\n- feat: include changelog in the releases 2da21c56\n- test: add utils tests 217b25d0\n# 2.2.2\n- feat: add feature 2da21c56'
+      const mockedOutput = '# 2.2.2\n- feat: add feature 2da21c56'
       readFile.mockImplementation((_, __, cb) => cb(null, mockedInput))
       const released = await generateReleased('2.2.2')
 
@@ -66,7 +66,7 @@ describe('changelog', () => {
         }
       ]
       const mockedOutput =
-        '## Latest\n\n### BREAKING\n\n- add new api b2f59019\n- deprecate function 2ea04355\n\n### Features\n\n- add option to write to local CHANGELOG file aa805ce7\n\n### Misc\n\n- extract line generating logic to function and promisify exec bffc2f9e\n\n## 0.1.0\n\n### Features\n\n- add execute release feature 4e02179c\n\n### Fixes\n\n- support other conventions b2f59019\n\n### Misc\n\n- update dependencies 4e02179c\n\n'
+        '# Latest\n\n## BREAKING\n\n- add new api b2f59019\n- deprecate function 2ea04355\n\n## Features\n\n- add option to write to local CHANGELOG file aa805ce7\n\n## Misc\n\n- extract line generating logic to function and promisify exec bffc2f9e\n\n# 0.1.0\n\n## Features\n\n- add execute release feature 4e02179c\n\n## Fixes\n\n- support other conventions b2f59019\n\n## Misc\n\n- update dependencies 4e02179c\n\n'
 
       expect(generateChangelog(null, mockedInput)).toBe(mockedOutput)
     })
@@ -100,7 +100,7 @@ describe('changelog', () => {
         }
       ]
       const mockedOutput =
-        '## 2.0.0\n\n### BREAKING\n\n- add new api b2f59019\n- deprecate function 2ea04355\n\n### Features\n\n- add option to write to local CHANGELOG file aa805ce7\n\n### Misc\n\n- extract line generating logic to function and promisify exec bffc2f9e\n\n## 0.1.0\n\n### Features\n\n- add execute release feature 4e02179c\n\n### Fixes\n\n- support other conventions b2f59019\n\n### Misc\n\n- update dependencies 4e02179c\n\n'
+        '# 2.0.0\n\n## BREAKING\n\n- add new api b2f59019\n- deprecate function 2ea04355\n\n## Features\n\n- add option to write to local CHANGELOG file aa805ce7\n\n## Misc\n\n- extract line generating logic to function and promisify exec bffc2f9e\n\n# 0.1.0\n\n## Features\n\n- add execute release feature 4e02179c\n\n## Fixes\n\n- support other conventions b2f59019\n\n## Misc\n\n- update dependencies 4e02179c\n\n'
 
       expect(generateChangelog('2.0.0', mockedInput)).toBe(mockedOutput)
     })

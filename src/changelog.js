@@ -16,7 +16,10 @@ export const changelog = async (version, options) => {
   if (!options || !options.write) return process.stdout.write(changelog)
 
   const released = latestTag && (await generateReleased(latestTag))
-  const newChangelog = released ? changelog + released : changelog
+
+  const newChangelog = released
+    ? changelog + released
+    : changelog.replace(/\n\n$/g, '\n')
 
   return writeFileSync('CHANGELOG.md', newChangelog)
 }

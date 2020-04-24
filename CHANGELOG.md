@@ -4,6 +4,10 @@
 
 - use higher level of headers for changelog eea23d95
 
+## Fixes
+
+- stop adding Latest when not applicable c64fa467
+
 # 1.0.0
 
 ## BREAKING

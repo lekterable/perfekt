@@ -1,7 +1,7 @@
 import { writeFileSync } from 'fs'
 import inquirer from 'inquirer'
 
-const questions = [
+export const questions = [
   {
     type: 'list',
     name: 'configFormat',

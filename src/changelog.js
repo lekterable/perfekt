@@ -12,7 +12,8 @@ export const changelog = async (version, options, config) => {
   const commits = await getCommits(latestTag)
   const grouped = groupCommits(commits)
   const changelog = generateChangelog(version, grouped, config)
-  if (!options || !options.write) return process.stdout.write(changelog)
+
+  if (!options.write) return process.stdout.write(changelog)
 
   const released = latestTag && (await generateReleased(latestTag, config))
 

@@ -8,6 +8,7 @@
 
 ## Fixes
 
+- replace %message% as last to avoid bugs [ec507396](https://github.com/lekterable/perfekt/commit/ec5073967f83dbcfc98b0ba17a1aa9659a042385)
 - stop adding empty line at the end of the file on --root [faee4801](https://github.com/lekterable/perfekt/commit/faee480108aab450a606ac8132f89c9f42ec8ab3)
 - stop adding Latest when not applicable [c64fa467](https://github.com/lekterable/perfekt/commit/c64fa4673612f90b349d125912f07d5db4140bcd)
 

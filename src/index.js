@@ -7,3 +7,8 @@ export const defaultConfig = {
   releaseFormat: '# %version%',
   lineFormat: '- %message% %hash%'
 }
+
+export const defaultChangelogOptions = {
+  write: false,
+  root: false
+}

@@ -86,6 +86,6 @@ export const generateChangelog = (version, groups, config) => {
 
 export const generateLine = ({ message, hash }, config) =>
   config.lineFormat
-    .replace('%message%', message)
     .replace('%HASH%', hash)
     .replace('%hash%', hash.slice(0, 8))
+    .replace('%message%', message)

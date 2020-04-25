@@ -2,6 +2,7 @@
 
 ## Features
 
+- introduce changelog customization using config file e66d6176
 - use higher level of headers for changelog eea23d95
 
 ## Fixes

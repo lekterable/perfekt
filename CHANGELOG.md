@@ -14,6 +14,7 @@
 
 ## Misc
 
+- add main modules tests [8990fd64](https://github.com/lekterable/perfekt/commit/8990fd64de5ababc39eba8e8c9b2d7b2509216ef)
 - include commit links in the changelog [8f622021](https://github.com/lekterable/perfekt/commit/8f622021665bc6076d00fde6527800980eba836a)
 
 # 1.0.0

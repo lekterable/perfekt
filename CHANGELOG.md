@@ -6,6 +6,7 @@
 
 ## Fixes
 
+- stop adding empty line at the end of the file on --root faee4801
 - stop adding Latest when not applicable c64fa467
 
 # 1.0.0

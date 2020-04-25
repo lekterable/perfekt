@@ -1,15 +1,24 @@
 #!/usr/bin/env node
 
 const { program } = require('commander')
-const { changelog, release, initialize } = require('../dist')
+const { changelog, release, initialize, defaultConfig } = require('../dist')
 const { version } = require('../package.json')
+const { cosmiconfig } = require('cosmiconfig')
 
 program
   .command('changelog [version]')
   .description('generate package changelog')
   .option('--write', 'write the output to file')
   .option('--root', 'generate changelog for the entire history')
-  .action((version, options) => changelog(version, options))
+  .action(async (version, options) => {
+    const cosmiConfig = (await cosmiconfig('perfekt').search()) || {}
+    const config = {
+      ...defaultConfig,
+      ...cosmiConfig.config
+    }
+
+    changelog(version, options, config)
+  })
 
 program
   .command('init')

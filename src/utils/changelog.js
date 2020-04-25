@@ -1,7 +1,7 @@
 import { readFile } from 'fs'
 import { getCommitDetails } from './git'
 
-export const generateReleased = previousVersion =>
+export const generateReleased = (previousVersion, config) =>
   new Promise((resolve, reject) =>
     readFile('CHANGELOG.md', 'utf8', (err, data) => {
       if (err) return reject(err)
@@ -10,13 +10,16 @@ export const generateReleased = previousVersion =>
       const released = data
         .split('\n')
         .filter(line => {
-          if (line === '# Latest') {
+          if (line === config.unreleasedFormat) {
             isLatest = true
 
             return false
           }
 
-          if (isLatest && line === `# ${previousVersion}`) {
+          if (
+            isLatest &&
+            line === config.releaseFormat.replace('%version%', previousVersion)
+          ) {
             isLatest = false
 
             return true
@@ -34,11 +37,15 @@ export const generateReleased = previousVersion =>
     })
   )
 
-export const generateChangelog = (version, groups) => {
+export const generateChangelog = (version, groups, config) => {
   const changelog = groups.map(group => {
     const release = getCommitDetails(group.release)
-    const title = version || 'Latest'
-    let groupChangelog = `# ${release ? release.message : title}\n\n`
+    const releaseVersion = (release && release.message) || version
+    const title = releaseVersion
+      ? config.releaseFormat.replace('%version%', releaseVersion)
+      : config.unreleasedFormat
+
+    let groupChangelog = title + '\n\n'
 
     const entries = Object.entries(group)
 
@@ -65,7 +72,7 @@ export const generateChangelog = (version, groups) => {
 
         const isLastLine = index + 1 === commits.length
         const space = isLastLine ? '\n\n' : '\n'
-        const line = generateLine({ message, hash }) + space
+        const line = generateLine({ message, hash }, config) + space
 
         return (groupChangelog += line)
       })
@@ -77,5 +84,7 @@ export const generateChangelog = (version, groups) => {
   return changelog.join('')
 }
 
-export const generateLine = ({ message, hash }) =>
-  `- ${message} ${hash.slice(0, 8)}`
+export const generateLine = ({ message, hash }, config) =>
+  config.lineFormat
+    .replace('%message%', message)
+    .replace('%hash%', hash.slice(0, 8))

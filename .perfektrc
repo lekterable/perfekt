@@ -1,0 +1,3 @@
+{
+  "lineFormat": "- %message% [%hash%](https://github.com/lekterable/perfekt/commit/%HASH%)"
+}

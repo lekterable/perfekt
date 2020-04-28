@@ -112,10 +112,26 @@ describe('git', () => {
       expect(commitDetails).toEqual(mockedOutput)
     })
 
-    it('should return title for non conventional commits', () => {
+    it('should return title and hash for commits using other convention', () => {
       const mockedInput =
         'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb Add some old feature'
-      const mockedOutput = 'Add some old feature'
+      const mockedOutput = {
+        hash: 'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb',
+        message: 'Add some old feature'
+      }
+
+      const commitDetails = getCommitDetails(mockedInput)
+
+      expect(commitDetails).toEqual(mockedOutput)
+    })
+
+    it('should return title for non conventional commits', () => {
+      const mockedInput =
+        'c31c0ae217dde31fa858070916fbed4931d3c50b init :seedling:'
+      const mockedOutput = {
+        hash: 'c31c0ae217dde31fa858070916fbed4931d3c50b',
+        message: 'init :seedling:'
+      }
 
       const commitDetails = getCommitDetails(mockedInput)
 

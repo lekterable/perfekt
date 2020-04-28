@@ -26,7 +26,7 @@ export const getCommitDetails = commit => {
     /(?<type>[\w ]*)(?:\((?<scope>[\w ]*)\))?(?<breaking>!)?: (?<message>.*)/
   )
 
-  if (!commitDetails) return title
+  if (!commitDetails) return { hash, message: title }
 
   const {
     groups: { type, scope, message, breaking }

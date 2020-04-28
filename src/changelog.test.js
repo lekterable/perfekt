@@ -26,6 +26,19 @@ jest.mock('fs', () => ({
 describe('changelog', () => {
   beforeEach(() => jest.resetAllMocks())
 
+  it('should throw if no commits found', async () => {
+    const mockedTag = '2.2.3'
+    const mockedCommits = []
+
+    existsSync.mockImplementation(() => true)
+    getLatestTag.mockImplementation(() => mockedTag)
+    getCommits.mockImplementation(() => mockedCommits)
+
+    expect(changelog(null, defaultOptions, defaultConfig)).rejects.toThrow(
+      'No commits found since the last tag'
+    )
+  })
+
   it('should print to output', async () => {
     const stdoutMock = mockProcessStdout()
     const mockedTag = '2.2.3'
@@ -83,6 +96,13 @@ describe('changelog', () => {
     const mockedTag = '2.2.3'
     const mockedChangelog =
       '# 2.2.3\n\n## Features\n\n- add %HASH% placeholder to line format a3c93b2f\n- introduce changelog customization using config file e66d6176\n- use higher level of headers for changelog eea23d95\n\n## Fixes\n\n- replace %message% as last to avoid bugs ec507396\n- stop adding empty line at the end of the file on --root faee4801\n- stop adding Latest when not applicable c64fa467\n\n## Misc\n\n- include commit links in the changelog 8f622021\n\n'
+    const mockedCommits = [
+      'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
+      'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+      '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature',
+      'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
+      '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore(changelog): update CHANGELOG'
+    ]
     const mockedGrouped = [
       {
         feat: [
@@ -99,6 +119,7 @@ describe('changelog', () => {
     const mockedReleased = ''
 
     getLatestTag.mockImplementation(() => mockedTag)
+    getCommits.mockImplementation(() => mockedCommits)
     groupCommits.mockImplementation(() => mockedGrouped)
     generateChangelog.mockImplementation(() => mockedChangelog)
     generateReleased.mockImplementation(() => mockedReleased)
@@ -122,9 +143,17 @@ describe('changelog', () => {
     const mockedTag = '2.2.3'
     const mockedChangelog =
       '# Latest\n\n## Features\n\n- add %HASH% placeholder to line format a3c93b2f\n- introduce changelog customization using config file e66d6176\n- use higher level of headers for changelog eea23d95\n\n## Fixes\n\n- replace %message% as last to avoid bugs ec507396\n- stop adding empty line at the end of the file on --root faee4801\n- stop adding Latest when not applicable c64fa467\n\n## Misc\n\n- include commit links in the changelog 8f622021\n\n'
+    const mockedCommits = [
+      'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
+      'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+      '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature',
+      'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
+      '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore(changelog): update CHANGELOG'
+    ]
     const mockedReleased = ''
 
     getLatestTag.mockImplementation(() => mockedTag)
+    getCommits.mockImplementation(() => mockedCommits)
     generateChangelog.mockImplementation(() => mockedChangelog)
     generateReleased.mockImplementation(() => mockedReleased)
 
@@ -140,12 +169,20 @@ describe('changelog', () => {
     const mockedTag = '2.2.3'
     const mockedChangelog =
       '# Latest\n\n## Features\n\n- add %HASH% placeholder to line format a3c93b2f\n- introduce changelog customization using config file e66d6176\n- use higher level of headers for changelog eea23d95\n\n## Fixes\n\n- replace %message% as last to avoid bugs ec507396\n- stop adding empty line at the end of the file on --root faee4801\n- stop adding Latest when not applicable c64fa467\n\n## Misc\n\n- include commit links in the changelog 8f622021\n\n'
+    const mockedCommits = [
+      'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
+      'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+      '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature',
+      'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
+      '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore(changelog): update CHANGELOG'
+    ]
     const mockedReleased = ''
     const mockedFilename = 'CHANGELOG.md'
     const mockedOutput =
       '# Latest\n\n## Features\n\n- add %HASH% placeholder to line format a3c93b2f\n- introduce changelog customization using config file e66d6176\n- use higher level of headers for changelog eea23d95\n\n## Fixes\n\n- replace %message% as last to avoid bugs ec507396\n- stop adding empty line at the end of the file on --root faee4801\n- stop adding Latest when not applicable c64fa467\n\n## Misc\n\n- include commit links in the changelog 8f622021\n'
 
     getLatestTag.mockImplementation(() => mockedTag)
+    getCommits.mockImplementation(() => mockedCommits)
     generateChangelog.mockImplementation(() => mockedChangelog)
     generateReleased.mockImplementation(() => mockedReleased)
 
@@ -161,11 +198,19 @@ describe('changelog', () => {
     const mockedTag = '2.2.3'
     const mockedChangelog =
       '# 2.2.3\n\n## Features\n\n- add %HASH% placeholder to line format a3c93b2f\n- introduce changelog customization using config file e66d6176\n- use higher level of headers for changelog eea23d95\n\n## Fixes\n\n- replace %message% as last to avoid bugs ec507396\n- stop adding empty line at the end of the file on --root faee4801\n- stop adding Latest when not applicable c64fa467\n\n## Misc\n\n- include commit links in the changelog 8f622021\n\n'
+    const mockedCommits = [
+      'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
+      'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+      '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature',
+      'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
+      '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore(changelog): update CHANGELOG'
+    ]
     const mockedReleased = '# 2.2.2\n- feat: add feature 2da21c56'
     const mockedFilename = 'CHANGELOG.md'
 
     existsSync.mockImplementation(() => true)
     getLatestTag.mockImplementation(() => mockedTag)
+    getCommits.mockImplementation(() => mockedCommits)
     generateChangelog.mockImplementation(() => mockedChangelog)
     generateReleased.mockImplementation(() => mockedReleased)
 

@@ -11,6 +11,9 @@ export const changelog = async (version, options, config) => {
   const hasChangelog = existsSync('CHANGELOG.md')
   const latestTag = hasChangelog && !options.root && (await getLatestTag())
   const commits = await getCommits(latestTag)
+
+  if (!commits.length) throw new Error('No commits found since the last tag')
+
   const grouped = groupCommits(commits)
   const changelog = generateChangelog(version, grouped, config)
 

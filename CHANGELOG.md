@@ -8,6 +8,7 @@
 
 ## Fixes
 
+- check if changelog exists before accessing [4d95659f](https://github.com/lekterable/perfekt/commit/4d95659f302e0fe968154e17214876849172509f)
 - make release pass the config object [56473839](https://github.com/lekterable/perfekt/commit/56473839b2887ea3962546eeb88ce0ad2a098365)
 - handle edge case with non conventional commits [8be681f2](https://github.com/lekterable/perfekt/commit/8be681f2483c5255caa6c6a5c12a452465d10a22)
 - replace %message% as last to avoid bugs [ec507396](https://github.com/lekterable/perfekt/commit/ec5073967f83dbcfc98b0ba17a1aa9659a042385)

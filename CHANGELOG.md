@@ -8,6 +8,7 @@
 
 ## Fixes
 
+- make release pass the config object [56473839](https://github.com/lekterable/perfekt/commit/56473839b2887ea3962546eeb88ce0ad2a098365)
 - handle edge case with non conventional commits [8be681f2](https://github.com/lekterable/perfekt/commit/8be681f2483c5255caa6c6a5c12a452465d10a22)
 - replace %message% as last to avoid bugs [ec507396](https://github.com/lekterable/perfekt/commit/ec5073967f83dbcfc98b0ba17a1aa9659a042385)
 - stop adding empty line at the end of the file on --root [faee4801](https://github.com/lekterable/perfekt/commit/faee480108aab450a606ac8132f89c9f42ec8ab3)

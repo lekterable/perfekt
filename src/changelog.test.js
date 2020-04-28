@@ -1,4 +1,4 @@
-import { writeFileSync } from 'fs'
+import { existsSync, writeFileSync } from 'fs'
 import { mockProcessStdout } from 'jest-mock-process'
 import { defaultChangelogOptions as defaultOptions, defaultConfig } from './'
 import { changelog } from './changelog'
@@ -19,7 +19,8 @@ jest.mock('./utils', () => ({
 }))
 jest.mock('fs', () => ({
   writeFileSync: jest.fn(),
-  readFile: jest.fn()
+  readFile: jest.fn(),
+  existsSync: jest.fn()
 }))
 
 describe('changelog', () => {
@@ -52,6 +53,7 @@ describe('changelog', () => {
       '# Latest\n\n## Features\n\n- add %HASH% placeholder to line format a3c93b2f\n- introduce changelog customization using config file e66d6176\n- use higher level of headers for changelog eea23d95\n\n## Fixes\n\n- replace %message% as last to avoid bugs ec507396\n- stop adding empty line at the end of the file on --root faee4801\n- stop adding Latest when not applicable c64fa467\n\n## Misc\n\n- include commit links in the changelog 8f622021\n\n'
     const mockedReleased = ''
 
+    existsSync.mockImplementation(() => true)
     getLatestTag.mockImplementation(() => mockedTag)
     getCommits.mockImplementation(() => mockedCommits)
     groupCommits.mockImplementation(() => mockedGrouped)
@@ -60,6 +62,8 @@ describe('changelog', () => {
 
     await changelog(null, defaultOptions, defaultConfig)
 
+    expect(existsSync).toBeCalledTimes(1)
+    expect(existsSync).toBeCalledWith('CHANGELOG.md')
     expect(getLatestTag).toBeCalledTimes(1)
     expect(getLatestTag).toBeCalledWith()
     expect(getCommits).toBeCalledTimes(1)
@@ -160,6 +164,7 @@ describe('changelog', () => {
     const mockedReleased = '# 2.2.2\n- feat: add feature 2da21c56'
     const mockedFilename = 'CHANGELOG.md'
 
+    existsSync.mockImplementation(() => true)
     getLatestTag.mockImplementation(() => mockedTag)
     generateChangelog.mockImplementation(() => mockedChangelog)
     generateReleased.mockImplementation(() => mockedReleased)

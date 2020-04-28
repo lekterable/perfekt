@@ -28,6 +28,14 @@ program
 program
   .command('release <version>')
   .description('execute a new release')
-  .action(version => release(version))
+  .action(async (version, options) => {
+    const cosmiConfig = (await cosmiconfig('perfekt').search()) || {}
+    const config = {
+      ...defaultConfig,
+      ...cosmiConfig.config
+    }
+
+    release(version, options, config)
+  })
 
 program.version(version).parse(process.argv)

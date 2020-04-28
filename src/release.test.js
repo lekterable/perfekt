@@ -1,3 +1,4 @@
+import { defaultConfig } from './'
 import { changelog } from './changelog'
 import { release } from './release'
 import { commitRelease, updateVersion } from './utils'
@@ -17,7 +18,7 @@ describe('release', () => {
   beforeEach(() => jest.resetAllMocks())
 
   it('should throw if no version passed', () => {
-    expect(release()).rejects.toThrow('Relese requires a versio')
+    expect(release()).rejects.toThrow('Relese requires a version')
   })
 
   it('should throw if incorrect version passed', () => {
@@ -45,9 +46,14 @@ describe('release', () => {
   it('should execute release', async () => {
     const mockedVersion = '2.2.2'
 
-    await release(mockedVersion)
+    await release(mockedVersion, {}, defaultConfig)
 
     expect(changelog).toBeCalledTimes(1)
+    expect(changelog).toBeCalledWith(
+      mockedVersion,
+      { write: true },
+      defaultConfig
+    )
     expect(commitRelease).toBeCalledTimes(1)
     expect(commitRelease).toBeCalledWith(mockedVersion)
     expect(updateVersion).toBeCalledTimes(1)

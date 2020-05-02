@@ -1,4 +1,4 @@
-# Latest
+# 1.1.0
 
 ## Features
 
@@ -8,6 +8,7 @@
 
 ## Fixes
 
+- throw error if there are no commits [5fa8e6c9](https://github.com/lekterable/perfekt/commit/5fa8e6c9996444fa0d17493cf1e379a696682696)
 - check if changelog exists before accessing [4d95659f](https://github.com/lekterable/perfekt/commit/4d95659f302e0fe968154e17214876849172509f)
 - make release pass the config object [56473839](https://github.com/lekterable/perfekt/commit/56473839b2887ea3962546eeb88ce0ad2a098365)
 - handle edge case with non conventional commits [8be681f2](https://github.com/lekterable/perfekt/commit/8be681f2483c5255caa6c6a5c12a452465d10a22)

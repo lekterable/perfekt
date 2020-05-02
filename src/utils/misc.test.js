@@ -88,12 +88,14 @@ describe('misc', () => {
           ['## Feat', 'feat', 'feature'],
           ['## Fix', 'fix'],
           ['## Custom', 'custom']
-        ]
+        ],
+        ignoredScopes: ['ignored']
       }
       const mockedInput = [
         'b2f5901922505efbfb6dd684252e8df0cdffeeb2 chore!: generate changelog',
         '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore!: version releases',
         'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
+        'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor(ignored): rewrite legacy code',
         'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
         'b2f5901922505efbfb6dd684252e8df0cdffeeb2 custom: make changelog customizable',
         'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',

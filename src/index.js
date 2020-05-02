@@ -9,7 +9,8 @@ export const defaultConfig = {
     ['## Features', 'feat', 'feature'],
     ['## Fixes', 'fix']
   ],
-  lineFormat: '- %message% %hash%'
+  lineFormat: '- %message% %hash%',
+  ignoredScopes: ['changelog']
 }
 
 export const defaultChangelogOptions = {

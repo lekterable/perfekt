@@ -18,7 +18,7 @@ export const groupCommits = (commits, config) =>
       const normalizedScope =
         commitDetails.scope && commitDetails.scope.toLowerCase()
 
-      if (normalizedScope === 'changelog') return [...grouped]
+      if (config.ignoredScopes.includes(normalizedScope)) return [...grouped]
       if (normalizedScope === 'release') {
         const isLatest = isObjectEmpty(group)
         const release = { release: commit }

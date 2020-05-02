@@ -1,3 +1,9 @@
+# Latest
+
+## Features
+
+- make changelog groups configurable [a2ec46eb](https://github.com/lekterable/perfekt/commit/a2ec46eb9e962a79a9153300adc2229af182d4a6)
+
 # 1.1.0
 
 ## Features

@@ -1,13 +1,10 @@
-import semver from 'semver'
 import { changelog } from './changelog'
-import { commitRelease, updateVersion } from './utils'
+import { commitRelease, defineVersion, updateVersion } from './utils'
 
-export const release = async (version, options, config) => {
-  if (!version) throw new Error('Relese requires a version')
+export const release = async (input, options, config) => {
+  if (!input) throw new Error('Relese requires a version')
 
-  const newVersion = semver.valid(semver.coerce(version))
-
-  if (!newVersion) throw new Error(`Version '${version}' doesn't look right`)
+  const newVersion = defineVersion(input)
 
   await updateVersion(newVersion)
   await changelog(newVersion, { write: true }, config)

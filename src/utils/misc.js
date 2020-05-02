@@ -1,4 +1,6 @@
 import { exec } from 'child_process'
+import { readFileSync } from 'fs'
+import semver from 'semver'
 import { getCommitDetails } from './git'
 
 export const execAsync = command =>
@@ -8,6 +10,24 @@ export const execAsync = command =>
       resolve(res)
     })
   )
+
+export const defineVersion = input => {
+  const allowed = ['major', 'minor', 'patch']
+
+  if (allowed.includes(input)) {
+    const packageJson = readFileSync('package.json', 'utf8')
+    const currentVersion = JSON.parse(packageJson).version
+    const newVersion = semver.inc(currentVersion, input)
+
+    return newVersion
+  }
+
+  const newVersion = semver.valid(semver.coerce(input))
+
+  if (!newVersion) throw new Error(`Version '${input}' doesn't look right`)
+
+  return newVersion
+}
 
 export const groupCommits = (commits, config) =>
   commits.reduce(

@@ -5,6 +5,10 @@
 - make changelog ignored scopes configurable [d34a9f12](https://github.com/lekterable/perfekt/commit/d34a9f12500df6ea21a17b85b783a41b1fca5347)
 - make changelog groups configurable [a2ec46eb](https://github.com/lekterable/perfekt/commit/a2ec46eb9e962a79a9153300adc2229af182d4a6)
 
+## Misc
+
+- catch errors higher in the scope [ac5c2a84](https://github.com/lekterable/perfekt/commit/ac5c2a84546ff5675ff239566fa7f9b93a9afab9)
+
 # 1.1.0
 
 ## Features

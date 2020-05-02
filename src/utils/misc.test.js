@@ -1,13 +1,50 @@
 import { exec } from 'child_process'
+import { readFileSync } from 'fs'
 import { defaultConfig } from '../'
-import { groupCommits, isObjectEmpty, updateVersion } from './misc'
+import {
+  defineVersion,
+  groupCommits,
+  isObjectEmpty,
+  updateVersion
+} from './misc'
 
+jest.mock('fs', () => ({ readFileSync: jest.fn() }))
 jest.mock('child_process', () => ({
   exec: jest.fn()
 }))
 
 describe('misc', () => {
   beforeEach(() => jest.resetAllMocks())
+
+  describe('defineVersion', () => {
+    it('should throw if incorrect version passed', () => {
+      const mockedInput = 'version'
+
+      expect(() => defineVersion(mockedInput)).toThrow(
+        "Version 'version' doesn't look right"
+      )
+    })
+
+    it('should bump the version', () => {
+      const mockedInput = 'major'
+      const mockedFile = '{ "version": "3.3.3" }'
+      const mockedOutput = '4.0.0'
+
+      readFileSync.mockImplementation(() => mockedFile)
+
+      const version = defineVersion(mockedInput)
+
+      expect(version).toBe(mockedOutput)
+    })
+
+    it('should define the version', () => {
+      const mockedInput = '3.3.3'
+
+      const version = defineVersion(mockedInput)
+
+      expect(version).toBe(mockedInput)
+    })
+  })
 
   describe('groupCommits', () => {
     it('should group commits with no releases', async () => {

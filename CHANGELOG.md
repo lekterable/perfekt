@@ -2,6 +2,7 @@
 
 ## Features
 
+- make no-commits error more specific [a357a61a](https://github.com/lekterable/perfekt/commit/a357a61a4197d01201a84b9ae7ed7f447e16c7d7)
 - add release version bumping [17feea4a](https://github.com/lekterable/perfekt/commit/17feea4af5e339532d680a6ef6e9ec331f8abd2e)
 - make changelog ignored scopes configurable [d34a9f12](https://github.com/lekterable/perfekt/commit/d34a9f12500df6ea21a17b85b783a41b1fca5347)
 - make changelog groups configurable [a2ec46eb](https://github.com/lekterable/perfekt/commit/a2ec46eb9e962a79a9153300adc2229af182d4a6)

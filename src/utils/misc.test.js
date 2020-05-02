@@ -1,4 +1,5 @@
 import { exec } from 'child_process'
+import { defaultConfig } from '../'
 import { groupCommits, isObjectEmpty, updateVersion } from './misc'
 
 jest.mock('child_process', () => ({
@@ -36,7 +37,7 @@ describe('misc', () => {
           ]
         }
       ]
-      const grouped = await groupCommits(mockedInput)
+      const grouped = await groupCommits(mockedInput, defaultConfig)
 
       expect(grouped).toEqual(mockedOutput)
     })
@@ -75,7 +76,58 @@ describe('misc', () => {
           ]
         }
       ]
-      const grouped = await groupCommits(mockedInput)
+      const grouped = await groupCommits(mockedInput, defaultConfig)
+
+      expect(grouped).toEqual(mockedOutput)
+    })
+
+    it('should group commits with custom config', async () => {
+      const config = {
+        ...defaultConfig,
+        groups: [
+          ['## Feat', 'feat', 'feature'],
+          ['## Fix', 'fix'],
+          ['## Custom', 'custom']
+        ]
+      }
+      const mockedInput = [
+        'b2f5901922505efbfb6dd684252e8df0cdffeeb2 chore!: generate changelog',
+        '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore!: version releases',
+        'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
+        'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+        'b2f5901922505efbfb6dd684252e8df0cdffeeb2 custom: make changelog customizable',
+        'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
+        'b2f5901922505efbfb6dd684252e8df0cdffeeb2 fix: support other conventions',
+        '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature'
+      ]
+      const mockedOutput = [
+        {
+          breaking: [
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 chore!: generate changelog',
+            '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore!: version releases'
+          ],
+          feat: [
+            'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file'
+          ],
+          custom: [
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 custom: make changelog customizable'
+          ],
+          misc: [
+            'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec'
+          ]
+        },
+        {
+          release:
+            'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
+          fix: [
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 fix: support other conventions'
+          ],
+          feat: [
+            '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature'
+          ]
+        }
+      ]
+      const grouped = await groupCommits(mockedInput, config)
 
       expect(grouped).toEqual(mockedOutput)
     })
@@ -106,7 +158,7 @@ describe('misc', () => {
           ]
         }
       ]
-      const grouped = await groupCommits(mockedInput)
+      const grouped = await groupCommits(mockedInput, defaultConfig)
 
       expect(grouped).toEqual(mockedOutput)
     })
@@ -132,7 +184,7 @@ describe('misc', () => {
             'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0'
         }
       ]
-      const grouped = await groupCommits(mockedInput)
+      const grouped = await groupCommits(mockedInput, defaultConfig)
 
       expect(grouped).toEqual(mockedOutput)
     })

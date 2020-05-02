@@ -82,7 +82,7 @@ describe('changelog', () => {
     expect(getCommits).toBeCalledTimes(1)
     expect(getCommits).toBeCalledWith(mockedTag)
     expect(groupCommits).toBeCalledTimes(1)
-    expect(groupCommits).toBeCalledWith(mockedCommits)
+    expect(groupCommits).toBeCalledWith(mockedCommits, defaultConfig)
     expect(generateChangelog).toBeCalledTimes(1)
     expect(generateChangelog).toBeCalledWith(null, mockedGrouped, defaultConfig)
     expect(generateReleased).not.toBeCalled()

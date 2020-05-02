@@ -49,23 +49,16 @@ export const generateChangelog = (version, groups, config) => {
 
     const entries = Object.entries(group)
 
-    entries.sort().forEach(([title, commits]) => {
-      if (title === 'release') return
+    entries.sort().forEach(([type, commits]) => {
+      if (type === 'release') return
 
-      switch (title) {
-        case 'breaking':
-          groupChangelog += '## BREAKING\n\n'
-          break
-        case 'feat':
-          groupChangelog += '## Features\n\n'
-          break
-        case 'fix':
-          groupChangelog += '## Fixes\n\n'
-          break
-        default:
-          groupChangelog += '## Misc\n\n'
-          break
-      }
+      const matchingGroup = config.groups.find(([_, ...types]) =>
+        types.includes(type)
+      )
+
+      if (type === 'breaking') groupChangelog += '## BREAKING\n\n'
+      else if (!matchingGroup) groupChangelog += '## Misc\n\n'
+      else groupChangelog += `${matchingGroup[0]}\n\n`
 
       return commits.forEach((commit, index) => {
         const { message, hash } = getCommitDetails(commit)

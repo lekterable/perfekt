@@ -14,7 +14,7 @@ export const changelog = async (version, options, config) => {
 
   if (!commits.length) throw new Error('No commits found since the last tag')
 
-  const grouped = groupCommits(commits)
+  const grouped = groupCommits(commits, config)
   const changelog = generateChangelog(version, grouped, config)
 
   if (!options.write) return process.stdout.write(changelog)

@@ -9,7 +9,7 @@ export const execAsync = command =>
     })
   )
 
-export const groupCommits = commits =>
+export const groupCommits = (commits, config) =>
   commits.reduce(
     (grouped, commit) => {
       const group = grouped[grouped.length - 1]
@@ -31,20 +31,18 @@ export const groupCommits = commits =>
         return [...rest, { ...group, breaking: [...existing, commit] }]
       }
 
-      switch (commitDetails.type) {
-        case 'feat': {
-          const existing = group.feat ? group.feat : []
-          return [...rest, { ...group, feat: [...existing, commit] }]
-        }
-        case 'fix': {
-          const existing = group.fix ? group.fix : []
-          return [...rest, { ...group, fix: [...existing, commit] }]
-        }
-        default: {
-          const existing = group.misc ? group.misc : []
-          return [...rest, { ...group, misc: [...existing, commit] }]
-        }
+      const matchingGroup = config.groups.find(([_, ...types]) =>
+        types.includes(commitDetails.type)
+      )
+
+      if (!matchingGroup) {
+        const existing = group.misc ? group.misc : []
+        return [...rest, { ...group, misc: [...existing, commit] }]
       }
+
+      const key = matchingGroup[1]
+      const existing = group[key] ? group[key] : []
+      return [...rest, { ...group, [key]: [...existing, commit] }]
     },
     [{}]
   )

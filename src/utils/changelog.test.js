@@ -90,7 +90,15 @@ describe('changelog', () => {
     })
 
     it('should generate changelog with custom config', () => {
-      const config = { ...defaultConfig, unreleasedFormat: '## Unreleased' }
+      const config = {
+        ...defaultConfig,
+        groups: [
+          ['## Feat', 'feat', 'feature'],
+          ['## Fix', 'fix'],
+          ['## Custom', 'custom']
+        ],
+        unreleasedFormat: '## Unreleased'
+      }
       const mockedInput = [
         {
           breaking: [
@@ -99,6 +107,9 @@ describe('changelog', () => {
           ],
           feat: [
             'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file'
+          ],
+          custom: [
+            '2ea04355c1e81c5088eeabc6e242fb1ade978524 custom: make changelog customizable'
           ],
           misc: [
             'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec'
@@ -119,7 +130,7 @@ describe('changelog', () => {
         }
       ]
       const mockedOutput =
-        '## Unreleased\n\n## BREAKING\n\n- add new api b2f59019\n- deprecate function 2ea04355\n\n## Features\n\n- add option to write to local CHANGELOG file aa805ce7\n\n## Misc\n\n- extract line generating logic to function and promisify exec bffc2f9e\n\n# 0.1.0\n\n## Features\n\n- add execute release feature 4e02179c\n\n## Fixes\n\n- support other conventions b2f59019\n\n## Misc\n\n- update dependencies 4e02179c\n\n'
+        '## Unreleased\n\n## BREAKING\n\n- add new api b2f59019\n- deprecate function 2ea04355\n\n## Custom\n\n- make changelog customizable 2ea04355\n\n## Feat\n\n- add option to write to local CHANGELOG file aa805ce7\n\n## Misc\n\n- extract line generating logic to function and promisify exec bffc2f9e\n\n# 0.1.0\n\n## Feat\n\n- add execute release feature 4e02179c\n\n## Fix\n\n- support other conventions b2f59019\n\n## Misc\n\n- update dependencies 4e02179c\n\n'
 
       expect(generateChangelog(null, mockedInput, config)).toBe(mockedOutput)
     })

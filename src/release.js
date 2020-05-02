@@ -7,13 +7,9 @@ export const release = async (version, options, config) => {
 
   const newVersion = semver.valid(semver.coerce(version))
 
-  if (!newVersion) throw new Error(`Version '${version}' doesnt look right`)
+  if (!newVersion) throw new Error(`Version '${version}' doesn't look right`)
 
-  try {
-    await updateVersion(newVersion)
-    await changelog(newVersion, { write: true }, config)
-    await commitRelease(newVersion)
-  } catch (error) {
-    console.error(error)
-  }
+  await updateVersion(newVersion)
+  await changelog(newVersion, { write: true }, config)
+  await commitRelease(newVersion)
 }

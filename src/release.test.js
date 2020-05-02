@@ -25,22 +25,8 @@ describe('release', () => {
     const mockedVersion = 'version'
 
     expect(release(mockedVersion)).rejects.toThrow(
-      "Version 'version' doesnt look right"
+      "Version 'version' doesn't look right"
     )
-  })
-
-  it('should log error if it occurs', async () => {
-    const mockedVersion = '2.2.2'
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation()
-
-    updateVersion.mockImplementation(() => Promise.reject(new Error()))
-
-    await release(mockedVersion)
-
-    expect(consoleSpy).toBeCalledTimes(1)
-    expect(consoleSpy).toBeCalledWith(expect.any(Error))
-
-    consoleSpy.mockRestore()
   })
 
   it('should execute release', async () => {

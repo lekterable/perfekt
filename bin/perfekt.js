@@ -17,7 +17,9 @@ program
       ...cosmiConfig.config
     }
 
-    changelog(version, options, config)
+    changelog(version, options, config).catch(error =>
+      console.error(error.message)
+    )
   })
 
 program
@@ -35,7 +37,9 @@ program
       ...cosmiConfig.config
     }
 
-    release(version, options, config)
+    release(version, options, config).catch(error =>
+      console.error(error.message)
+    )
   })
 
 program.version(version).parse(process.argv)

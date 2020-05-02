@@ -27,6 +27,17 @@ describe('changelog', () => {
   beforeEach(() => jest.resetAllMocks())
 
   it('should throw if no commits found', async () => {
+    const mockedCommits = []
+
+    existsSync.mockImplementation(() => true)
+    getCommits.mockImplementation(() => mockedCommits)
+
+    expect(changelog(null, defaultOptions, defaultConfig)).rejects.toThrow(
+      'No commits found'
+    )
+  })
+
+  it('should throw if no commits found with tag', async () => {
     const mockedTag = '2.2.3'
     const mockedCommits = []
 
@@ -35,7 +46,7 @@ describe('changelog', () => {
     getCommits.mockImplementation(() => mockedCommits)
 
     expect(changelog(null, defaultOptions, defaultConfig)).rejects.toThrow(
-      'No commits found since the last tag'
+      "No commits found since the latest tag '2.2.3'"
     )
   })
 

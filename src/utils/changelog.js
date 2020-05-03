@@ -1,8 +1,12 @@
-import { readFile } from 'fs'
+import { existsSync, readFile } from 'fs'
 import { getCommitDetails } from './git'
 
 export const generateReleased = (previousVersion, config) =>
-  new Promise((resolve, reject) =>
+  new Promise((resolve, reject) => {
+    const hasChangelog = existsSync('CHANGELOG.md')
+
+    if (!hasChangelog) return resolve(null)
+
     readFile('CHANGELOG.md', 'utf8', (err, data) => {
       if (err) return reject(err)
 
@@ -35,7 +39,7 @@ export const generateReleased = (previousVersion, config) =>
 
       return resolve(released)
     })
-  )
+  })
 
 export const generateChangelog = (version, groups, config) => {
   const changelog = groups.map(group => {

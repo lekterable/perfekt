@@ -1,17 +1,30 @@
-import { readFile } from 'fs'
+import { existsSync, readFile } from 'fs'
 import { defaultConfig } from '../'
 import { generateChangelog, generateLine, generateReleased } from './changelog'
 
 jest.mock('fs', () => ({
-  readFile: jest.fn()
+  readFile: jest.fn(),
+  existsSync: jest.fn()
 }))
 
 describe('changelog', () => {
   beforeEach(() => jest.resetAllMocks())
 
   describe('generateReleased', () => {
+    it("should return null if CHANGELOG doesn't exist", async () => {
+      existsSync.mockImplementation(() => false)
+
+      const released = await generateReleased()
+
+      expect(existsSync).toBeCalledTimes(1)
+      expect(existsSync).toBeCalledWith('CHANGELOG.md')
+      expect(released).toBe(null)
+    })
+
     it('should reject if receives an error', async () => {
       const error = 'error'
+
+      existsSync.mockImplementation(() => true)
       readFile.mockImplementation((_, __, cb) => cb(error))
 
       expect(generateReleased(null, defaultConfig)).rejects.toMatch(error)
@@ -21,6 +34,8 @@ describe('changelog', () => {
       const error = 'Previous release not found in CHANGELOG'
       const mockedInput =
         '# Latest\n- feat: include changelog in the releases 2da21c56\n- test: add utils tests 217b25d0'
+
+      existsSync.mockImplementation(() => true)
       readFile.mockImplementation((_, __, cb) => cb(null, mockedInput))
 
       expect(generateReleased('2.2.2', defaultConfig)).rejects.toThrow(error)
@@ -30,7 +45,10 @@ describe('changelog', () => {
       const mockedInput =
         '# Latest\n- feat: include changelog in the releases 2da21c56\n- test: add utils tests 217b25d0\n# 2.2.2\n- feat: add feature 2da21c56'
       const mockedOutput = '# 2.2.2\n- feat: add feature 2da21c56'
+
+      existsSync.mockImplementation(() => true)
       readFile.mockImplementation((_, __, cb) => cb(null, mockedInput))
+
       const released = await generateReleased('2.2.2', defaultConfig)
 
       expect(released).toBe(mockedOutput)
@@ -45,7 +63,10 @@ describe('changelog', () => {
       const mockedInput =
         '## Unreleased\n- feat: include changelog in the releases 2da21c56\n- test: add utils tests 217b25d0\n## Release v2.2.2\n- feat: add feature 2da21c56'
       const mockedOutput = '## Release v2.2.2\n- feat: add feature 2da21c56'
+
+      existsSync.mockImplementation(() => true)
       readFile.mockImplementation((_, __, cb) => cb(null, mockedInput))
+
       const released = await generateReleased('2.2.2', config)
 
       expect(released).toBe(mockedOutput)

@@ -1,4 +1,4 @@
-import { existsSync, writeFileSync } from 'fs'
+import { writeFileSync } from 'fs'
 import {
   generateChangelog,
   generateReleased,
@@ -8,9 +8,8 @@ import {
 } from './utils'
 
 export const changelog = async (version, options, config) => {
-  const hasChangelog = existsSync('CHANGELOG.md')
-  const latestTag = hasChangelog && !options.root && (await getLatestTag())
-  const commits = await getCommits(latestTag)
+  const latestTag = !options.root && !options.from && (await getLatestTag())
+  const commits = await getCommits(options.from || latestTag)
 
   if (!commits.length) {
     const message = latestTag

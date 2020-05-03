@@ -1,8 +1,8 @@
 import { execAsync } from './misc'
 
-export const getCommits = async tag => {
-  const query = tag
-    ? `git log --format="%H %s" ${tag}..`
+export const getCommits = async from => {
+  const query = from
+    ? `git log --format="%H %s" ${from}..`
     : 'git log --format="%H %s"'
   const commits = await execAsync(query)
 

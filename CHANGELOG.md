@@ -9,6 +9,7 @@
 
 ## Misc
 
+- add eslint prettier config [86f22d65](https://github.com/lekterable/perfekt/commit/86f22d65f117bf26fc9fd1596e3c074acf58d3b8)
 - catch errors higher in the scope [ac5c2a84](https://github.com/lekterable/perfekt/commit/ac5c2a84546ff5675ff239566fa7f9b93a9afab9)
 
 # 1.1.0

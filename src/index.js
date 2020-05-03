@@ -15,5 +15,10 @@ export const defaultConfig = {
 
 export const defaultChangelogOptions = {
   write: false,
-  root: false
+  root: false,
+  from: null
+}
+
+export const defaultReleaseOptions = {
+  from: null
 }

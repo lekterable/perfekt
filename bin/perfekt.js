@@ -10,6 +10,10 @@ program
   .description('generate package changelog')
   .option('--write', 'write the output to file')
   .option('--root', 'generate changelog for the entire history')
+  .option(
+    '--from <commit>',
+    "SHA of the last commit that won't be a included in this changelog"
+  )
   .action(async (version, options) => {
     const cosmiConfig = (await cosmiconfig('perfekt').search()) || {}
     const config = {
@@ -30,6 +34,10 @@ program
 program
   .command('release <version>')
   .description('execute a new release')
+  .option(
+    '--from <commit>',
+    "SHA of the last commit that won't be a included in this release"
+  )
   .action(async (version, options) => {
     const cosmiConfig = (await cosmiconfig('perfekt').search()) || {}
     const config = {

@@ -7,6 +7,6 @@ export const release = async (input, options, config) => {
   const newVersion = defineVersion(input)
 
   await updateVersion(newVersion)
-  await changelog(newVersion, { write: true }, config)
+  await changelog(newVersion, { write: true, from: options.from }, config)
   await commitRelease(newVersion)
 }

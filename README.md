@@ -153,10 +153,12 @@ Default config looks like this:
 {
   "unreleasedFormat": "# Latest",
   "releaseFormat": "# %version%",
+  "breakingFormat": "## BREAKING",
   "groups": [
     ["## Features", "feat", "feature"],
     ["## Fixes", "fix"]
   ],
+  "miscFormat": "## Misc",
   "lineFormat": "- %message% %hash%",
   "ignoredScopes": ["changelog"]
 }
@@ -173,6 +175,18 @@ none
 Default:
 
 `# Latest`
+
+### `breakingFormat`
+
+Format of the breaking changes header in the generated changelog
+
+Placeholders:
+
+none
+
+Default:
+
+`## BREAKING`
 
 ### `releaseFormat`
 
@@ -195,6 +209,18 @@ commit type comes from: `type(scope?): message`
 Default:
 
 `[['## Features', 'feat', 'feature'], ['## Fixes', 'fix']]`
+
+### `miscFormat`
+
+Format of the miscellaneous header in the generated changelog
+
+Placeholders:
+
+none
+
+Default:
+
+`## Misc`
 
 ### `lineFormat`
 

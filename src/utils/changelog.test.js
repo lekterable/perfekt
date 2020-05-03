@@ -113,12 +113,16 @@ describe('changelog', () => {
     it('should generate changelog with custom config', () => {
       const config = {
         ...defaultConfig,
+        unreleasedFormat: '## Unreleased',
+        releaseFormat: '# v.%version%',
+        breakingFormat: '### BREAKING CHANGE',
         groups: [
           ['## Feat', 'feat', 'feature'],
           ['## Fix', 'fix'],
           ['## Custom', 'custom']
         ],
-        unreleasedFormat: '## Unreleased'
+        miscFormat: '### Miscellaneous',
+        lineFormat: '* %message% %hash%'
       }
       const mockedInput = [
         {
@@ -151,7 +155,7 @@ describe('changelog', () => {
         }
       ]
       const mockedOutput =
-        '## Unreleased\n\n## BREAKING\n\n- add new api b2f59019\n- deprecate function 2ea04355\n\n## Custom\n\n- make changelog customizable 2ea04355\n\n## Feat\n\n- add option to write to local CHANGELOG file aa805ce7\n\n## Misc\n\n- extract line generating logic to function and promisify exec bffc2f9e\n\n# 0.1.0\n\n## Feat\n\n- add execute release feature 4e02179c\n\n## Fix\n\n- support other conventions b2f59019\n\n## Misc\n\n- update dependencies 4e02179c\n\n'
+        '## Unreleased\n\n### BREAKING CHANGE\n\n* add new api b2f59019\n* deprecate function 2ea04355\n\n## Custom\n\n* make changelog customizable 2ea04355\n\n## Feat\n\n* add option to write to local CHANGELOG file aa805ce7\n\n### Miscellaneous\n\n* extract line generating logic to function and promisify exec bffc2f9e\n\n# v.0.1.0\n\n## Feat\n\n* add execute release feature 4e02179c\n\n## Fix\n\n* support other conventions b2f59019\n\n### Miscellaneous\n\n* update dependencies 4e02179c\n\n'
 
       expect(generateChangelog(null, mockedInput, config)).toBe(mockedOutput)
     })

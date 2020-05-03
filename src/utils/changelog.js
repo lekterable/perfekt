@@ -60,9 +60,9 @@ export const generateChangelog = (version, groups, config) => {
         types.includes(type)
       )
 
-      if (type === 'breaking') groupChangelog += '## BREAKING\n\n'
-      else if (!matchingGroup) groupChangelog += '## Misc\n\n'
-      else groupChangelog += `${matchingGroup[0]}\n\n`
+      if (type === 'breaking') groupChangelog += `${config.breakingFormat}\n\n`
+      else if (matchingGroup) groupChangelog += `${matchingGroup[0]}\n\n`
+      else groupChangelog += `${config.miscFormat}\n\n`
 
       return commits.forEach((commit, index) => {
         const { message, hash } = getCommitDetails(commit)

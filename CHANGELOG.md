@@ -2,6 +2,7 @@
 
 ## Features
 
+- add --from option to changelog and release [0586c886](https://github.com/lekterable/perfekt/commit/0586c8867ef43fabe18a34bf496e65288055120d)
 - make no-commits error more specific [a357a61a](https://github.com/lekterable/perfekt/commit/a357a61a4197d01201a84b9ae7ed7f447e16c7d7)
 - add release version bumping [17feea4a](https://github.com/lekterable/perfekt/commit/17feea4af5e339532d680a6ef6e9ec331f8abd2e)
 - make changelog ignored scopes configurable [d34a9f12](https://github.com/lekterable/perfekt/commit/d34a9f12500df6ea21a17b85b783a41b1fca5347)
@@ -9,6 +10,7 @@
 
 ## Misc
 
+- update README [dd3bf31e](https://github.com/lekterable/perfekt/commit/dd3bf31edd0df6b27bec7764c731bef4fda1971d)
 - add eslint prettier config [86f22d65](https://github.com/lekterable/perfekt/commit/86f22d65f117bf26fc9fd1596e3c074acf58d3b8)
 - catch errors higher in the scope [ac5c2a84](https://github.com/lekterable/perfekt/commit/ac5c2a84546ff5675ff239566fa7f9b93a9afab9)
 

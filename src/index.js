@@ -5,10 +5,12 @@ export * from './release'
 export const defaultConfig = {
   unreleasedFormat: '# Latest',
   releaseFormat: '# %version%',
+  breakingFormat: '## BREAKING',
   groups: [
     ['## Features', 'feat', 'feature'],
     ['## Fixes', 'fix']
   ],
+  miscFormat: '## Misc',
   lineFormat: '- %message% %hash%',
   ignoredScopes: ['changelog']
 }

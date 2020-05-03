@@ -2,6 +2,7 @@
 
 ## Features
 
+- make breaking and misc headers configurable [6b05a3b8](https://github.com/lekterable/perfekt/commit/6b05a3b8430eb18af4c2d9fa67addc78c7357cfb)
 - add --from option to changelog and release [0586c886](https://github.com/lekterable/perfekt/commit/0586c8867ef43fabe18a34bf496e65288055120d)
 - make no-commits error more specific [a357a61a](https://github.com/lekterable/perfekt/commit/a357a61a4197d01201a84b9ae7ed7f447e16c7d7)
 - add release version bumping [17feea4a](https://github.com/lekterable/perfekt/commit/17feea4af5e339532d680a6ef6e9ec331f8abd2e)

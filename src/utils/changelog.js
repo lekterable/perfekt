@@ -10,30 +10,31 @@ export const generateReleased = (previousVersion, config) =>
     readFile('CHANGELOG.md', 'utf8', (err, data) => {
       if (err) return reject(err)
 
-      let isLatest = false
+      let isUnreleased = false
+
       const released = data
         .split('\n')
         .filter(line => {
           if (line === config.unreleasedFormat) {
-            isLatest = true
+            isUnreleased = true
 
             return false
           }
 
           if (
-            isLatest &&
+            isUnreleased &&
             line === config.releaseFormat.replace('%version%', previousVersion)
           ) {
-            isLatest = false
+            isUnreleased = false
 
             return true
           }
 
-          return !isLatest
+          return !isUnreleased
         })
         .join('\n')
 
-      if (isLatest) {
+      if (isUnreleased) {
         return reject(new Error('Previous release not found in CHANGELOG'))
       }
 

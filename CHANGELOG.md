@@ -1,4 +1,4 @@
-# Latest
+# 1.2.0
 
 ## Features
 
@@ -11,6 +11,7 @@
 
 ## Misc
 
+- rename isLatest variable to isUnreleased [94636f8d](https://github.com/lekterable/perfekt/commit/94636f8d11864a5c5c0b9f1377e689858b04c7d5)
 - update README [dd3bf31e](https://github.com/lekterable/perfekt/commit/dd3bf31edd0df6b27bec7764c731bef4fda1971d)
 - add eslint prettier config [86f22d65](https://github.com/lekterable/perfekt/commit/86f22d65f117bf26fc9fd1596e3c074acf58d3b8)
 - catch errors higher in the scope [ac5c2a84](https://github.com/lekterable/perfekt/commit/ac5c2a84546ff5675ff239566fa7f9b93a9afab9)

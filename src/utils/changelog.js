@@ -23,7 +23,7 @@ export const generateReleased = (previousVersion, config) =>
 
           if (
             isUnreleased &&
-            line === config.releaseFormat.replace('%version%', previousVersion)
+            line === config.releaseFormat.replace(/%version%/g, previousVersion)
           ) {
             isUnreleased = false
 
@@ -47,7 +47,7 @@ export const generateChangelog = (version, groups, config) => {
     const release = getCommitDetails(group.release)
     const releaseVersion = (release && release.message) || version
     const title = releaseVersion
-      ? config.releaseFormat.replace('%version%', releaseVersion)
+      ? config.releaseFormat.replace(/%version%/g, releaseVersion)
       : config.unreleasedFormat
 
     let groupChangelog = title + '\n\n'
@@ -84,6 +84,6 @@ export const generateChangelog = (version, groups, config) => {
 
 export const generateLine = ({ message, hash }, config) =>
   config.lineFormat
-    .replace('%HASH%', hash)
-    .replace('%hash%', hash.slice(0, 8))
-    .replace('%message%', message)
+    .replace(/%HASH%/g, hash)
+    .replace(/%hash%/g, hash.slice(0, 8))
+    .replace(/%message%/g, message)

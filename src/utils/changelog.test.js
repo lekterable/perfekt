@@ -249,12 +249,15 @@ describe('changelog', () => {
     })
 
     it('should generate line with custom config', () => {
-      const config = { ...defaultConfig, lineFormat: '* %message%' }
+      const config = {
+        ...defaultConfig,
+        lineFormat: '* %message% %hash% %hash%'
+      }
       const mockedInput = {
         message: 'generate changelog',
         hash: 'b2f5901922505efbfb6dd684252e8df0cdffeeb2'
       }
-      const mockedOutput = '* generate changelog'
+      const mockedOutput = '* generate changelog b2f59019 b2f59019'
 
       const line = generateLine(mockedInput, config)
 

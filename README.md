@@ -155,8 +155,8 @@ Default config looks like this:
   "releaseFormat": "# %version%",
   "breakingFormat": "## BREAKING",
   "groups": [
-    ["## Features", "feat", "feature"],
-    ["## Fixes", "fix"]
+    { "name": "## Features", "aliases": ["feat", "feature"] },
+    { "name": "## Fixes", "aliases": ["fix"] }
   ],
   "miscFormat": "## Misc",
   "lineFormat": "- %message% %hash%",
@@ -202,13 +202,17 @@ Default:
 
 ### `groups`
 
-This defines how commits will be grouped inside of the release block, each array is a separate group where the first item is it's header and the rest are commit types which will be associated with it. All commits with unmatched types will become a part of the `Misc` group.
+Used to define how commits should be grouped inside of the release block.
 
-commit type comes from: `type(scope?): message`
+Each object is a separate group. The `name` property will be used as the group's header and the `types` array contains all commit types which will be associated with it.
+
+All commits with unmatched types will become a part of the `Misc` group.
+
+> commit type comes from: `type(scope?): message`
 
 Default:
 
-`[['## Features', 'feat', 'feature'], ['## Fixes', 'fix']]`
+`[ { name: '## Features', types: ['feat', 'feature'] }, { name: '## Fixes', types: ['fix'] } ]`
 
 ### `miscFormat`
 

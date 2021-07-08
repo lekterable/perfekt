@@ -8,10 +8,10 @@
   <a href="https://www.npmjs.com/package/perfekt">
     <img alt="npm version" src="https://img.shields.io/npm/v/perfekt.svg?style=for-the-badge">
   </a>
-  <a href="https://travis-ci.com/github/lekterable/perfekt"></a>
-    <img alt="travis" src="https://img.shields.io/travis/com/lekterable/perfekt?logo=travis&style=for-the-badge">
+  <a href="https://github.com/lekterable/lekterable/perfekt/workflows/CI">
+    <img alt="CI" src="https://img.shields.io/github/workflow/status/lekterable/perfekt/CI?label=CI&logo=github&style=for-the-badge">
   </a>
-  <a href="https://codecov.io/gh/lekterable/perfekt"></a>
+  <a href="https://app.codecov.io/gh/lekterable/perfekt">
     <img alt="code coverage" src="https://img.shields.io/codecov/c/github/lekterable/perfekt?logo=codecov&style=for-the-badge" />
   </a>
   <a href="https://github.com/prettier/prettier">

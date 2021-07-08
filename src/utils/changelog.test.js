@@ -1,18 +1,202 @@
 import { existsSync, readFile } from 'fs'
 import { defaultConfig } from '../'
-import { generateChangelog, generateLine, generateReleased } from './changelog'
+import {
+  generateChangelog,
+  generateLine,
+  generateReleased,
+  groupCommits
+} from './changelog'
 
-jest.mock('fs', () => ({
-  readFile: jest.fn(),
-  existsSync: jest.fn()
-}))
+jest.mock('fs', () => ({ readFile: jest.fn(), existsSync: jest.fn() }))
 
 describe('changelog', () => {
-  beforeEach(() => jest.resetAllMocks())
+  describe('groupCommits', () => {
+    it('should group commits with no releases', async () => {
+      const mockedInput = [
+        'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
+        'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+        'b2f5901922505efbfb6dd684252e8df0cdffeeb2 fix: support other conventions',
+        'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 fix: a bug',
+        '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature',
+        'b2f5901922505efbfb6dd684252e8df0cdffeeb2 tests: add core tests',
+        '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore: update dependencies'
+      ]
+      const mockedOutput = [
+        {
+          fix: [
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 fix: support other conventions',
+            'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 fix: a bug'
+          ],
+          feat: [
+            'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+            '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature'
+          ],
+          misc: [
+            'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 tests: add core tests',
+            '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore: update dependencies'
+          ]
+        }
+      ]
+      const grouped = await groupCommits(mockedInput, defaultConfig)
+
+      expect(grouped).toEqual(mockedOutput)
+    })
+
+    it('should group commits', async () => {
+      const mockedInput = [
+        'b2f5901922505efbfb6dd684252e8df0cdffeeb2 chore!: generate changelog',
+        '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore!: version releases',
+        'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
+        'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+        'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
+        'b2f5901922505efbfb6dd684252e8df0cdffeeb2 fix: support other conventions',
+        '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature'
+      ]
+      const mockedOutput = [
+        {
+          breaking: [
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 chore!: generate changelog',
+            '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore!: version releases'
+          ],
+          feat: [
+            'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file'
+          ],
+          misc: [
+            'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec'
+          ]
+        },
+        {
+          release:
+            'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
+          fix: [
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 fix: support other conventions'
+          ],
+          feat: [
+            '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature'
+          ]
+        }
+      ]
+      const grouped = await groupCommits(mockedInput, defaultConfig)
+
+      expect(grouped).toEqual(mockedOutput)
+    })
+
+    it('should group commits with custom config', async () => {
+      const config = {
+        ...defaultConfig,
+        groups: [
+          { name: '## Feat', types: ['feat', 'feature'] },
+          { name: '## Fix', types: ['fix'] },
+          { name: '## Custom', types: ['custom'] }
+        ],
+        ignoredScopes: ['ignored']
+      }
+
+      const mockedInput = [
+        'b2f5901922505efbfb6dd684252e8df0cdffeeb2 chore!: generate changelog',
+        '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore!: version releases',
+        'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
+        'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor(ignored): rewrite legacy code',
+        'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+        'b2f5901922505efbfb6dd684252e8df0cdffeeb2 custom: make changelog customizable',
+        'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
+        'b2f5901922505efbfb6dd684252e8df0cdffeeb2 fix: support other conventions',
+        '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature'
+      ]
+      const mockedOutput = [
+        {
+          breaking: [
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 chore!: generate changelog',
+            '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore!: version releases'
+          ],
+          feat: [
+            'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file'
+          ],
+          custom: [
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 custom: make changelog customizable'
+          ],
+          misc: [
+            'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec'
+          ]
+        },
+        {
+          release:
+            'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
+          fix: [
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 fix: support other conventions'
+          ],
+          feat: [
+            '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature'
+          ]
+        }
+      ]
+      const grouped = await groupCommits(mockedInput, config)
+
+      expect(grouped).toEqual(mockedOutput)
+    })
+
+    it('should skip changelog scope', async () => {
+      const mockedInput = [
+        'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
+        'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+        'b2f5901922505efbfb6dd684252e8df0cdffeeb2 fix: support other conventions',
+        'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 fix: a bug',
+        '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature',
+        'b2f5901922505efbfb6dd684252e8df0cdffeeb2 tests: add core tests',
+        '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore(changelog): update CHANGELOG'
+      ]
+      const mockedOutput = [
+        {
+          fix: [
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 fix: support other conventions',
+            'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 fix: a bug'
+          ],
+          feat: [
+            'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+            '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature'
+          ],
+          misc: [
+            'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
+            'b2f5901922505efbfb6dd684252e8df0cdffeeb2 tests: add core tests'
+          ]
+        }
+      ]
+      const grouped = await groupCommits(mockedInput, defaultConfig)
+
+      expect(grouped).toEqual(mockedOutput)
+    })
+
+    it('should group commits with no unreleased', async () => {
+      const mockedInput = [
+        'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
+        'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+        '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature',
+        'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
+        '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore(changelog): update CHANGELOG'
+      ]
+      const mockedOutput = [
+        {
+          feat: [
+            'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
+            '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature'
+          ],
+          misc: [
+            'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec'
+          ],
+          release:
+            'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0'
+        }
+      ]
+      const grouped = await groupCommits(mockedInput, defaultConfig)
+
+      expect(grouped).toEqual(mockedOutput)
+    })
+  })
 
   describe('generateReleased', () => {
     it("should return null if CHANGELOG doesn't exist", async () => {
-      existsSync.mockImplementation(() => false)
+      existsSync.mockReturnValueOnce(false)
 
       const released = await generateReleased()
 
@@ -24,7 +208,7 @@ describe('changelog', () => {
     it('should reject if receives an error', async () => {
       const error = 'error'
 
-      existsSync.mockImplementation(() => true)
+      existsSync.mockReturnValueOnce(true)
       readFile.mockImplementation((_, __, cb) => cb(error))
 
       expect(generateReleased(null, defaultConfig)).rejects.toMatch(error)
@@ -35,7 +219,7 @@ describe('changelog', () => {
       const mockedInput =
         '# Latest\n- feat: include changelog in the releases 2da21c56\n- test: add utils tests 217b25d0'
 
-      existsSync.mockImplementation(() => true)
+      existsSync.mockReturnValueOnce(true)
       readFile.mockImplementation((_, __, cb) => cb(null, mockedInput))
 
       expect(generateReleased('2.2.2', defaultConfig)).rejects.toThrow(error)
@@ -46,7 +230,7 @@ describe('changelog', () => {
         '# Latest\n- feat: include changelog in the releases 2da21c56\n- test: add utils tests 217b25d0\n# 2.2.2\n- feat: add feature 2da21c56'
       const mockedOutput = '# 2.2.2\n- feat: add feature 2da21c56'
 
-      existsSync.mockImplementation(() => true)
+      existsSync.mockReturnValueOnce(true)
       readFile.mockImplementation((_, __, cb) => cb(null, mockedInput))
 
       const released = await generateReleased('2.2.2', defaultConfig)
@@ -64,7 +248,7 @@ describe('changelog', () => {
         '## Unreleased\n- feat: include changelog in the releases 2da21c56\n- test: add utils tests 217b25d0\n## Release v2.2.2\n- feat: add feature 2da21c56'
       const mockedOutput = '## Release v2.2.2\n- feat: add feature 2da21c56'
 
-      existsSync.mockImplementation(() => true)
+      existsSync.mockReturnValueOnce(true)
       readFile.mockImplementation((_, __, cb) => cb(null, mockedInput))
 
       const released = await generateReleased('2.2.2', config)
@@ -117,9 +301,9 @@ describe('changelog', () => {
         releaseFormat: '# v.%version%',
         breakingFormat: '### BREAKING CHANGE',
         groups: [
-          ['## Feat', 'feat', 'feature'],
-          ['## Fix', 'fix'],
-          ['## Custom', 'custom']
+          { name: '## Feat', types: ['feat', 'feature'] },
+          { name: '## Fix', types: ['fix'] },
+          { name: '## Custom', types: ['custom'] }
         ],
         miscFormat: '### Miscellaneous',
         lineFormat: '* %message% %hash%'

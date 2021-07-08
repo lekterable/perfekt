@@ -10,16 +10,10 @@ jest.mock('fs', () => ({
 }))
 
 describe.only('initialize', () => {
-  beforeEach(() => jest.resetAllMocks())
-
   describe('initialize', () => {
     it('should write to file with --write option and released', async () => {
       const mockedConfigFormat = '.prettierrc'
-      prompt.mockImplementation(() =>
-        Promise.resolve({
-          configFormat: mockedConfigFormat
-        })
-      )
+      prompt.mockResolvedValueOnce({ configFormat: mockedConfigFormat })
 
       await initialize()
 

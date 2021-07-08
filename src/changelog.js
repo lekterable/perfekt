@@ -8,18 +8,19 @@ import {
 } from './utils'
 
 export const changelog = async (version, options, config) => {
-  const latestTag = !options.root && !options.from && (await getLatestTag())
-  const commits = await getCommits(options.from || latestTag)
+  const latestTag = options.root || options.from ? null : await getLatestTag()
+  const commits = await getCommits(options.from ?? latestTag)
 
   if (!commits.length) {
     const message = latestTag
       ? `No commits found since the latest tag '${latestTag}'`
       : 'No commits found'
+
     throw new Error(message)
   }
 
-  const grouped = groupCommits(commits, config)
-  const changelog = generateChangelog(version, grouped, config)
+  const groupedCommits = groupCommits(commits, config)
+  const changelog = generateChangelog(version, groupedCommits, config)
 
   if (!options.write) return process.stdout.write(changelog)
 

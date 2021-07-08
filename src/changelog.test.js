@@ -23,12 +23,10 @@ jest.mock('fs', () => ({
 }))
 
 describe('changelog', () => {
-  beforeEach(() => jest.resetAllMocks())
-
   it('should throw if no commits found', async () => {
     const mockedCommits = []
 
-    getCommits.mockImplementation(() => mockedCommits)
+    getCommits.mockReturnValueOnce(mockedCommits)
 
     expect(changelog(null, defaultOptions, defaultConfig)).rejects.toThrow(
       'No commits found'
@@ -39,8 +37,8 @@ describe('changelog', () => {
     const mockedTag = '2.2.3'
     const mockedCommits = []
 
-    getLatestTag.mockImplementation(() => mockedTag)
-    getCommits.mockImplementation(() => mockedCommits)
+    getLatestTag.mockReturnValueOnce(mockedTag)
+    getCommits.mockReturnValueOnce(mockedCommits)
 
     expect(changelog(null, defaultOptions, defaultConfig)).rejects.toThrow(
       "No commits found since the latest tag '2.2.3'"
@@ -74,11 +72,11 @@ describe('changelog', () => {
       '# Latest\n\n## Features\n\n- add %HASH% placeholder to line format a3c93b2f\n- introduce changelog customization using config file e66d6176\n- use higher level of headers for changelog eea23d95\n\n## Fixes\n\n- replace %message% as last to avoid bugs ec507396\n- stop adding empty line at the end of the file on --root faee4801\n- stop adding Latest when not applicable c64fa467\n\n## Misc\n\n- include commit links in the changelog 8f622021\n\n'
     const mockedReleased = ''
 
-    getLatestTag.mockImplementation(() => mockedTag)
-    getCommits.mockImplementation(() => mockedCommits)
-    groupCommits.mockImplementation(() => mockedGrouped)
-    generateChangelog.mockImplementation(() => mockedChangelog)
-    generateReleased.mockImplementation(() => mockedReleased)
+    getLatestTag.mockReturnValueOnce(mockedTag)
+    getCommits.mockReturnValueOnce(mockedCommits)
+    groupCommits.mockReturnValueOnce(mockedGrouped)
+    generateChangelog.mockReturnValueOnce(mockedChangelog)
+    generateReleased.mockReturnValueOnce(mockedReleased)
 
     await changelog(null, defaultOptions, defaultConfig)
 
@@ -123,11 +121,11 @@ describe('changelog', () => {
     ]
     const mockedReleased = ''
 
-    getLatestTag.mockImplementation(() => mockedTag)
-    getCommits.mockImplementation(() => mockedCommits)
-    groupCommits.mockImplementation(() => mockedGrouped)
-    generateChangelog.mockImplementation(() => mockedChangelog)
-    generateReleased.mockImplementation(() => mockedReleased)
+    getLatestTag.mockReturnValueOnce(mockedTag)
+    getCommits.mockReturnValueOnce(mockedCommits)
+    groupCommits.mockReturnValueOnce(mockedGrouped)
+    generateChangelog.mockReturnValueOnce(mockedChangelog)
+    generateReleased.mockReturnValueOnce(mockedReleased)
 
     await changelog('2.2.3', defaultOptions, defaultConfig)
 
@@ -159,10 +157,10 @@ describe('changelog', () => {
     const mockedOutput =
       '# Latest\n\n## Features\n\n- add %HASH% placeholder to line format a3c93b2f\n- introduce changelog customization using config file e66d6176\n- use higher level of headers for changelog eea23d95\n\n## Fixes\n\n- replace %message% as last to avoid bugs ec507396\n- stop adding empty line at the end of the file on --root faee4801\n- stop adding Latest when not applicable c64fa467\n\n## Misc\n\n- include commit links in the changelog 8f622021\n'
 
-    getLatestTag.mockImplementation(() => mockedTag)
-    getCommits.mockImplementation(() => mockedCommits)
-    generateChangelog.mockImplementation(() => mockedChangelog)
-    generateReleased.mockImplementation(() => mockedReleased)
+    getLatestTag.mockReturnValueOnce(mockedTag)
+    getCommits.mockReturnValueOnce(mockedCommits)
+    generateChangelog.mockReturnValueOnce(mockedChangelog)
+    generateReleased.mockReturnValueOnce(mockedReleased)
 
     await changelog(null, options, defaultConfig)
 
@@ -186,10 +184,10 @@ describe('changelog', () => {
     const mockedReleased = '# 2.2.2\n- feat: add feature 2da21c56'
     const mockedFilename = 'CHANGELOG.md'
 
-    getLatestTag.mockImplementation(() => mockedTag)
-    getCommits.mockImplementation(() => mockedCommits)
-    generateChangelog.mockImplementation(() => mockedChangelog)
-    generateReleased.mockImplementation(() => mockedReleased)
+    getLatestTag.mockReturnValueOnce(mockedTag)
+    getCommits.mockReturnValueOnce(mockedCommits)
+    generateChangelog.mockReturnValueOnce(mockedChangelog)
+    generateReleased.mockReturnValueOnce(mockedReleased)
 
     await changelog('2.2.3', options, defaultConfig)
 
@@ -217,9 +215,9 @@ describe('changelog', () => {
       '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore(changelog): update CHANGELOG'
     ]
 
-    getLatestTag.mockImplementation(() => mockedTag)
-    getCommits.mockImplementation(() => mockedCommits)
-    generateChangelog.mockImplementation(() => mockedChangelog)
+    getLatestTag.mockReturnValueOnce(mockedTag)
+    getCommits.mockReturnValueOnce(mockedCommits)
+    generateChangelog.mockReturnValueOnce(mockedChangelog)
 
     await changelog(null, options, defaultConfig)
 
@@ -242,9 +240,9 @@ describe('changelog', () => {
       '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore(changelog): update CHANGELOG'
     ]
 
-    getLatestTag.mockImplementation(() => mockedTag)
-    getCommits.mockImplementation(() => mockedCommits)
-    generateChangelog.mockImplementation(() => mockedChangelog)
+    getLatestTag.mockReturnValueOnce(mockedTag)
+    getCommits.mockReturnValueOnce(mockedCommits)
+    generateChangelog.mockReturnValueOnce(mockedChangelog)
 
     await changelog(null, options, defaultConfig)
 

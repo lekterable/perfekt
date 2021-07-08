@@ -6,13 +6,9 @@ import {
   getLatestTag
 } from './git'
 
-jest.mock('child_process', () => ({
-  exec: jest.fn()
-}))
+jest.mock('child_process', () => ({ exec: jest.fn() }))
 
 describe('git', () => {
-  beforeEach(() => jest.resetAllMocks())
-
   describe('getLatestTag', () => {
     it('should return null if there is no tag', async () => {
       exec.mockImplementation((_, cb) => cb(null))

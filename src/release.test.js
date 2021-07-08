@@ -3,21 +3,15 @@ import { changelog } from './changelog'
 import { release } from './release'
 import { commitRelease, defineVersion, updateVersion } from './utils'
 
-jest.mock('./changelog', () => ({
-  changelog: jest.fn()
-}))
+jest.mock('./changelog', () => ({ changelog: jest.fn() }))
 jest.mock('./utils', () => ({
   commitRelease: jest.fn(),
   updateVersion: jest.fn(),
   defineVersion: jest.fn()
 }))
-jest.mock('console', () => ({
-  error: jest.fn()
-}))
+jest.mock('console', () => ({ error: jest.fn() }))
 
 describe('release', () => {
-  beforeEach(() => jest.resetAllMocks())
-
   it('should throw if no version passed', () => {
     expect(release()).rejects.toThrow('Relese requires a version')
   })
@@ -25,7 +19,7 @@ describe('release', () => {
   it('should execute release', async () => {
     const mockedVersion = '2.2.2'
 
-    defineVersion.mockImplementation(() => mockedVersion)
+    defineVersion.mockReturnValueOnce(mockedVersion)
 
     await release(mockedVersion, {}, defaultConfig)
 

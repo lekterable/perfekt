@@ -1,5 +1,44 @@
 import { existsSync, readFile } from 'fs'
 import { getCommitDetails } from './git'
+import { isObjectEmpty } from './misc'
+
+export const groupCommits = (commits, config) =>
+  commits.reduce(
+    (grouped, commit) => {
+      const group = grouped[grouped.length - 1]
+      const rest = grouped.slice(0, -1)
+      const commitDetails = getCommitDetails(commit)
+      const normalizedScope =
+        commitDetails.scope && commitDetails.scope.toLowerCase()
+
+      if (config.ignoredScopes.includes(normalizedScope)) return [...grouped]
+      if (normalizedScope === 'release') {
+        const isLatest = isObjectEmpty(group)
+        const release = { release: commit }
+
+        return isLatest ? [release] : [...grouped, release]
+      }
+
+      if (commitDetails.breaking) {
+        const existing = group.breaking ? group.breaking : []
+        return [...rest, { ...group, breaking: [...existing, commit] }]
+      }
+
+      const matchingGroup = config.groups.find(({ types }) =>
+        types.includes(commitDetails.type)
+      )
+
+      if (!matchingGroup) {
+        const existing = group.misc ? group.misc : []
+        return [...rest, { ...group, misc: [...existing, commit] }]
+      }
+
+      const key = matchingGroup.types[0]
+      const existing = group[key] ? group[key] : []
+      return [...rest, { ...group, [key]: [...existing, commit] }]
+    },
+    [{}]
+  )
 
 export const generateReleased = (previousVersion, config) =>
   new Promise((resolve, reject) => {
@@ -42,44 +81,44 @@ export const generateReleased = (previousVersion, config) =>
     })
   })
 
-export const generateChangelog = (version, groups, config) => {
-  const changelog = groups.map(group => {
+export const generateChangelog = (version, groupedCommits, config) => {
+  const releases = groupedCommits.map(group => {
     const release = getCommitDetails(group.release)
     const releaseVersion = (release && release.message) || version
     const title = releaseVersion
       ? config.releaseFormat.replace(/%version%/g, releaseVersion)
       : config.unreleasedFormat
 
-    let groupChangelog = title + '\n\n'
+    const groups = Object.entries(group)
+      .sort()
+      .map(([type, commits]) => {
+        if (type === 'release') return null
 
-    const entries = Object.entries(group)
+        const matchingGroup = config.groups.find(({ types }) =>
+          types.includes(type)
+        )
 
-    entries.sort().forEach(([type, commits]) => {
-      if (type === 'release') return
+        const lines = commits.map((commit, index) => {
+          const { message, hash } = getCommitDetails(commit)
 
-      const matchingGroup = config.groups.find(([_, ...types]) =>
-        types.includes(type)
-      )
+          const isLastLine = index + 1 === commits.length
+          const space = isLastLine ? '\n\n' : '\n'
 
-      if (type === 'breaking') groupChangelog += `${config.breakingFormat}\n\n`
-      else if (matchingGroup) groupChangelog += `${matchingGroup[0]}\n\n`
-      else groupChangelog += `${config.miscFormat}\n\n`
+          return generateLine({ message, hash }, config) + space
+        })
 
-      return commits.forEach((commit, index) => {
-        const { message, hash } = getCommitDetails(commit)
+        const header = matchingGroup ? matchingGroup.name : config.miscFormat
+        const isBreaking = type === 'breaking'
 
-        const isLastLine = index + 1 === commits.length
-        const space = isLastLine ? '\n\n' : '\n'
-        const line = generateLine({ message, hash }, config) + space
+        const groupHeader = isBreaking ? config.breakingFormat : header
 
-        return (groupChangelog += line)
+        return groupHeader + '\n\n' + lines.join('')
       })
-    })
 
-    return groupChangelog
+    return title + '\n\n' + groups.join('')
   })
 
-  return changelog.join('')
+  return releases.join('')
 }
 
 export const generateLine = ({ message, hash }, config) =>

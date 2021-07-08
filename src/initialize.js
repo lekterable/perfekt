@@ -5,7 +5,7 @@ export const questions = [
   {
     type: 'list',
     name: 'configFormat',
-    message: 'What format do you want to use for your your config?',
+    message: 'Which format do you want to use for your your config?',
     choices: [
       '.perfektrc',
       'perfekt.config.js',

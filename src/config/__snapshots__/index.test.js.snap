@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Config get config should return config with overrides 1`] = `
+Object {
+  "breakingHeader": "# BREAKING",
+  "groups": Array [
+    Object {
+      "change": "minor",
+      "name": "## Features",
+      "types": Array [
+        "feat",
+        "feature",
+      ],
+    },
+    Object {
+      "change": "patch",
+      "name": "## Fixes",
+      "types": Array [
+        "fix",
+      ],
+    },
+  ],
+  "ignoredScopes": Array [
+    "changelog",
+  ],
+  "lineFormat": "* %message% %hash% %hash%",
+  "miscFormat": "## Misc",
+  "releaseHeader": "## Release version - @%version%",
+  "unreleasedHeader": "## **Unreleased**",
+}
+`;
+
+exports[`Config get config should return default config 1`] = `
+Object {
+  "breakingHeader": "## BREAKING",
+  "groups": Array [
+    Object {
+      "change": "minor",
+      "name": "## Features",
+      "types": Array [
+        "feat",
+        "feature",
+      ],
+    },
+    Object {
+      "change": "patch",
+      "name": "## Fixes",
+      "types": Array [
+        "fix",
+      ],
+    },
+  ],
+  "ignoredScopes": Array [
+    "changelog",
+  ],
+  "lineFormat": "- %message% %hash%",
+  "miscFormat": "## Misc",
+  "releaseHeader": "# %version%",
+  "unreleasedHeader": "# Latest",
+}
+`;

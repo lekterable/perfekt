@@ -3,25 +3,6 @@
   "version": "1.2.0",
   "author": "Kornel Dubieniecki",
   "description": "Release and version your packages with perfe(k)t ease!",
-  "main": "dist/index.js",
-  "bin": {
-    "perfekt": "./bin/perfekt.js"
-  },
-  "scripts": {
-    "build": "webpack",
-    "dev": "webpack --progress --colors --watch",
-    "prepare": "npm run build && husky install",
-    "test": "jest",
-    "test:coverage": "jest --collectCoverage",
-    "test:watch": "jest --watch"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/lekterable/perfekt"
-  },
-  "bugs": {
-    "url": "https://github.com/lekterable/perfekt/issues"
-  },
   "keywords": [
     "perfekt",
     "perfect",
@@ -31,7 +12,34 @@
     "cli",
     "semver"
   ],
+  "bugs": {
+    "url": "https://github.com/lekterable/perfekt/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lekterable/perfekt"
+  },
   "license": "MIT",
+  "main": "dist/index.js",
+  "bin": {
+    "perfekt": "./bin/perfekt.js"
+  },
+  "scripts": {
+    "build": "webpack",
+    "dev": "webpack --progress --watch",
+    "eslint": "eslint .",
+    "format": "npm run prettier -- --write",
+    "format:check": "npm run prettier -- --check",
+    "lint": "npm run eslint -- --fix",
+    "lint:check": "npm run eslint -- --max-warnings 0",
+    "prepare": "npm run build && husky install",
+    "prettier": "prettier 'src/**'",
+    "validate": "npm run format:check && npm run lint:check",
+    "test": "jest",
+    "test:ci": "npm run test:coverage -- --ci",
+    "test:coverage": "jest --collectCoverage",
+    "test:watch": "jest --watch"
+  },
   "dependencies": {
     "commander": "^8.0.0",
     "cosmiconfig": "^7.0.0",
@@ -46,7 +54,7 @@
     "@commitlint/cli": "^12.1.4",
     "@commitlint/config-conventional": "^12.1.4",
     "babel-loader": "^8.2.2",
-    "eslint": "^7.30.0",
+    "eslint": "^7.31.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.23.4",
@@ -55,9 +63,9 @@
     "husky": "^7.0.1",
     "jest": "^27.0.6",
     "jest-mock-process": "^1.4.1",
-    "lint-staged": "^11.0.0",
+    "lint-staged": "^11.0.1",
     "prettier": "^2.3.2",
-    "webpack": "^5.43.0",
+    "webpack": "^5.45.1",
     "webpack-cli": "^4.7.2"
   }
 }

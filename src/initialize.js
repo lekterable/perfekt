@@ -1,5 +1,5 @@
-import { writeFileSync } from 'fs'
 import inquirer from 'inquirer'
+import { writeFile } from './utils'
 
 export const questions = [
   {
@@ -16,8 +16,10 @@ export const questions = [
   }
 ]
 
-export const initialize = async () => {
+const initialize = async () => {
   const { configFormat } = await inquirer.prompt(questions)
 
-  writeFileSync(configFormat, '')
+  writeFile(configFormat, '')
 }
+
+export default initialize

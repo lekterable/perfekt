@@ -1,0 +1,112 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateChangelog should generate changelog 1`] = `
+"# 2.0.0
+
+## Features
+
+- add option to write to local CHANGELOG file aa805ce7
+- add execute release feature 4e02179c
+
+## Fixes
+
+- support other conventions b2f59019
+- a bug bffc2f9e
+
+## Misc
+
+- extract line generating logic to function and promisify exec bffc2f9e
+- add core tests b2f59019
+- update dependencies 2ea04355
+"
+`;
+
+exports[`generateChangelog should generate changelog with breaking changes 1`] = `
+"# 2.0.0
+
+## BREAKING
+
+- add release \`new\` keyword 86aa5dc1
+
+## Features
+
+- make breaking and misc headers configurable 6b05a3b8
+- make changelog ignored scopes configurable d34a9f12
+
+## Fixes
+
+- throw error if there are no commits 5fa8e6c9
+
+## Misc
+
+- include commit links in the changelog 8f622021
+"
+`;
+
+exports[`generateChangelog should generate changelog with multiple releases 1`] = `
+"# 3.0.0
+
+## Features
+
+- add option to write to local CHANGELOG file aa805ce7
+- add execute release feature 4e02179c
+
+## Fixes
+
+- support other conventions b2f59019
+- a bug bffc2f9e
+
+## Misc
+
+- extract line generating logic to function and promisify exec bffc2f9e
+- add core tests b2f59019
+- update dependencies 2ea04355
+
+# 1.2.0
+
+## Features
+
+- replace all placeholder occurrences d0e72481
+
+## Fixes
+
+- check if changelog exists before accessing 4d95659f
+
+## Misc
+
+- update README badges abfb3d86
+"
+`;
+
+exports[`generateChangelog should generate changelog with no version 1`] = `
+"# Latest
+
+## Features
+
+- add option to write to local CHANGELOG file aa805ce7
+- add execute release feature 4e02179c
+
+## Fixes
+
+- support other conventions b2f59019
+- a bug bffc2f9e
+
+## Misc
+
+- extract line generating logic to function and promisify exec bffc2f9e
+- add core tests b2f59019
+- update dependencies 2ea04355
+"
+`;
+
+exports[`generateChangelog should generate changelog with unconvetional commits 1`] = `
+"# 2.0.0
+
+## Misc
+
+- Add a new feature 8c56a8d6
+- Fix a bug acaa2789
+- Refactor some legacy code aea7f150
+- Update CHANGELOG.md 7a50d00c
+"
+`;

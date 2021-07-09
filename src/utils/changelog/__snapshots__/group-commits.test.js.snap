@@ -1,0 +1,186 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`groupCommits should group commits with breaking changes 1`] = `
+Array [
+  Object {
+    "breaking": Array [
+      Commit {},
+      Commit {},
+    ],
+    "feat": Array [
+      Commit {},
+      Commit {},
+    ],
+    "fix": Array [
+      Commit {},
+      Commit {},
+    ],
+    "misc": Array [
+      Commit {},
+      Commit {},
+      Commit {},
+    ],
+  },
+]
+`;
+
+exports[`groupCommits should group commits with custom config 1`] = `
+Array [
+  Object {
+    "custom": Array [
+      Commit {},
+    ],
+    "feat": Array [
+      Commit {},
+      Commit {},
+    ],
+    "fix": Array [
+      Commit {},
+      Commit {},
+    ],
+    "misc": Array [
+      Commit {},
+      Commit {},
+      Commit {},
+    ],
+  },
+]
+`;
+
+exports[`groupCommits should group commits with multiple releases 1`] = `
+Array [
+  Object {
+    "feat": Array [
+      Commit {},
+    ],
+    "release": Commit {},
+  },
+  Object {
+    "feat": Array [
+      Commit {},
+      Commit {},
+    ],
+    "fix": Array [
+      Commit {},
+      Commit {},
+    ],
+    "misc": Array [
+      Commit {},
+      Commit {},
+      Commit {},
+    ],
+    "release": Commit {},
+  },
+]
+`;
+
+exports[`groupCommits should group commits with no releases 1`] = `
+Array [
+  Object {
+    "feat": Array [
+      Commit {},
+      Commit {},
+    ],
+    "fix": Array [
+      Commit {},
+      Commit {},
+    ],
+    "misc": Array [
+      Commit {},
+      Commit {},
+      Commit {},
+    ],
+  },
+]
+`;
+
+exports[`groupCommits should group commits with no unreleased 1`] = `
+Array [
+  Object {
+    "feat": Array [
+      Commit {},
+      Commit {},
+    ],
+    "fix": Array [
+      Commit {},
+      Commit {},
+    ],
+    "misc": Array [
+      Commit {},
+      Commit {},
+      Commit {},
+    ],
+    "release": Commit {},
+  },
+]
+`;
+
+exports[`groupCommits should group commits with release 1`] = `
+Array [
+  Object {
+    "feat": Array [
+      Commit {},
+    ],
+  },
+  Object {
+    "feat": Array [
+      Commit {},
+      Commit {},
+    ],
+    "fix": Array [
+      Commit {},
+      Commit {},
+    ],
+    "misc": Array [
+      Commit {},
+      Commit {},
+      Commit {},
+    ],
+    "release": Commit {},
+  },
+]
+`;
+
+exports[`groupCommits should group commits with unknown types 1`] = `
+Array [
+  Object {
+    "misc": Array [
+      Commit {},
+      Commit {},
+      Commit {},
+    ],
+  },
+]
+`;
+
+exports[`groupCommits should group unconventional commits 1`] = `
+Array [
+  Object {
+    "misc": Array [
+      Commit {},
+      Commit {},
+      Commit {},
+    ],
+  },
+]
+`;
+
+exports[`groupCommits should skip \`changelog\` scope by default 1`] = `
+Array [
+  Object {
+    "feat": Array [
+      Commit {},
+      Commit {},
+    ],
+    "fix": Array [
+      Commit {},
+      Commit {},
+    ],
+    "misc": Array [
+      Commit {},
+      Commit {},
+      Commit {},
+    ],
+  },
+]
+`;

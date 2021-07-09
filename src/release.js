@@ -1,12 +1,19 @@
-import { changelog } from './changelog'
-import { commitRelease, defineVersion, updateVersion } from './utils'
+import { defaults, Optionable } from './options'
+import Git from './git'
+import NPM from './npm'
 
-export const release = async (input, options, config) => {
-  if (!input) throw new Error('Relese requires a version')
+export default class Release extends Optionable {
+  #git
+  #npm
 
-  const newVersion = await defineVersion(input, config)
+  constructor() {
+    super(defaults.releaseOptions)
+    this.#npm = new NPM()
+    this.#git = new Git()
+  }
 
-  await updateVersion(newVersion)
-  await changelog(newVersion, { write: true, from: options.from }, config)
-  await commitRelease(newVersion)
+  finish(version) {
+    this.#npm.updateVersion(version)
+    this.#git.release(version)
+  }
 }

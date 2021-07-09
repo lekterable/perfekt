@@ -135,11 +135,11 @@ Options:
 
 `--root` - generate changelog for the entire history
 
-`--from <commit>` - SHA of the last commit that will **NOT** be included in this changelog
+`--from <commit>` - SHA of the last commit which will **NOT** be included in this changelog
 
 Arguments:
 
-`version` - _(optional)_ version which will be used for generating the changelog, fallbacks to [unreleased format](#unreleasedFormat) if not passed
+`version` - _(optional)_ version which will be used for generating the changelog, fallbacks to [unreleased format](#unreleasedHeader) if not passed
 
 ## Configuration
 
@@ -151,9 +151,9 @@ Default config looks like this:
 
 ```json
 {
-  "unreleasedFormat": "# Latest",
-  "releaseFormat": "# %version%",
-  "breakingFormat": "## BREAKING",
+  "unreleasedHeader": "# Latest",
+  "releaseHeader": "# %version%",
+  "breakingHeader": "## BREAKING",
   "groups": [
     {
       "name": "## Features",
@@ -172,7 +172,7 @@ Default config looks like this:
 }
 ```
 
-### `unreleasedFormat`
+### `unreleasedHeader`
 
 Format of the unreleased-block header in the generated changelog
 
@@ -184,7 +184,7 @@ Default:
 
 `# Latest`
 
-### `breakingFormat`
+### `breakingHeader`
 
 Format of the breaking changes header in the generated changelog
 
@@ -196,7 +196,7 @@ Default:
 
 `## BREAKING`
 
-### `releaseFormat`
+### `releaseHeader`
 
 Format of the release header in the generated changelog
 

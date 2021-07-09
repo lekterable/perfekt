@@ -1,1 +1,1 @@
-module.exports = { resetMocks: true }
+module.exports = { resetMocks: true, restoreMocks: true }

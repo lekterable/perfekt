@@ -1,34 +1,67 @@
-import { writeFileSync } from 'fs'
 import {
   generateChangelog,
-  generateReleased,
-  getCommits,
-  getLatestTag,
-  groupCommits
+  readFile,
+  writeFile,
+  fileExists,
+  printOutput,
+  createReleasedFilter
 } from './utils'
+import { defaults, Optionable } from './options'
+import Git from './git'
 
-export const changelog = async (version, options, config) => {
-  const latestTag = options.root || options.from ? null : await getLatestTag()
-  const commits = await getCommits(options.from ?? latestTag)
+export default class Changelog extends Optionable {
+  #config
 
-  if (!commits.length) {
-    const message = latestTag
-      ? `No commits found since the latest tag '${latestTag}'`
-      : 'No commits found'
-
-    throw new Error(message)
+  constructor(config) {
+    super(defaults.changelogOptions)
+    this.#config = config
   }
 
-  const groupedCommits = groupCommits(commits, config)
-  const changelog = generateChangelog(version, groupedCommits, config)
+  get hasChangelog() {
+    return fileExists('CHANGELOG.md')
+  }
 
-  if (!options.write) return process.stdout.write(changelog)
+  async getChangelog() {
+    return await readFile('CHANGELOG.md')
+  }
 
-  const released = latestTag && (await generateReleased(latestTag, config))
+  async getHistory(version) {
+    const isFromOverwritten = Boolean(this.options.root || this.options.from)
 
-  const newChangelog = released
-    ? changelog + released
-    : changelog.replace(/\n\n$/g, '\n')
+    if (!this.hasChangelog || isFromOverwritten) return null
 
-  return writeFileSync('CHANGELOG.md', newChangelog)
+    const changelog = await this.getChangelog()
+
+    if (!changelog) {
+      throw new Error("CHANGELOG doesn't contain any history.")
+    }
+
+    const filterReleased = createReleasedFilter(version, this.#config)
+
+    return changelog.split('\n').filter(filterReleased).join('\n')
+  }
+
+  generate(commits, version) {
+    return generateChangelog(commits, version, this.#config)
+  }
+
+  save(changelog) {
+    return writeFile('CHANGELOG.md', changelog)
+  }
+
+  print(changelog) {
+    printOutput(changelog)
+  }
+
+  async finish(commits, version) {
+    let changelog = this.generate(commits, version)
+
+    const history = await this.getHistory(new Git().latestTag)
+
+    if (history) changelog = changelog + '\n' + history
+
+    if (this.options.write) return this.save(changelog)
+
+    return this.print(changelog)
+  }
 }

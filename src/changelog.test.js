@@ -1,253 +1,422 @@
-import { writeFileSync } from 'fs'
-import { mockProcessStdout } from 'jest-mock-process'
-import { defaultChangelogOptions as defaultOptions, defaultConfig } from './'
-import { changelog } from './changelog'
-import {
-  generateChangelog,
-  generateReleased,
-  getCommits,
-  getLatestTag,
-  groupCommits
-} from './utils'
+import fs from 'fs'
+import * as generateChangelog from './utils/changelog/generate-changelog'
+import * as writeFile from './utils/misc/write-file'
+import * as readFile from './utils/misc/read-file'
+import * as fileExists from './utils/misc/file-exists'
+import * as printOutput from './utils/misc/print-output'
+import * as createReleasedFilter from './utils/changelog/create-released-filter'
+import Git from './git'
+import Config from './config'
+import Commit from './commit'
+import Changelog from './changelog'
 
-jest.mock('./utils', () => ({
-  generateChangelog: jest.fn(),
-  generateReleased: jest.fn(),
-  getCommits: jest.fn(),
-  getLatestTag: jest.fn(),
-  groupCommits: jest.fn()
-}))
-jest.mock('fs', () => ({
-  writeFileSync: jest.fn(),
-  readFile: jest.fn()
-}))
+jest.mock('fs')
 
-describe('changelog', () => {
-  it('should throw if no commits found', async () => {
-    const mockedCommits = []
+const mockVersion = '2.2.3'
+const CHANGELOG = 'CHANGELOG.md'
 
-    getCommits.mockReturnValueOnce(mockedCommits)
-
-    expect(changelog(null, defaultOptions, defaultConfig)).rejects.toThrow(
-      'No commits found'
+const mockGrouped = [
+  {
+    feat: [
+      new Commit(
+        'd0e72481e9b9dc2bed8e495b8943d2d90399db32 feat: replace all placeholder occurrences'
+      ),
+      new Commit(
+        'a357a61a4197d01201a84b9ae7ed7f447e16c7d7 feat: make no-commits error more specific'
+      ),
+      new Commit(
+        '17feea4af5e339532d680a6ef6e9ec331f8abd2e feat: add release version bumping'
+      )
+    ],
+    fix: [
+      new Commit(
+        '5fa8e6c9996444fa0d17493cf1e379a696682696 fix: throw error if there are no commits'
+      )
+    ],
+    misc: [
+      new Commit(
+        'ee24740b920b22e916ca5ab0449abb08e99143c4 ci: setup CI with GitHub Actions'
+      ),
+      new Commit(
+        '1a0b3f3e91a9a71bf52882b75c7306046db13c8e refactor: rename function and format tests'
+      )
+    ]
+  },
+  {
+    feat: [
+      new Commit(
+        '6b05a3b8430eb18af4c2d9fa67addc78c7357cfb feat: make breaking and misc headers configurable'
+      ),
+      new Commit(
+        '86aa5dc18c363514e518b16b6eeb0bb2c5d94617 feat: add release `new` keyword'
+      ),
+      new Commit(
+        'd34a9f12500df6ea21a17b85b783a41b1fca5347 feat: make changelog ignored scopes configurable'
+      )
+    ],
+    fix: [
+      new Commit(
+        '5fa8e6c9996444fa0d17493cf1e379a696682696 fix: throw error if there are no commits'
+      ),
+      new Commit(
+        '4d95659f302e0fe968154e17214876849172509f fix: check if changelog exists before accessing'
+      )
+    ],
+    misc: [
+      new Commit(
+        '8f622021665bc6076d00fde6527800980eba836a chore: include commit links in the changelog'
+      )
+    ],
+    release: new Commit(
+      '73f2ecbf494ed97fcf34fce833014241fe74a6b6 chore(release): 1.2.0'
     )
+  }
+]
+
+const generateMockUnreleased = (title = 'Latest') =>
+  `# ${title}\n\n## Features\n\n- replace all placeholder occurrences d0e72481\n- make no-commits error more specific a357a61a\n- add release version bumping 17feea4a\n\n## Fixes\n\n- throw error if there are no commits 5fa8e6c9\n\n## Misc\n\n- setup CI with GitHub Actions ee24740b\n- rename function and format tests 1a0b3f3e\n`
+
+const generateMockReleased = (version = '1.0.0') =>
+  `# ${version}\n\n## Features\n\n- make breaking and misc headers configurable 6b05a3b8\n- add release \`new\` keyword 86aa5dc1\n- make changelog ignored scopes configurable d34a9f12\n\n## Fixes\n\n- throw error if there are no commits 5fa8e6c9\n- check if changelog exists before accessing 4d95659f\n\n## Misc\n\n- include commit links in the changelog 8f622021\n`
+
+const generateMockChangelog = (version = '1.0.0', unreleasedVersion = null) =>
+  unreleasedVersion
+    ? generateMockUnreleased(unreleasedVersion) +
+      '\n' +
+      generateMockReleased(version)
+    : generateMockReleased(version)
+
+describe('Changelog', () => {
+  const { config } = new Config()
+  const changelog = new Changelog(config)
+
+  let latestTagSpy
+  let hasChangelogSpy
+  let stdoutSpy
+
+  beforeEach(() => {
+    changelog.options = null
+
+    latestTagSpy = jest.spyOn(Git.prototype, 'latestTag', 'get')
+    hasChangelogSpy = jest.spyOn(Changelog.prototype, 'hasChangelog', 'get')
+    stdoutSpy = jest.spyOn(process.stdout, 'write')
   })
 
-  it('should throw if no commits found with tag', async () => {
-    const mockedTag = '2.2.3'
-    const mockedCommits = []
+  describe('get hasChangelog', () => {
+    let fileExistsSpy
 
-    getLatestTag.mockReturnValueOnce(mockedTag)
-    getCommits.mockReturnValueOnce(mockedCommits)
+    beforeEach(() => {
+      fileExistsSpy = jest.spyOn(fileExists, 'default')
+    })
 
-    expect(changelog(null, defaultOptions, defaultConfig)).rejects.toThrow(
-      "No commits found since the latest tag '2.2.3'"
-    )
+    it('should return `null` if CHANGELOG.md does not exist', async () => {
+      fs.existsSync.mockReturnValueOnce(false)
+
+      const hasChangelog = changelog.hasChangelog
+
+      expect(fileExistsSpy).toBeCalledTimes(1)
+      expect(fileExistsSpy).toBeCalledWith(CHANGELOG)
+      expect(hasChangelog).toBe(false)
+    })
+
+    it('should return `true` if CHANGELOG.md exists', async () => {
+      fs.existsSync.mockReturnValueOnce(true)
+
+      const hasChangelog = changelog.hasChangelog
+
+      expect(fileExistsSpy).toBeCalledTimes(1)
+      expect(fileExistsSpy).toBeCalledWith(CHANGELOG)
+      expect(hasChangelog).toBe(true)
+    })
   })
 
-  it('should print to output', async () => {
-    const stdoutMock = mockProcessStdout()
-    const mockedTag = '2.2.3'
-    const mockedCommits = [
-      'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
-      'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
-      '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature',
-      'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
-      '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore(changelog): update CHANGELOG'
-    ]
-    const mockedGrouped = [
-      {
-        feat: [
-          'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
-          '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature'
-        ],
-        misc: [
-          'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec'
-        ],
-        release:
-          'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0'
-      }
-    ]
-    const mockedChangelog =
-      '# Latest\n\n## Features\n\n- add %HASH% placeholder to line format a3c93b2f\n- introduce changelog customization using config file e66d6176\n- use higher level of headers for changelog eea23d95\n\n## Fixes\n\n- replace %message% as last to avoid bugs ec507396\n- stop adding empty line at the end of the file on --root faee4801\n- stop adding Latest when not applicable c64fa467\n\n## Misc\n\n- include commit links in the changelog 8f622021\n\n'
-    const mockedReleased = ''
+  describe('getChangelog', () => {
+    let readFileSpy
 
-    getLatestTag.mockReturnValueOnce(mockedTag)
-    getCommits.mockReturnValueOnce(mockedCommits)
-    groupCommits.mockReturnValueOnce(mockedGrouped)
-    generateChangelog.mockReturnValueOnce(mockedChangelog)
-    generateReleased.mockReturnValueOnce(mockedReleased)
+    beforeEach(() => {
+      readFileSpy = jest.spyOn(readFile, 'default')
+    })
 
-    await changelog(null, defaultOptions, defaultConfig)
+    it('should reject if receives an error', () => {
+      const mockError = 'error'
 
-    expect(getLatestTag).toBeCalledTimes(1)
-    expect(getLatestTag).toBeCalledWith()
-    expect(getCommits).toBeCalledTimes(1)
-    expect(getCommits).toBeCalledWith(mockedTag)
-    expect(groupCommits).toBeCalledTimes(1)
-    expect(groupCommits).toBeCalledWith(mockedCommits, defaultConfig)
-    expect(generateChangelog).toBeCalledTimes(1)
-    expect(generateChangelog).toBeCalledWith(null, mockedGrouped, defaultConfig)
-    expect(generateReleased).not.toBeCalled()
-    expect(stdoutMock).toBeCalledTimes(1)
-    expect(stdoutMock).toBeCalledWith(mockedChangelog)
-    expect(writeFileSync).not.toBeCalled()
+      fs.readFile.mockImplementationOnce((_, __, cb) => cb(mockError))
+
+      expect(changelog.getChangelog(null, config)).rejects.toMatch(mockError)
+      expect(readFileSpy).toBeCalledTimes(1)
+      expect(readFileSpy).toBeCalledWith('CHANGELOG.md')
+    })
+
+    it('should return the changelog file', async () => {
+      const file = 'file'
+
+      fs.readFile.mockImplementationOnce((_, __, cb) => cb(null, file))
+
+      expect(await changelog.getChangelog(null, config)).toMatchInlineSnapshot(
+        `"file"`
+      )
+      expect(readFileSpy).toBeCalledTimes(1)
+      expect(readFileSpy).toBeCalledWith('CHANGELOG.md')
+    })
   })
 
-  it('should generate changelog with version', async () => {
-    const stdoutMock = mockProcessStdout()
-    const mockedTag = '2.2.3'
-    const mockedChangelog =
-      '# 2.2.3\n\n## Features\n\n- add %HASH% placeholder to line format a3c93b2f\n- introduce changelog customization using config file e66d6176\n- use higher level of headers for changelog eea23d95\n\n## Fixes\n\n- replace %message% as last to avoid bugs ec507396\n- stop adding empty line at the end of the file on --root faee4801\n- stop adding Latest when not applicable c64fa467\n\n## Misc\n\n- include commit links in the changelog 8f622021\n\n'
-    const mockedCommits = [
-      'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
-      'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
-      '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature',
-      'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
-      '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore(changelog): update CHANGELOG'
-    ]
-    const mockedGrouped = [
-      {
-        feat: [
-          'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
-          '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature'
-        ],
-        misc: [
-          'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec'
-        ],
-        release:
-          'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0'
-      }
-    ]
-    const mockedReleased = ''
+  describe('getHistory', () => {
+    let createReleasedFilterSpy
+    let getChangelogSpy
 
-    getLatestTag.mockReturnValueOnce(mockedTag)
-    getCommits.mockReturnValueOnce(mockedCommits)
-    groupCommits.mockReturnValueOnce(mockedGrouped)
-    generateChangelog.mockReturnValueOnce(mockedChangelog)
-    generateReleased.mockReturnValueOnce(mockedReleased)
+    beforeEach(() => {
+      createReleasedFilterSpy = jest.spyOn(createReleasedFilter, 'default')
+      getChangelogSpy = jest.spyOn(Changelog.prototype, 'getChangelog')
+    })
 
-    await changelog('2.2.3', defaultOptions, defaultConfig)
+    it('should not get history if there is no existing CHANGELOG', async () => {
+      hasChangelogSpy.mockReturnValueOnce(false)
 
-    expect(generateChangelog).toBeCalledTimes(1)
-    expect(generateChangelog).toBeCalledWith(
-      mockedTag,
-      mockedGrouped,
-      defaultConfig
-    )
-    expect(stdoutMock).toBeCalledTimes(1)
-    expect(stdoutMock).toBeCalledWith(mockedChangelog)
-    expect(writeFileSync).not.toBeCalled()
+      const history = await changelog.getHistory(mockVersion)
+
+      expect(getChangelogSpy).not.toBeCalled()
+      expect(createReleasedFilterSpy).not.toBeCalled()
+      expect(history).toEqual(null)
+    })
+
+    it('should not get history with `--from` option', async () => {
+      const options = { from: '4e02179c' }
+
+      hasChangelogSpy.mockReturnValueOnce(true)
+
+      changelog.options = options
+      const history = await changelog.getHistory(mockVersion)
+
+      expect(getChangelogSpy).not.toBeCalled()
+      expect(createReleasedFilterSpy).not.toBeCalled()
+      expect(history).toEqual(null)
+    })
+
+    it('should not get history with `--root` option', async () => {
+      const options = { root: true }
+
+      hasChangelogSpy.mockReturnValueOnce(true)
+
+      changelog.options = options
+      const history = await changelog.getHistory(mockVersion)
+
+      expect(getChangelogSpy).not.toBeCalled()
+      expect(createReleasedFilterSpy).not.toBeCalled()
+      expect(history).toEqual(null)
+    })
+
+    it('should throw if there is no history', () => {
+      const mockChangelog = ''
+
+      hasChangelogSpy.mockReturnValueOnce(true)
+
+      fs.readFile.mockImplementationOnce((_, __, cb) => cb(null, mockChangelog))
+
+      expect(
+        changelog.getHistory(mockVersion)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"CHANGELOG doesn't contain any history."`
+      )
+    })
+
+    it('should get history', async () => {
+      const mockReleased = generateMockReleased(mockVersion)
+      const mockChangelog = generateMockChangelog(mockVersion)
+
+      hasChangelogSpy.mockReturnValue(true)
+      fs.readFile.mockImplementationOnce((_, __, cb) => cb(null, mockChangelog))
+
+      const history = await changelog.getHistory(mockVersion)
+
+      expect(getChangelogSpy).toBeCalledTimes(1)
+      expect(createReleasedFilterSpy).toBeCalledTimes(1)
+      expect(createReleasedFilterSpy).toBeCalledWith(mockVersion, config)
+      expect(history).toEqual(mockReleased)
+    })
   })
 
-  it('should write to file with --write option', async () => {
-    const options = { ...defaultOptions, write: true }
-    const mockedTag = '2.2.3'
-    const mockedChangelog =
-      '# Latest\n\n## Features\n\n- add %HASH% placeholder to line format a3c93b2f\n- introduce changelog customization using config file e66d6176\n- use higher level of headers for changelog eea23d95\n\n## Fixes\n\n- replace %message% as last to avoid bugs ec507396\n- stop adding empty line at the end of the file on --root faee4801\n- stop adding Latest when not applicable c64fa467\n\n## Misc\n\n- include commit links in the changelog 8f622021\n\n'
-    const mockedCommits = [
-      'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
-      'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
-      '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature',
-      'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
-      '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore(changelog): update CHANGELOG'
-    ]
-    const mockedReleased = ''
-    const mockedFilename = 'CHANGELOG.md'
-    const mockedOutput =
-      '# Latest\n\n## Features\n\n- add %HASH% placeholder to line format a3c93b2f\n- introduce changelog customization using config file e66d6176\n- use higher level of headers for changelog eea23d95\n\n## Fixes\n\n- replace %message% as last to avoid bugs ec507396\n- stop adding empty line at the end of the file on --root faee4801\n- stop adding Latest when not applicable c64fa467\n\n## Misc\n\n- include commit links in the changelog 8f622021\n'
+  describe('generate', () => {
+    let generateChangelogSpy
 
-    getLatestTag.mockReturnValueOnce(mockedTag)
-    getCommits.mockReturnValueOnce(mockedCommits)
-    generateChangelog.mockReturnValueOnce(mockedChangelog)
-    generateReleased.mockReturnValueOnce(mockedReleased)
+    beforeEach(() => {
+      generateChangelogSpy = jest.spyOn(generateChangelog, 'default')
+    })
 
-    await changelog(null, options, defaultConfig)
+    it('should generate changelog', () => {
+      const result = changelog.generate(mockGrouped, mockVersion)
 
-    expect(writeFileSync).toBeCalledTimes(1)
-    expect(writeFileSync).toBeCalledWith(mockedFilename, mockedOutput)
+      expect(generateChangelogSpy).toBeCalledTimes(1)
+      expect(generateChangelogSpy).toBeCalledWith(
+        mockGrouped,
+        mockVersion,
+        config
+      )
+      expect(result).toMatchSnapshot()
+    })
   })
 
-  it('should write to file with --write option and released', async () => {
-    const options = { ...defaultOptions, write: true }
-    const stdoutMock = mockProcessStdout()
-    const mockedTag = '2.2.3'
-    const mockedChangelog =
-      '# 2.2.3\n\n## Features\n\n- add %HASH% placeholder to line format a3c93b2f\n- introduce changelog customization using config file e66d6176\n- use higher level of headers for changelog eea23d95\n\n## Fixes\n\n- replace %message% as last to avoid bugs ec507396\n- stop adding empty line at the end of the file on --root faee4801\n- stop adding Latest when not applicable c64fa467\n\n## Misc\n\n- include commit links in the changelog 8f622021\n\n'
-    const mockedCommits = [
-      'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
-      'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
-      '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature',
-      'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
-      '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore(changelog): update CHANGELOG'
-    ]
-    const mockedReleased = '# 2.2.2\n- feat: add feature 2da21c56'
-    const mockedFilename = 'CHANGELOG.md'
+  describe('save', () => {
+    let writeFileSpy
 
-    getLatestTag.mockReturnValueOnce(mockedTag)
-    getCommits.mockReturnValueOnce(mockedCommits)
-    generateChangelog.mockReturnValueOnce(mockedChangelog)
-    generateReleased.mockReturnValueOnce(mockedReleased)
+    beforeEach(() => {
+      writeFileSpy = jest.spyOn(writeFile, 'default')
+    })
 
-    await changelog('2.2.3', options, defaultConfig)
+    it('should save changelog', () => {
+      const mockChangelog = generateMockChangelog(mockVersion)
 
-    expect(generateReleased).toBeCalledTimes(1)
-    expect(generateReleased).toBeCalledWith(mockedTag, defaultConfig)
-    expect(stdoutMock).not.toBeCalled()
-    expect(writeFileSync).toBeCalledTimes(1)
-    expect(writeFileSync).toBeCalledWith(
-      mockedFilename,
-      mockedChangelog + mockedReleased
-    )
+      writeFileSpy.mockResolvedValueOnce()
+
+      changelog.save(mockChangelog)
+
+      expect(writeFileSpy).toBeCalledTimes(1)
+      expect(writeFileSpy).toBeCalledWith(CHANGELOG, mockChangelog)
+    })
   })
 
-  it('should generate changelog with --root option', async () => {
-    const stdoutMock = mockProcessStdout()
-    const options = { ...defaultOptions, root: true }
-    const mockedTag = '2.2.3'
-    const mockedChangelog =
-      '# Latest\n\n## Features\n\n- add %HASH% placeholder to line format a3c93b2f\n- introduce changelog customization using config file e66d6176\n- use higher level of headers for changelog eea23d95\n\n## Fixes\n\n- replace %message% as last to avoid bugs ec507396\n- stop adding empty line at the end of the file on --root faee4801\n- stop adding Latest when not applicable c64fa467\n\n## Misc\n\n- include commit links in the changelog 8f622021\n\n'
-    const mockedCommits = [
-      'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
-      'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
-      '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature',
-      'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
-      '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore(changelog): update CHANGELOG'
-    ]
+  describe('print', () => {
+    let printOutputSpy
 
-    getLatestTag.mockReturnValueOnce(mockedTag)
-    getCommits.mockReturnValueOnce(mockedCommits)
-    generateChangelog.mockReturnValueOnce(mockedChangelog)
+    beforeEach(() => {
+      printOutputSpy = jest.spyOn(printOutput, 'default')
+    })
 
-    await changelog(null, options, defaultConfig)
+    it('should print changelog', () => {
+      const mockChangelog = generateMockChangelog(mockVersion)
 
-    expect(stdoutMock).toBeCalledTimes(1)
-    expect(stdoutMock).toBeCalledWith(mockedChangelog)
-    expect(writeFileSync).not.toBeCalled()
+      stdoutSpy.mockImplementation()
+
+      changelog.print(mockChangelog)
+
+      expect(printOutputSpy).toBeCalledTimes(1)
+      expect(printOutputSpy).toBeCalledWith(mockChangelog)
+    })
   })
 
-  it('should generate changelog with --from option', async () => {
-    const stdoutMock = mockProcessStdout()
-    const options = { ...defaultOptions, from: '4e02179c' }
-    const mockedTag = '2.2.3'
-    const mockedChangelog =
-      '# Latest\n\n## Features\n\n- add %HASH% placeholder to line format a3c93b2f\n- introduce changelog customization using config file e66d6176\n- use higher level of headers for changelog eea23d95\n\n## Fixes\n\n- replace %message% as last to avoid bugs ec507396\n- stop adding empty line at the end of the file on --root faee4801\n- stop adding Latest when not applicable c64fa467\n\n## Misc\n\n- include commit links in the changelog 8f622021\n\n'
-    const mockedCommits = [
-      'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
-      'aa805ce71ee103965ce3db46d4f6ed2658efd08d feat: add option to write to local CHANGELOG file',
-      '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature',
-      'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
-      '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore(changelog): update CHANGELOG'
-    ]
+  describe('finish', () => {
+    let generateSpy
+    let getHistorySpy
+    let printSpy
+    let saveSpy
 
-    getLatestTag.mockReturnValueOnce(mockedTag)
-    getCommits.mockReturnValueOnce(mockedCommits)
-    generateChangelog.mockReturnValueOnce(mockedChangelog)
+    beforeEach(() => {
+      generateSpy = jest.spyOn(Changelog.prototype, 'generate')
+      getHistorySpy = jest.spyOn(Changelog.prototype, 'getHistory')
+      printSpy = jest.spyOn(Changelog.prototype, 'print')
+      saveSpy = jest.spyOn(Changelog.prototype, 'save')
+    })
 
-    await changelog(null, options, defaultConfig)
+    it('should print to output', async () => {
+      const mockVersion = null
+      const mockReleased = ''
 
-    expect(stdoutMock).toBeCalledTimes(1)
-    expect(stdoutMock).toBeCalledWith(mockedChangelog)
-    expect(writeFileSync).not.toBeCalled()
+      const mockUnreleased = generateMockUnreleased()
+
+      hasChangelogSpy.mockReturnValueOnce(false)
+      latestTagSpy.mockReturnValueOnce(mockVersion)
+      fs.readFile.mockImplementationOnce((_, __, cb) => cb(null, mockReleased))
+      stdoutSpy.mockImplementation()
+
+      await changelog.finish([mockGrouped[0]], mockVersion)
+
+      expect(generateSpy).toBeCalledTimes(1)
+      expect(generateSpy).toBeCalledWith([mockGrouped[0]], mockVersion)
+      expect(getHistorySpy).toBeCalledTimes(1)
+      expect(getHistorySpy).toBeCalledWith(mockVersion)
+      expect(saveSpy).not.toBeCalled()
+      expect(printSpy).toBeCalledTimes(1)
+      expect(printSpy).toBeCalledWith(mockUnreleased)
+    })
+
+    it('should generate changelog with version', async () => {
+      const mockVersion = '2.0.0'
+      const mockReleased = ''
+
+      const mockUnreleased = generateMockUnreleased(mockVersion)
+
+      hasChangelogSpy.mockReturnValueOnce(false)
+      latestTagSpy.mockReturnValueOnce(mockVersion)
+      fs.readFile.mockImplementationOnce((_, __, cb) => cb(null, mockReleased))
+      stdoutSpy.mockImplementation()
+
+      await changelog.finish([mockGrouped[0]], mockVersion)
+
+      expect(generateSpy).toBeCalledTimes(1)
+      expect(generateSpy).toBeCalledWith([mockGrouped[0]], mockVersion)
+      expect(getHistorySpy).toBeCalledTimes(1)
+      expect(getHistorySpy).toBeCalledWith(mockVersion)
+      expect(saveSpy).not.toBeCalled()
+      expect(printSpy).toBeCalledTimes(1)
+      expect(printSpy).toBeCalledWith(mockUnreleased)
+    })
+
+    it('should generate changelog with released', async () => {
+      const mockVersion = '1.0.0'
+      const mockNextVersion = '2.0.0'
+      const mockChangelog = generateMockChangelog(mockVersion, mockNextVersion)
+      const mockReleased = generateMockReleased(mockVersion)
+
+      hasChangelogSpy.mockReturnValueOnce(true)
+      latestTagSpy.mockReturnValueOnce(mockVersion)
+      fs.readFile.mockImplementationOnce((_, __, cb) => cb(null, mockReleased))
+      stdoutSpy.mockImplementation()
+
+      await changelog.finish([mockGrouped[0]], mockNextVersion)
+
+      expect(generateSpy).toBeCalledTimes(1)
+      expect(generateSpy).toBeCalledWith([mockGrouped[0]], mockNextVersion)
+      expect(getHistorySpy).toBeCalledTimes(1)
+      expect(getHistorySpy).toBeCalledWith(mockVersion)
+      expect(saveSpy).not.toBeCalled()
+      expect(printSpy).toBeCalledTimes(1)
+      expect(printSpy).toBeCalledWith(mockChangelog)
+    })
+
+    it('should write to file with `--write` option', async () => {
+      const options = { write: true }
+      const mockVersion = null
+      const mockUnreleased = generateMockUnreleased()
+      const mockReleased = ''
+
+      hasChangelogSpy.mockReturnValueOnce(false)
+      latestTagSpy.mockReturnValueOnce(mockVersion)
+      fs.readFile.mockImplementationOnce((_, __, cb) => cb(null, mockReleased))
+      fs.writeFile.mockImplementationOnce((_, __, ___, cb) => cb(null))
+
+      changelog.options = options
+      await changelog.finish([mockGrouped[0]], mockVersion)
+
+      expect(generateSpy).toBeCalledTimes(1)
+      expect(generateSpy).toBeCalledWith([mockGrouped[0]], mockVersion)
+      expect(getHistorySpy).toBeCalledTimes(1)
+      expect(getHistorySpy).toBeCalledWith(mockVersion)
+      expect(saveSpy).toBeCalledTimes(1)
+      expect(saveSpy).toBeCalledWith(mockUnreleased)
+      expect(printSpy).not.toBeCalled()
+    })
+
+    it('should write to file with `--write` option and released', async () => {
+      const options = { write: true }
+      const mockVersion = '1.0.0'
+      const mockNextVersion = '2.0.0'
+      const mockChangelog = generateMockChangelog(mockVersion, mockNextVersion)
+      const mockReleased = generateMockReleased(mockVersion)
+
+      hasChangelogSpy.mockReturnValueOnce(true)
+      latestTagSpy.mockReturnValueOnce(mockVersion)
+      fs.readFile.mockImplementationOnce((_, __, cb) => cb(null, mockReleased))
+      fs.writeFile.mockImplementationOnce((_, __, ___, cb) => cb(null))
+
+      changelog.options = options
+      await changelog.finish([mockGrouped[0]], mockNextVersion)
+
+      expect(generateSpy).toBeCalledTimes(1)
+      expect(generateSpy).toBeCalledWith([mockGrouped[0]], mockNextVersion)
+      expect(getHistorySpy).toBeCalledTimes(1)
+      expect(getHistorySpy).toBeCalledWith(mockVersion)
+      expect(saveSpy).toBeCalledTimes(1)
+      expect(saveSpy).toBeCalledWith(mockChangelog)
+      expect(printSpy).not.toBeCalled()
+    })
   })
 })

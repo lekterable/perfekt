@@ -1,39 +1,30 @@
-import { defaultConfig } from './'
-import { changelog } from './changelog'
-import { release } from './release'
-import { commitRelease, defineVersion, updateVersion } from './utils'
+import Git from './git'
+import NPM from './npm'
+import Release from './release'
 
-jest.mock('./changelog', () => ({ changelog: jest.fn() }))
-jest.mock('./utils', () => ({
-  commitRelease: jest.fn(),
-  updateVersion: jest.fn(),
-  defineVersion: jest.fn()
-}))
-jest.mock('console', () => ({ error: jest.fn() }))
+jest.mock('./utils/misc/exec')
 
-describe('release', () => {
-  it('should throw if no version passed', () => {
-    expect(release()).rejects.toThrow('Relese requires a version')
+describe('Release', () => {
+  const release = new Release()
+
+  let updateVersionSpy
+  let releaseSpy
+
+  beforeEach(() => {
+    updateVersionSpy = jest.spyOn(NPM.prototype, 'updateVersion')
+    releaseSpy = jest.spyOn(Git.prototype, 'release')
   })
 
-  it('should execute release', async () => {
-    const mockedVersion = '2.2.2'
+  describe('finish', () => {
+    it('should finish the release', () => {
+      const mockVersion = '1.1.1'
 
-    defineVersion.mockReturnValueOnce(mockedVersion)
+      release.finish(mockVersion)
 
-    await release(mockedVersion, {}, defaultConfig)
-
-    expect(defineVersion).toBeCalledTimes(1)
-    expect(defineVersion).toBeCalledWith(mockedVersion, defaultConfig)
-    expect(updateVersion).toBeCalledTimes(1)
-    expect(updateVersion).toBeCalledWith(mockedVersion)
-    expect(changelog).toBeCalledTimes(1)
-    expect(changelog).toBeCalledWith(
-      mockedVersion,
-      { write: true },
-      defaultConfig
-    )
-    expect(commitRelease).toBeCalledTimes(1)
-    expect(commitRelease).toBeCalledWith(mockedVersion)
+      expect(updateVersionSpy).toBeCalledTimes(1)
+      expect(updateVersionSpy).toBeCalledWith(mockVersion)
+      expect(releaseSpy).toBeCalledTimes(1)
+      expect(releaseSpy).toBeCalledWith(mockVersion)
+    })
   })
 })

@@ -1,3 +1,5 @@
 export * from './changelog'
-export * from './git'
 export * from './misc'
+export * from './npm'
+export * from './object'
+export * from './release'

@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Changelog generate should generate changelog 1`] = `
+"# 2.2.3
+
+## Features
+
+- replace all placeholder occurrences d0e72481
+- make no-commits error more specific a357a61a
+- add release version bumping 17feea4a
+
+## Fixes
+
+- throw error if there are no commits 5fa8e6c9
+
+## Misc
+
+- setup CI with GitHub Actions ee24740b
+- rename function and format tests 1a0b3f3e
+
+# 1.2.0
+
+## Features
+
+- make breaking and misc headers configurable 6b05a3b8
+- add release \`new\` keyword 86aa5dc1
+- make changelog ignored scopes configurable d34a9f12
+
+## Fixes
+
+- throw error if there are no commits 5fa8e6c9
+- check if changelog exists before accessing 4d95659f
+
+## Misc
+
+- include commit links in the changelog 8f622021
+"
+`;

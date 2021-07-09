@@ -1,26 +1,2 @@
-export * from './changelog'
-export * from './initialize'
-export * from './release'
-
-export const defaultConfig = {
-  unreleasedFormat: '# Latest',
-  releaseFormat: '# %version%',
-  breakingFormat: '## BREAKING',
-  groups: [
-    { name: '## Features', change: 'minor', types: ['feat', 'feature'] },
-    { name: '## Fixes', change: 'patch', types: ['fix'] }
-  ],
-  miscFormat: '## Misc',
-  lineFormat: '- %message% %hash%',
-  ignoredScopes: ['changelog']
-}
-
-export const defaultChangelogOptions = {
-  write: false,
-  root: false,
-  from: null
-}
-
-export const defaultReleaseOptions = {
-  from: null
-}
+export { default as Perfekt } from './perfekt'
+export { default as Config } from './config'

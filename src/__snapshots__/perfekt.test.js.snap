@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Perfekt changelog should generate changelog 1`] = `
+"# 2.2.2
+
+## Features
+
+- add option to write to local CHANGELOG file aa805ce7
+- add execute release feature 4e02179c
+
+## Fixes
+
+- support other conventions b2f59019
+- a bug bffc2f9e
+
+## Misc
+
+- extract line generating logic to function and promisify exec bffc2f9e
+- add core tests b2f59019
+- update dependencies 2ea04355
+"
+`;
+
+exports[`Perfekt changelog should generate changelog with \`--from\` option 1`] = `
+"# 2.2.2
+
+## Features
+
+- add option to write to local CHANGELOG file aa805ce7
+- add execute release feature 4e02179c
+
+## Fixes
+
+- support other conventions b2f59019
+- a bug bffc2f9e
+
+## Misc
+
+- extract line generating logic to function and promisify exec bffc2f9e
+- add core tests b2f59019
+- update dependencies 2ea04355
+"
+`;
+
+exports[`Perfekt changelog should generate changelog with \`--root\` option 1`] = `
+"# 2.2.2
+
+## Features
+
+- add option to write to local CHANGELOG file aa805ce7
+- add execute release feature 4e02179c
+
+## Fixes
+
+- support other conventions b2f59019
+- a bug bffc2f9e
+
+## Misc
+
+- extract line generating logic to function and promisify exec bffc2f9e
+- add core tests b2f59019
+- update dependencies 2ea04355
+"
+`;

@@ -71,7 +71,7 @@ For the projects that have a long-existing git history, which could potentially 
 
 `perfekt release <version> --from <commit>`
 
-where `<version>` is the version of your new release and `<commit>` is the hash of the last commit that should `NOT` be the part of the release.
+where `<version>` is the version of your new release and `<commit>` is the hash of the last commit that should **NOT** be the part of the release.
 
 after this, you can start referring to [new projects section](#new-projects) when executing future releases.
 
@@ -108,11 +108,11 @@ Options:
 
 `-h, --help` - display help for command
 
-`--from <commit>` - SHA of the last commit that will `NOT` be included in this release
+`--from <commit>` - SHA of the last commit which will **NOT** be included in this release
 
 Arguments:
 
-`version` - _(required)_ version which will be used while executing the release. You can also use `major`, `minor` and `patch` instead of a specific version number to make **perfekt** bump the version for you automatically.
+`version` - _(required)_ version which will be used while executing the release. You can use `major`, `minor` and `patch` instead of a specific version number to bump it or `new` to make **perfekt** determine the version for you automatically based on the unreleased changes.
 
 ### `changelog`
 
@@ -124,7 +124,7 @@ This will:
 
 - Look for the latest git tag
   - if found transform unreleased into a release and append with the previous changelog
-  - if `NOT`, try to generate a new changelog for the whole history
+  - if **NOT**, try to generate a new changelog for the whole history
 - Output changelog in the console, if you want to save it in the `CHANGELOG.md` file use `--write` option
 
 Options:
@@ -135,7 +135,7 @@ Options:
 
 `--root` - generate changelog for the entire history
 
-`--from <commit>` - SHA of the last commit that will `NOT` be included in this changelog
+`--from <commit>` - SHA of the last commit that will **NOT** be included in this changelog
 
 Arguments:
 
@@ -155,8 +155,16 @@ Default config looks like this:
   "releaseFormat": "# %version%",
   "breakingFormat": "## BREAKING",
   "groups": [
-    { "name": "## Features", "aliases": ["feat", "feature"] },
-    { "name": "## Fixes", "aliases": ["fix"] }
+    {
+      "name": "## Features",
+      "change": "minor",
+      "aliases": ["feat", "feature"]
+    },
+    {
+      "name": "## Fixes",
+      "change": "patch",
+      "aliases": ["fix"]
+    }
   ],
   "miscFormat": "## Misc",
   "lineFormat": "- %message% %hash%",
@@ -204,7 +212,17 @@ Default:
 
 Used to define how commits should be grouped inside of the release block.
 
-Each object is a separate group. The `name` property will be used as the group's header and the `types` array contains all commit types which will be associated with it.
+Each object is a separate group, e.g:
+
+```json
+{
+  "name": "## Features",
+  "change": "minor",
+  "types": ["feat", "feature"]
+}
+```
+
+The `name` property will be used as the group's header in changelog, `change` is needed to determine the release type when using `new` as a release version and the `types` array contains all commit types which should be associated with that group.
 
 All commits with unmatched types will become a part of the `Misc` group.
 
@@ -212,7 +230,11 @@ All commits with unmatched types will become a part of the `Misc` group.
 
 Default:
 
-`[ { name: '## Features', types: ['feat', 'feature'] }, { name: '## Fixes', types: ['fix'] } ]`
+`[ { name: '## Features', change: 'minor', types: ['feat', 'feature'] }, { name: '## Fixes', change: 'patch', types: ['fix'] } ]`
+
+> change can be either `major`, `minor` or `patch`
+
+> `Breaking` and `Misc` groups correspond to `major` and `patch` changes respectively.
 
 ### `miscFormat`
 

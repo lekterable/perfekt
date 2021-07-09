@@ -8,8 +8,7 @@ export const groupCommits = (commits, config) =>
       const group = grouped[grouped.length - 1]
       const rest = grouped.slice(0, -1)
       const commitDetails = getCommitDetails(commit)
-      const normalizedScope =
-        commitDetails.scope && commitDetails.scope.toLowerCase()
+      const normalizedScope = commitDetails.scope?.toLowerCase()
 
       if (config.ignoredScopes.includes(normalizedScope)) return [...grouped]
       if (normalizedScope === 'release') {
@@ -84,7 +83,7 @@ export const generateReleased = (previousVersion, config) =>
 export const generateChangelog = (version, groupedCommits, config) => {
   const releases = groupedCommits.map(group => {
     const release = getCommitDetails(group.release)
-    const releaseVersion = (release && release.message) || version
+    const releaseVersion = release?.message || version
     const title = releaseVersion
       ? config.releaseFormat.replace(/%version%/g, releaseVersion)
       : config.unreleasedFormat

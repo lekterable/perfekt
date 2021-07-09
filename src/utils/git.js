@@ -1,5 +1,11 @@
 import { execAsync } from './misc'
 
+export const getLatestTag = async () => {
+  const latestTag = await execAsync('git tag | tail -n 1')
+
+  return latestTag ? latestTag.replace('\n', '') : null
+}
+
 export const getCommits = async from => {
   const query = from
     ? `git log --format="%H %s" ${from}..`
@@ -9,10 +15,10 @@ export const getCommits = async from => {
   return commits.split('\n').filter(commit => commit)
 }
 
-export const getLatestTag = async () => {
-  const latestTag = await execAsync('git tag | tail -n 1')
+export const getUnreleasedCommits = async () => {
+  const latestTag = await getLatestTag()
 
-  return latestTag ? latestTag.replace('\n', '') : null
+  return latestTag ? getCommits(latestTag) : null
 }
 
 export const getCommitDetails = commit => {

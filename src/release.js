@@ -4,7 +4,7 @@ import { commitRelease, defineVersion, updateVersion } from './utils'
 export const release = async (input, options, config) => {
   if (!input) throw new Error('Relese requires a version')
 
-  const newVersion = defineVersion(input)
+  const newVersion = await defineVersion(input, config)
 
   await updateVersion(newVersion)
   await changelog(newVersion, { write: true, from: options.from }, config)

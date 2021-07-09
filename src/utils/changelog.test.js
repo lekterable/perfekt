@@ -86,9 +86,9 @@ describe('changelog', () => {
       const config = {
         ...defaultConfig,
         groups: [
-          { name: '## Feat', types: ['feat', 'feature'] },
-          { name: '## Fix', types: ['fix'] },
-          { name: '## Custom', types: ['custom'] }
+          { name: '## Feat', type: 'minor', types: ['feat', 'feature'] },
+          { name: '## Fix', type: 'patch', types: ['fix'] },
+          { name: '## Custom', type: 'patch', types: ['custom'] }
         ],
         ignoredScopes: ['ignored']
       }
@@ -209,7 +209,7 @@ describe('changelog', () => {
       const error = 'error'
 
       existsSync.mockReturnValueOnce(true)
-      readFile.mockImplementation((_, __, cb) => cb(error))
+      readFile.mockImplementationOnce((_, __, cb) => cb(error))
 
       expect(generateReleased(null, defaultConfig)).rejects.toMatch(error)
     })
@@ -220,7 +220,7 @@ describe('changelog', () => {
         '# Latest\n- feat: include changelog in the releases 2da21c56\n- test: add utils tests 217b25d0'
 
       existsSync.mockReturnValueOnce(true)
-      readFile.mockImplementation((_, __, cb) => cb(null, mockedInput))
+      readFile.mockImplementationOnce((_, __, cb) => cb(null, mockedInput))
 
       expect(generateReleased('2.2.2', defaultConfig)).rejects.toThrow(error)
     })
@@ -231,7 +231,7 @@ describe('changelog', () => {
       const mockedOutput = '# 2.2.2\n- feat: add feature 2da21c56'
 
       existsSync.mockReturnValueOnce(true)
-      readFile.mockImplementation((_, __, cb) => cb(null, mockedInput))
+      readFile.mockImplementationOnce((_, __, cb) => cb(null, mockedInput))
 
       const released = await generateReleased('2.2.2', defaultConfig)
 
@@ -249,7 +249,7 @@ describe('changelog', () => {
       const mockedOutput = '## Release v2.2.2\n- feat: add feature 2da21c56'
 
       existsSync.mockReturnValueOnce(true)
-      readFile.mockImplementation((_, __, cb) => cb(null, mockedInput))
+      readFile.mockImplementationOnce((_, __, cb) => cb(null, mockedInput))
 
       const released = await generateReleased('2.2.2', config)
 
@@ -301,9 +301,9 @@ describe('changelog', () => {
         releaseFormat: '# v.%version%',
         breakingFormat: '### BREAKING CHANGE',
         groups: [
-          { name: '## Feat', types: ['feat', 'feature'] },
-          { name: '## Fix', types: ['fix'] },
-          { name: '## Custom', types: ['custom'] }
+          { name: '## Feat', change: 'minor', types: ['feat', 'feature'] },
+          { name: '## Fix', change: 'patch', types: ['fix'] },
+          { name: '## Custom', change: 'patch', types: ['custom'] }
         ],
         miscFormat: '### Miscellaneous',
         lineFormat: '* %message% %hash%'

@@ -24,7 +24,7 @@ describe('release', () => {
     await release(mockedVersion, {}, defaultConfig)
 
     expect(defineVersion).toBeCalledTimes(1)
-    expect(defineVersion).toBeCalledWith(mockedVersion)
+    expect(defineVersion).toBeCalledWith(mockedVersion, defaultConfig)
     expect(updateVersion).toBeCalledTimes(1)
     expect(updateVersion).toBeCalledWith(mockedVersion)
     expect(changelog).toBeCalledTimes(1)

@@ -7,8 +7,8 @@ export const defaultConfig = {
   releaseFormat: '# %version%',
   breakingFormat: '## BREAKING',
   groups: [
-    { name: '## Features', types: ['feat', 'feature'] },
-    { name: '## Fixes', types: ['fix'] }
+    { name: '## Features', change: 'minor', types: ['feat', 'feature'] },
+    { name: '## Fixes', change: 'patch', types: ['fix'] }
   ],
   miscFormat: '## Misc',
   lineFormat: '- %message% %hash%',

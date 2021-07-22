@@ -1,3 +1,23 @@
+# 2.0.0
+
+## BREAKING
+
+- rewrite the codebase using classes [be73954c](https://github.com/lekterable/perfekt/commit/be73954cc6cd4f9d9b1411e778e1065d9d24d162)
+- update `groups` configuration option [c02bbda1](https://github.com/lekterable/perfekt/commit/c02bbda1489af11372198c01e75110cbac1ebbf3)
+
+## Features
+
+- add release `new` keyword [86aa5dc1](https://github.com/lekterable/perfekt/commit/86aa5dc18c363514e518b16b6eeb0bb2c5d94617)
+- replace all placeholder occurrences [d0e72481](https://github.com/lekterable/perfekt/commit/d0e72481e9b9dc2bed8e495b8943d2d90399db32)
+
+## Misc
+
+- update README badges [abfb3d86](https://github.com/lekterable/perfekt/commit/abfb3d86c05b3680a6aed505d0f9194f13912878)
+- setup CI with GitHub Actions [ee24740b](https://github.com/lekterable/perfekt/commit/ee24740b920b22e916ca5ab0449abb08e99143c4)
+- update `groups` configuration option documentation [132d550c](https://github.com/lekterable/perfekt/commit/132d550cf4efff99c2982bd3568b67179ef9ac5d)
+- update dependencies and configurations [25cbe30f](https://github.com/lekterable/perfekt/commit/25cbe30fa5e641068842b2e9af8888eacf10c238)
+- reword question [8c3ff1c8](https://github.com/lekterable/perfekt/commit/8c3ff1c8776cb3cf739b5c8133fa2883b7909f7a)
+
 # 1.2.0
 
 ## Features

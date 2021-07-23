@@ -31,7 +31,7 @@ const generateChangelog = (groupedCommits, version, config) => {
           return generateLine({ message, hash }, config) + space
         })
 
-        const header = matchingGroup ? matchingGroup.name : config.miscFormat
+        const header = matchingGroup ? matchingGroup.name : config.miscHeader
         const isBreaking = type === 'breaking'
 
         const groupHeader = isBreaking ? config.breakingHeader : header

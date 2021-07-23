@@ -24,7 +24,7 @@ Object {
     "changelog",
   ],
   "lineFormat": "* %message% %hash% %hash%",
-  "miscFormat": "## Misc",
+  "miscHeader": "## Misc",
   "releaseHeader": "## Release version - @%version%",
   "unreleasedHeader": "## **Unreleased**",
 }
@@ -54,7 +54,7 @@ Object {
     "changelog",
   ],
   "lineFormat": "- %message% %hash%",
-  "miscFormat": "## Misc",
+  "miscHeader": "## Misc",
   "releaseHeader": "# %version%",
   "unreleasedHeader": "# Latest",
 }

@@ -12,10 +12,10 @@ describe('Config', () => {
 
     it('should return config with overrides', () => {
       const overrides = {
-        breakingHeader: '# BREAKING',
-        lineFormat: '* %message% %hash% %hash%',
         unreleasedHeader: '## **Unreleased**',
-        releaseHeader: '## Release version - @%version%'
+        releaseHeader: '## Release version - @%version%',
+        breakingHeader: '# BREAKING',
+        lineFormat: '* %message% %hash% %hash%'
       }
       const { config } = new Config(overrides)
 

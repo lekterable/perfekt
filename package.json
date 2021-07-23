@@ -1,6 +1,6 @@
 {
   "name": "perfekt",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "author": "Kornel Dubieniecki",
   "description": "Release and version your packages with perfe(k)t ease!",
   "keywords": [

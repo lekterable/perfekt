@@ -1,3 +1,11 @@
+# 2.0.1
+
+## Misc
+
+- create project's documentation [04cf235a](https://github.com/lekterable/perfekt/commit/04cf235ad42c41613a4b2bc9afa1aaa0894d39b9)
+- rename config property [b80d3657](https://github.com/lekterable/perfekt/commit/b80d3657083964f919e3b854de49aa18f83c9beb)
+- update badge link in README [cb544712](https://github.com/lekterable/perfekt/commit/cb54471291f3a604a787ca1cf38b3e8a5d44b677)
+
 # 2.0.0
 
 ## BREAKING

@@ -8,7 +8,7 @@
   <a href="https://www.npmjs.com/package/perfekt">
     <img alt="npm version" src="https://img.shields.io/npm/v/perfekt.svg?style=for-the-badge">
   </a>
-  <a href="https://github.com/lekterable/lekterable/perfekt/workflows/CI">
+  <a href="https://github.com/lekterable/perfekt/actions/workflows/CI.yml">
     <img alt="CI" src="https://img.shields.io/github/workflow/status/lekterable/perfekt/CI?label=CI&logo=github&style=for-the-badge">
   </a>
   <a href="https://app.codecov.io/gh/lekterable/perfekt">

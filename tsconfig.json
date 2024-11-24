@@ -1,0 +1,14 @@
+{
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "~*": ["src/*"] },
+    "outDir": "dist",
+    "strict": true,
+    "declaration": true,
+    "esModuleInterop": true,
+    "target": "es6",
+    "moduleResolution": "node"
+  }
+}

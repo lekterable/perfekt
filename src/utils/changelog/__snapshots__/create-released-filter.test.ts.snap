@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`filterReleased should filter released 1`] = `
+[
+  "# 2.2.2",
+  "",
+  "## Features",
+  "",
+  "- add %HASH% placeholder to line format a3c93b2f",
+  "- introduce changelog customization using config file e66d6176",
+  "- use higher level of headers for changelog eea23d95",
+  "",
+  "## Fixes",
+  "",
+  "- replace %message% as last to avoid bugs ec507396",
+  "- stop adding empty line at the end of the file on --root faee4801",
+  "- stop adding Latest when not applicable c64fa467",
+  "",
+  "## Misc",
+  "",
+  "- include commit links in the changelog 8f622021",
+  "",
+]
+`;
+
+exports[`filterReleased should filter released with custom config 1`] = `
+[
+  "## Release version - @2.2.2",
+  "",
+  "## Features",
+  "",
+  "- add %HASH% placeholder to line format a3c93b2f",
+  "- introduce changelog customization using config file e66d6176",
+  "- use higher level of headers for changelog eea23d95",
+  "",
+  "## Fixes",
+  "",
+  "- replace %message% as last to avoid bugs ec507396",
+  "- stop adding empty line at the end of the file on --root faee4801",
+  "- stop adding Latest when not applicable c64fa467",
+  "",
+  "## Misc",
+  "",
+  "- include commit links in the changelog 8f622021",
+  "",
+]
+`;

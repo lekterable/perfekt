@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getCommitsTypes should return \`breaking\` for breaking changes 1`] = `
+[
+  "feat",
+  "fix",
+  "chore",
+  "breaking",
+]
+`;
+
+exports[`getCommitsTypes should return commits types 1`] = `
+[
+  "feat",
+  "fix",
+  "chore",
+]
+`;
+
+exports[`getCommitsTypes should return unique types 1`] = `
+[
+  "feat",
+  "fix",
+  "chore",
+]
+`;

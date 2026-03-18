@@ -16,11 +16,17 @@ class Git {
   }
 
   commit(message: string) {
-    exec(`git commit -m '${message}'`)
+    exec(`git commit --no-verify -m '${message}'`)
   }
 
   tag(tag: string, message: string) {
     execFile('git', ['tag', '-a', tag, '-m', message])
+  }
+
+  get isClean() {
+    const status = exec('git status --porcelain')?.toString().trim() ?? ''
+
+    return status.length === 0
   }
 
   get latestTag() {

@@ -50,7 +50,7 @@ describe('Git', () => {
       )
       expect(execMock).toHaveBeenNthCalledWith(
         2,
-        "git commit -m 'chore(release): 2.0.0'"
+        "git commit --no-verify -m 'chore(release): 2.0.0'"
       )
       expect(execFileMock).toHaveBeenCalledWith('git', [
         'tag',
@@ -77,6 +77,24 @@ describe('Git', () => {
       expect(git.latestTag).toBe('2.2.2')
       expect(execMock).toHaveBeenCalledTimes(1)
       expect(execMock).toHaveBeenCalledWith('git tag | tail -n 1')
+    })
+  })
+
+  describe('get isClean', () => {
+    it('should return true when the working tree is clean', () => {
+      execMock.mockReturnValueOnce('')
+
+      expect(git.isClean).toBe(true)
+      expect(execMock).toHaveBeenCalledTimes(1)
+      expect(execMock).toHaveBeenCalledWith('git status --porcelain')
+    })
+
+    it('should return false when the working tree has changes', () => {
+      execMock.mockReturnValueOnce(' M README.md\n')
+
+      expect(git.isClean).toBe(false)
+      expect(execMock).toHaveBeenCalledTimes(1)
+      expect(execMock).toHaveBeenCalledWith('git status --porcelain')
     })
   })
 

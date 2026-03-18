@@ -186,6 +186,10 @@ describe('cli', () => {
       [new Error("version couldn't be bumped"), 'INVALID_VERSION'],
       [new Error('No unreleased commits.'), 'NO_UNRELEASED_COMMITS'],
       [
+        new Error('Working tree must be clean before creating a release.'),
+        'DIRTY_WORKTREE'
+      ],
+      [
         new Error("Couldn't determine a version bump from unreleased commits."),
         'INVALID_COMMIT_TYPES'
       ],

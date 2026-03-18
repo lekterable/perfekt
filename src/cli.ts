@@ -155,6 +155,9 @@ export const getErrorCode = (error: unknown) => {
   if (message.includes("Couldn't determine a version bump")) {
     return 'INVALID_COMMIT_TYPES'
   }
+  if (message.includes('Working tree must be clean')) {
+    return 'DIRTY_WORKTREE'
+  }
 
   if (message.includes("Couldn't get unreleased commits")) {
     return 'MISSING_RELEASE_TAG'

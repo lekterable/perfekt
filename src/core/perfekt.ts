@@ -152,6 +152,10 @@ class Perfekt {
     }
 
     if (!options.dryRun) {
+      if (!this.#git.isClean) {
+        throw new Error('Working tree must be clean before creating a release.')
+      }
+
       await this.#changelog.save(changelog.markdown)
 
       this.#release.options = options

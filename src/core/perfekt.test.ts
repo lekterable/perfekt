@@ -257,7 +257,7 @@ describe('Perfekt', () => {
         'git add CHANGELOG.md package.json pnpm-lock.yaml'
       )
       expect(execMock).toHaveBeenCalledWith(
-        "git commit -m 'chore(release): 2.2.2'"
+        "git commit --no-verify -m 'chore(release): 2.2.2'"
       )
       expect(execFileMock).toHaveBeenCalledWith('git', [
         'tag',
@@ -369,6 +369,45 @@ describe('Perfekt', () => {
         },
         commitCount: 7
       })
+    })
+
+    it('should throw before writing files when the working tree is dirty', async () => {
+      fsMock.readFile
+        .mockReset()
+        .mockImplementationOnce(resolveReadFile('{ "version": "1.2.0" }'))
+        .mockImplementationOnce(resolveReadFile(existingChangelog))
+      fsMock.writeFile.mockClear()
+      execMock.mockReset()
+      execMock.mockReturnValueOnce('1.2.0')
+      execMock.mockReturnValueOnce(mockLog)
+      execMock.mockReturnValueOnce(' M README.md')
+
+      await expect(perfekt.release('2.2.2', {})).rejects.toThrow(
+        'Working tree must be clean before creating a release.'
+      )
+
+      expect(execMock).toHaveBeenNthCalledWith(3, 'git status --porcelain')
+      expect(fsMock.writeFile).not.toHaveBeenCalled()
+      expect(execFileMock).not.toHaveBeenCalled()
+    })
+
+    it('should allow dirty working trees during release dry runs', async () => {
+      fsMock.readFile
+        .mockReset()
+        .mockImplementationOnce(resolveReadFile('{ "version": "1.2.0" }'))
+        .mockImplementationOnce(resolveReadFile(existingChangelog))
+      fsMock.writeFile.mockClear()
+      execMock.mockReset()
+      execMock.mockReturnValueOnce('1.2.0')
+      execMock.mockReturnValueOnce(mockLog)
+
+      await expect(
+        perfekt.release('2.2.2', { dryRun: true })
+      ).resolves.toBeDefined()
+
+      expect(execMock).toHaveBeenCalledTimes(2)
+      expect(fsMock.writeFile).not.toHaveBeenCalled()
+      expect(execFileMock).not.toHaveBeenCalled()
     })
 
     it('should include npm lockfiles when releasing npm-managed projects', async () => {

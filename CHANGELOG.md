@@ -1,3 +1,13 @@
+# 3.0.0
+
+## BREAKING
+
+- update the architecture, release flow, and tooling [fb111072](https://github.com/lekterable/perfekt/commit/fb11107228c7cef8f8443c3750b8153316a4b24b)
+
+## Misc
+
+- rewrite project in typescript [1a757955](https://github.com/lekterable/perfekt/commit/1a75795564aec73b58c8e806af404639681cc939)
+
 # 2.0.1
 
 ## Misc

@@ -1,3 +1,9 @@
+# 3.0.1
+
+## Fixes
+
+- require clean worktree and remove commit hook noise [f318b49b](https://github.com/lekterable/perfekt/commit/f318b49b990a2cb97b25806432d921c30c28034a)
+
 # 3.0.0
 
 ## BREAKING

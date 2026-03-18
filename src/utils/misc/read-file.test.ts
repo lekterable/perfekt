@@ -1,6 +1,6 @@
-import { expect } from '@jest/globals'
 import fs from 'fs'
 import readFile from './read-file'
+import { rejectReadFile, resolveReadFile } from '~testing/fs'
 
 jest.mock('fs')
 
@@ -10,12 +10,11 @@ describe('readFile', () => {
   it('should reject if receives an error', async () => {
     const mockFileName = 'CHANGELOG.md'
     const mockError = 'error'
-    // @ts-expect-error -- Make type-safe later
-    fsMock.readFile.mockImplementationOnce((_, __, cb) => cb(mockError))
+    fsMock.readFile.mockImplementationOnce(rejectReadFile(mockError))
 
-    expect(readFile(mockFileName)).rejects.toMatch(mockError)
-    expect(fsMock.readFile).toBeCalledTimes(1)
-    expect(fsMock.readFile).toBeCalledWith(
+    await expect(readFile(mockFileName)).rejects.toThrow(mockError)
+    expect(fsMock.readFile).toHaveBeenCalledTimes(1)
+    expect(fsMock.readFile).toHaveBeenCalledWith(
       mockFileName,
       'utf8',
       expect.any(Function)
@@ -25,13 +24,12 @@ describe('readFile', () => {
   it('should read file', async () => {
     const mockFile = 'file content'
     const mockFileName = 'CHANGELOG.md'
-    // @ts-expect-error -- Make type-safe later
-    fsMock.readFile.mockImplementationOnce((_, __, cb) => cb(undefined, mockFile))
+    fsMock.readFile.mockImplementationOnce(resolveReadFile(mockFile))
 
     const changelog = await readFile(mockFileName)
 
-    expect(fsMock.readFile).toBeCalledTimes(1)
-    expect(fsMock.readFile).toBeCalledWith(
+    expect(fsMock.readFile).toHaveBeenCalledTimes(1)
+    expect(fsMock.readFile).toHaveBeenCalledWith(
       mockFileName,
       'utf8',
       expect.any(Function)

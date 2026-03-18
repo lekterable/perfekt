@@ -1,4 +1,4 @@
-import Commit from '~libs/commit'
+import Commit from '~core/commit'
 import { Config } from '~types'
 
 const generateLine = ({ message, hash }: Commit, config: Config) =>

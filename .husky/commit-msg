@@ -1,4 +1,1 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
-npx --no-install commitlint --edit $1
+pnpm exec commitlint --format @commitlint/format/lib/index.js --edit "$1"

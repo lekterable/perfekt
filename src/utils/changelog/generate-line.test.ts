@@ -1,6 +1,6 @@
-import { Commit } from '~libs'
+import Commit from '~core/commit'
 import generateLine from './generate-line'
-import Config from '../../config'
+import Config from '~core/config'
 
 const mockCommit = new Commit(
   'b2f5901922505efbfb6dd684252e8df0cdffeeb2 feat: generate changelog'

@@ -1,6 +1,6 @@
 import exec from '../misc/exec'
+import { getVersionCommand } from './get-package-manager'
 
-const updateVersion = (version: string) =>
-  exec(`npm version ${version} --no-git-tag-version`)
+const updateVersion = (version: string) => exec(getVersionCommand(version))
 
 export default updateVersion

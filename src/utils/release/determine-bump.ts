@@ -1,5 +1,5 @@
 import { Config } from '~types'
-import Git from '~libs/git'
+import Git from '~core/git'
 import getCommitsTypes from './get-commits-types'
 import getChangesType from './get-changes-type'
 
@@ -10,13 +10,13 @@ const determineBump = async (config: Config) => {
     throw new Error('No unreleased commits, nothing to release.')
   }
 
-  const types = getCommitsTypes(unreleasedCommits).filter(Boolean)
+  const types = getCommitsTypes(unreleasedCommits)
 
-  const bump = getChangesType(types as string[], config)
+  const bump = getChangesType(types, config)
 
   if (!bump) {
     throw new Error(
-      "Couldn't determine the version update, provided commit types are invalid."
+      "Couldn't determine a version bump from unreleased commits."
     )
   }
 

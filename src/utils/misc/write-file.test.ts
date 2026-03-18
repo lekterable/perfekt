@@ -1,5 +1,6 @@
 import fs from 'fs'
 import writeFile from './write-file'
+import { rejectWriteFile, resolveWriteFile } from '~testing/fs'
 
 jest.mock('fs')
 
@@ -11,12 +12,11 @@ describe('writeFile', () => {
 
   it('should write to file', async () => {
     const mockError = 'error'
-    // @ts-expect-error -- Make type-safe later
-    fsMock.writeFile.mockImplementationOnce((_, __, ___, cb) => cb(mockError))
+    fsMock.writeFile.mockImplementationOnce(rejectWriteFile(mockError))
 
-    expect(writeFile(fileName, content)).rejects.toMatch(mockError)
-    expect(fsMock.writeFile).toBeCalledTimes(1)
-    expect(fsMock.writeFile).toBeCalledWith(
+    await expect(writeFile(fileName, content)).rejects.toThrow(mockError)
+    expect(fsMock.writeFile).toHaveBeenCalledTimes(1)
+    expect(fsMock.writeFile).toHaveBeenCalledWith(
       fileName,
       content,
       'utf8',
@@ -24,14 +24,13 @@ describe('writeFile', () => {
     )
   })
 
-  it('should write to file', async () => {
-    // @ts-expect-error -- Make type-safe later
-    fsMock.writeFile.mockImplementationOnce((_, __, ___, cb) => cb(undefined))
+  it('should write the file content', async () => {
+    fsMock.writeFile.mockImplementationOnce(resolveWriteFile())
 
     await writeFile(fileName, content)
 
-    expect(fsMock.writeFile).toBeCalledTimes(1)
-    expect(fsMock.writeFile).toBeCalledWith(
+    expect(fsMock.writeFile).toHaveBeenCalledTimes(1)
+    expect(fsMock.writeFile).toHaveBeenCalledWith(
       fileName,
       content,
       'utf8',

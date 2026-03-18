@@ -1,7 +1,6 @@
 {
   "name": "perfekt",
   "version": "2.0.1",
-  "author": "Kornel Dubieniecki",
   "description": "Release and version your packages with perfe(k)t ease!",
   "keywords": [
     "perfekt",
@@ -20,63 +19,59 @@
     "url": "https://github.com/lekterable/perfekt"
   },
   "license": "MIT",
-  "main": "dist/index.js",
+  "author": "Kornel Dubieniecki (https://kornel.me)",
+  "bin": {
+    "perfekt": "./dist/cli.cjs"
+  },
   "files": [
     "dist"
   ],
-  "bin": {
-    "perfekt": "./bin/perfekt.js"
-  },
   "scripts": {
-    "build": "tsc",
-    "dev": "webpack --progress --watch",
+    "build": "tsdown",
+    "ci": "pnpm run validate && pnpm run test:ci && pnpm run build",
+    "dev": "tsdown --watch",
     "eslint": "eslint .",
-    "format": "npm run prettier -- --write",
-    "format:check": "npm run prettier -- --check",
-    "lint": "npm run eslint -- --fix",
-    "lint:check": "npm run eslint -- --max-warnings 0",
-    "prepare": "npm run build && husky install",
+    "format": "prettier 'src/**' --write",
+    "format:check": "prettier 'src/**' --check",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint . --max-warnings 0",
+    "prepare": "pnpm run build && husky",
     "prettier": "prettier 'src/**'",
-    "validate": "npm run format:check && npm run lint:check",
     "test": "jest",
-    "test:ci": "npm run test:coverage -- --ci",
+    "test:ci": "jest --collectCoverage --ci --runInBand",
     "test:coverage": "jest --collectCoverage",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "types": "tsc --noEmit",
+    "validate": "pnpm run format:check && pnpm run lint:check && pnpm run types"
   },
   "dependencies": {
-    "commander": "8.0.0",
-    "cosmiconfig": "7.0.0",
-    "inquirer": "9.1.4",
-    "semver": "7.3.5"
+    "commander": "14.0.3",
+    "cosmiconfig": "9.0.1",
+    "inquirer": "13.3.2",
+    "semver": "7.7.4"
   },
   "devDependencies": {
-    "@babel/core": "7.14.6",
-    "@babel/eslint-parser": "7.14.7",
-    "@babel/plugin-transform-runtime": "7.14.5",
-    "@babel/preset-env": "7.14.7",
-    "@babel/preset-typescript": "7.18.6",
-    "@commitlint/cli": "12.1.4",
-    "@commitlint/config-conventional": "12.1.4",
-    "@types/inquirer": "9.0.3",
-    "@types/jest": "29.5.14",
-    "@types/semver": "7.3.12",
-    "babel-loader": "8.2.2",
-    "eslint": "7.31.0",
-    "eslint-config-prettier": "8.3.0",
-    "eslint-config-standard": "16.0.3",
-    "eslint-plugin-import": "2.23.4",
-    "eslint-plugin-node": "11.1.0",
-    "eslint-plugin-promise": "5.1.0",
-    "husky": "7.0.1",
-    "jest": "29.7.0",
+    "@commitlint/cli": "20.5.0",
+    "@commitlint/config-conventional": "20.5.0",
+    "@eslint/js": "10.0.1",
+    "@types/jest": "30.0.0",
+    "@types/node": "25.5.0",
+    "@types/semver": "7.7.1",
+    "@typescript-eslint/eslint-plugin": "8.57.1",
+    "@typescript-eslint/parser": "8.57.1",
+    "eslint": "10.0.3",
+    "globals": "17.4.0",
+    "husky": "9.1.7",
+    "jest": "30.3.0",
     "jest-mock-process": "2.0.0",
-    "jest-module-name-mapper": "0.1.5",
-    "lint-staged": "11.0.1",
-    "prettier": "2.3.2",
-    "ts-jest": "29.0.0",
-    "ts-node": "10.9.1",
-    "typescript": "4.8.3",
-    "webpack": "5.45.1",
-    "webpack-cli": "4.7.2"
+    "lint-staged": "16.4.0",
+    "prettier": "3.8.1",
+    "ts-jest": "29.4.6",
+    "tsdown": "0.21.4",
+    "typescript": "5.9.3"
+  },
+  "packageManager": "pnpm@10.32.0",
+  "engines": {
+    "node": ">=20"
   }
 }

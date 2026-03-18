@@ -2,8 +2,9 @@ import fs from 'fs'
 import semver from 'semver'
 import exec from '../misc/exec'
 import determineVersion from './determine-version'
-import Config from '../../config'
+import Config from '~core/config'
 import * as determineBump from './determine-bump'
+import { resolveReadFile } from '~testing/fs'
 
 jest.mock('fs')
 jest.mock('child_process')
@@ -43,18 +44,15 @@ describe('determineVersion', () => {
     const mockInput = 'major'
     const mockOutput = '4.0.0'
 
-    // @ts-expect-error -- Make type-safe later
-    fsMock.readFile.mockImplementationOnce((_, __, cb) =>
-      cb(undefined, mockFile)
-    )
+    fsMock.readFile.mockImplementationOnce(resolveReadFile(mockFile))
 
     const version = await determineVersion(mockInput, config)
 
-    expect(determineBumpSpy).not.toBeCalled()
-    expect(incSpy).toBeCalledTimes(1)
-    expect(incSpy).toBeCalledWith(mockVersion, mockInput)
-    expect(coerceSpy).not.toBeCalled()
-    expect(validSpy).not.toBeCalled()
+    expect(determineBumpSpy).not.toHaveBeenCalled()
+    expect(incSpy).toHaveBeenCalledTimes(1)
+    expect(incSpy).toHaveBeenCalledWith(mockVersion, mockInput)
+    expect(coerceSpy).not.toHaveBeenCalled()
+    expect(validSpy).not.toHaveBeenCalled()
     expect(version).toBe(mockOutput)
   })
 
@@ -66,53 +64,56 @@ describe('determineVersion', () => {
     const mockInput = 'new'
     const mockOutput = '2.0.0'
 
-    // @ts-expect-error -- Make type-safe later
-    fsMock.readFile.mockImplementationOnce((_, __, cb) =>
-      cb(undefined, mockFile)
-    )
+    fsMock.readFile.mockImplementationOnce(resolveReadFile(mockFile))
 
     execMock.mockReturnValueOnce('1.2.0')
     execMock.mockReturnValueOnce(mockLog)
 
     const version = await determineVersion(mockInput, config)
 
-    expect(determineBumpSpy).toBeCalledTimes(1)
-    expect(determineBumpSpy).toBeCalledWith(config)
-    expect(incSpy).toBeCalledTimes(1)
-    expect(incSpy).toBeCalledWith(mockVersion, 'major')
-    expect(coerceSpy).not.toBeCalled()
-    expect(validSpy).not.toBeCalled()
+    expect(determineBumpSpy).toHaveBeenCalledTimes(1)
+    expect(determineBumpSpy).toHaveBeenCalledWith(config)
+    expect(incSpy).toHaveBeenCalledTimes(1)
+    expect(incSpy).toHaveBeenCalledWith(mockVersion, 'major')
+    expect(coerceSpy).not.toHaveBeenCalled()
+    expect(validSpy).not.toHaveBeenCalled()
     expect(version).toBe(mockOutput)
   })
 
   it('should coerce the version', async () => {
+    const mockFile = `{ "version": "1.0.0" }`
     const mockInput = 'v3'
     const mockOutput = '3.0.0'
 
+    fsMock.readFile.mockImplementationOnce(resolveReadFile(mockFile))
+
     const version = await determineVersion(mockInput, config)
 
-    expect(determineBumpSpy).not.toBeCalled()
-    expect(incSpy).not.toBeCalled()
-    expect(coerceSpy).toBeCalledTimes(1)
-    expect(coerceSpy).toBeCalledWith(mockInput)
-    expect(validSpy).toBeCalledTimes(1)
-    expect(validSpy).toBeCalledWith(
+    expect(determineBumpSpy).not.toHaveBeenCalled()
+    expect(incSpy).not.toHaveBeenCalled()
+    expect(coerceSpy).toHaveBeenCalledTimes(1)
+    expect(coerceSpy).toHaveBeenCalledWith(mockInput)
+    expect(validSpy).toHaveBeenCalledTimes(1)
+    expect(validSpy).toHaveBeenCalledWith(
       expect.objectContaining({ version: mockOutput })
     )
     expect(version).toBe(mockOutput)
   })
 
   it('should return the correct version', async () => {
+    const mockFile = `{ "version": "1.0.0" }`
     const mockInput = '3.3.3'
+
+    fsMock.readFile.mockImplementationOnce(resolveReadFile(mockFile))
 
     const version = await determineVersion(mockInput, config)
 
-    expect(determineBumpSpy).not.toBeCalled()
-    expect(incSpy).not.toBeCalled()
-    expect(coerceSpy).toBeCalledTimes(1)
-    expect(coerceSpy).toBeCalledWith(mockInput)
-    expect(validSpy).toBeCalledTimes(1)
-    expect(validSpy).toBeCalledWith(
+    expect(determineBumpSpy).not.toHaveBeenCalled()
+    expect(incSpy).not.toHaveBeenCalled()
+    expect(coerceSpy).toHaveBeenCalledTimes(1)
+    expect(coerceSpy).toHaveBeenCalledWith(mockInput)
+    expect(validSpy).toHaveBeenCalledTimes(1)
+    expect(validSpy).toHaveBeenCalledWith(
       expect.objectContaining({ version: mockInput })
     )
     expect(version).toBe(mockInput)

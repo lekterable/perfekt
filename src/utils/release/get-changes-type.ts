@@ -1,29 +1,29 @@
-import { Config } from '~types'
+import { Config, ReleaseChange } from '~types'
+
+const changePriority: Record<ReleaseChange, number> = {
+  major: 0,
+  minor: 1,
+  patch: 2
+}
 
 export const sortChangeTypes = (
-  a: string | undefined,
-  b: string | undefined
+  a: ReleaseChange | undefined,
+  b: ReleaseChange | undefined
 ) => {
-  if (a === 'major') return -1
-  if (b === 'major') return +1
-  if (a === 'minor') return -1
-  if (b === 'minor') return +1
-  if (a === 'patch') return -1
-  if (b === 'patch') return +1
+  if (!a && !b) return 0
+  if (!a) return 1
+  if (!b) return -1
 
-  // @ts-expect-error - tbi later
-  return a - b
+  return changePriority[a] - changePriority[b]
 }
 
 const mapTypeToChangeFactory = (config: Config) => (type: string) => {
   if (type === 'breaking') return 'major'
-  if (type === 'misc') return 'patch'
+  if (type === 'misc' || type === 'refactor') return 'patch'
 
   const matchingGroup = config.groups.find(({ types }) => types.includes(type))
 
   if (matchingGroup) return matchingGroup.change
-
-  console.warn(`Unexpected commit type \`${type}\` received.`)
 
   return undefined
 }

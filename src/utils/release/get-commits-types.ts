@@ -1,11 +1,14 @@
-import Commit from '~libs/commit'
+import Commit from '~core/commit'
 
-const getCommitsTypes = (commits: Commit[]) => {
-  const types = commits.map(({ type, isBreaking }) =>
-    isBreaking ? 'breaking' : type
+const getCommitsTypes = (commits: Commit[]) => [
+  ...new Set(
+    commits.flatMap(({ type, isBreaking }) => {
+      if (isBreaking) return ['breaking']
+      if (type) return [type]
+
+      return []
+    })
   )
-
-  return [...new Set(types)]
-}
+]
 
 export default getCommitsTypes

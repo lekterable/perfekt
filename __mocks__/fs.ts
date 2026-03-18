@@ -1,3 +1,3 @@
-const fs = jest.genMockFromModule('fs')
+const fs = jest.createMockFromModule<typeof import('fs')>('fs')
 
 export default fs

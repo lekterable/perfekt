@@ -1,9 +1,9 @@
 import determineBump from './determine-bump'
 import * as getCommitsTypes from './get-commits-types'
 import * as getChangesType from './get-changes-type'
-import Config from '~config'
-import Git from '~libs/git'
-import Commit from '~libs/commit'
+import Config from '~core/config'
+import Git from '~core/git'
+import Commit from '~core/commit'
 
 jest.mock('../misc/exec')
 
@@ -25,7 +25,6 @@ const mockCommits = [
 describe('determineBump', () => {
   const { config } = new Config()
 
-  let warnSpy: jest.SpiedFunction<typeof console.warn>
   let getUnreleasedCommitsSpy: jest.SpiedFunction<
     typeof Git.prototype.getUnreleasedCommits
   >
@@ -33,7 +32,6 @@ describe('determineBump', () => {
   let getChangesTypeSpy: jest.SpiedFunction<typeof getChangesType.default>
 
   beforeEach(() => {
-    warnSpy = jest.spyOn(console, 'warn')
     getUnreleasedCommitsSpy = jest.spyOn(Git.prototype, 'getUnreleasedCommits')
     getCommitsTypesSpy = jest.spyOn(getCommitsTypes, 'default')
     getChangesTypeSpy = jest.spyOn(getChangesType, 'default')
@@ -45,7 +43,7 @@ describe('determineBump', () => {
     expect(determineBump(config)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"No unreleased commits, nothing to release."`
     )
-    expect(getUnreleasedCommitsSpy).toBeCalledTimes(1)
+    expect(getUnreleasedCommitsSpy).toHaveBeenCalledTimes(1)
   })
 
   it('should throw if could not determine bump', async () => {
@@ -53,11 +51,11 @@ describe('determineBump', () => {
     getChangesTypeSpy.mockReturnValueOnce(undefined)
 
     expect(determineBump(config)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Couldn't determine the version update, provided commit types are invalid."`
+      `"Couldn't determine a version bump from unreleased commits."`
     )
-    expect(getUnreleasedCommitsSpy).toBeCalledTimes(1)
-    expect(getCommitsTypesSpy).toBeCalledTimes(1)
-    expect(getCommitsTypesSpy).toBeCalledWith(mockCommits)
+    expect(getUnreleasedCommitsSpy).toHaveBeenCalledTimes(1)
+    expect(getCommitsTypesSpy).toHaveBeenCalledTimes(1)
+    expect(getCommitsTypesSpy).toHaveBeenCalledWith(mockCommits)
   })
 
   it('should determine bump', async () => {
@@ -68,12 +66,11 @@ describe('determineBump', () => {
 
     const bump = await determineBump(config)
 
-    expect(warnSpy).not.toBeCalled()
-    expect(getUnreleasedCommitsSpy).toBeCalledTimes(1)
-    expect(getCommitsTypesSpy).toBeCalledTimes(1)
-    expect(getCommitsTypesSpy).toBeCalledWith(mockCommits)
-    expect(getChangesTypeSpy).toBeCalledTimes(1)
-    expect(getChangesTypeSpy).toBeCalledWith(mockTypes, config)
+    expect(getUnreleasedCommitsSpy).toHaveBeenCalledTimes(1)
+    expect(getCommitsTypesSpy).toHaveBeenCalledTimes(1)
+    expect(getCommitsTypesSpy).toHaveBeenCalledWith(mockCommits)
+    expect(getChangesTypeSpy).toHaveBeenCalledTimes(1)
+    expect(getChangesTypeSpy).toHaveBeenCalledWith(mockTypes, config)
     expect(bump).toBe(mockBump)
   })
 
@@ -91,12 +88,11 @@ describe('determineBump', () => {
 
     const bump = await determineBump(config)
 
-    expect(warnSpy).not.toBeCalled()
-    expect(getUnreleasedCommitsSpy).toBeCalledTimes(1)
-    expect(getCommitsTypesSpy).toBeCalledTimes(1)
-    expect(getCommitsTypesSpy).toBeCalledWith(commits)
-    expect(getChangesTypeSpy).toBeCalledTimes(1)
-    expect(getChangesTypeSpy).toBeCalledWith(mockTypes, config)
+    expect(getUnreleasedCommitsSpy).toHaveBeenCalledTimes(1)
+    expect(getCommitsTypesSpy).toHaveBeenCalledTimes(1)
+    expect(getCommitsTypesSpy).toHaveBeenCalledWith(commits)
+    expect(getChangesTypeSpy).toHaveBeenCalledTimes(1)
+    expect(getChangesTypeSpy).toHaveBeenCalledWith(mockTypes, config)
     expect(bump).toBe(mockBump)
   })
 
@@ -114,16 +110,14 @@ describe('determineBump', () => {
     const mockTypes = ['feat', 'fix', 'ci', 'refactor']
 
     getUnreleasedCommitsSpy.mockReturnValueOnce(commits)
-    warnSpy.mockImplementation()
 
     const bump = await determineBump(config)
 
-    expect(warnSpy).toBeCalledTimes(2)
-    expect(getUnreleasedCommitsSpy).toBeCalledTimes(1)
-    expect(getCommitsTypesSpy).toBeCalledTimes(1)
-    expect(getCommitsTypesSpy).toBeCalledWith(commits)
-    expect(getChangesTypeSpy).toBeCalledTimes(1)
-    expect(getChangesTypeSpy).toBeCalledWith(mockTypes, config)
+    expect(getUnreleasedCommitsSpy).toHaveBeenCalledTimes(1)
+    expect(getCommitsTypesSpy).toHaveBeenCalledTimes(1)
+    expect(getCommitsTypesSpy).toHaveBeenCalledWith(commits)
+    expect(getChangesTypeSpy).toHaveBeenCalledTimes(1)
+    expect(getChangesTypeSpy).toHaveBeenCalledWith(mockTypes, config)
     expect(bump).toBe(mockBump)
   })
 })

@@ -9,7 +9,7 @@
     <img alt="npm version" src="https://img.shields.io/npm/v/perfekt.svg?style=for-the-badge">
   </a>
   <a href="https://github.com/lekterable/perfekt/actions/workflows/CI.yml">
-    <img alt="CI" src="https://img.shields.io/github/workflow/status/lekterable/perfekt/CI?label=CI&logo=github&style=for-the-badge">
+    <img alt="CI" src="https://img.shields.io/github/actions/workflow/status/lekterable/perfekt/CI.yml?branch=master&label=CI&logo=github&style=for-the-badge">
   </a>
   <a href="https://app.codecov.io/gh/lekterable/perfekt">
     <img alt="code coverage" src="https://img.shields.io/codecov/c/github/lekterable/perfekt?logo=codecov&style=for-the-badge" />
@@ -29,9 +29,15 @@
 
 **perfekt** is a release, changelog and versioning manager. It's easy to use and doesn't require any configuration to get it up and running.
 
+It works with all package managers: `pnpm`, `npm` and `yarn`. `perfekt` detects the package manager from your `packageManager` field or lockfile and updates the matching lockfile during releases.
+
+It can also return structured JSON for `release` and `changelog`, which makes it a good fit for CI jobs, scripts, and agents.
+
 ## Convention
 
 For **perfekt** to run with its full power, your project must follow the [conventional commits](https://www.conventionalcommits.org) specification, this allows it to know the type of changes introduced in a given commit.
+
+If you want help enforcing that locally, [commitlint](https://commitlint.js.org/) is a good companion tool for validating commit messages before they land in git history.
 
 If your project doesn't do it yet, you can start any time as there is no need for rewriting any git history, simply create an initial release which will contain all of the _unconventional_ commits and after that start naming your commits accordingly.
 
@@ -42,6 +48,18 @@ If for some reason you can't follow the convention for your commits' names, you 
 For a quick introduction and set up instructions head to the [getting started](https://lekterable.github.io/perfekt/#/getting-started.md) section.
 
 You can also view the entire documentation online at [lekterable.github.io/perfekt](https://lekterable.github.io/perfekt)
+
+To install **perfekt** globally, run:
+
+`pnpm add -g perfekt`
+
+or
+
+`npm install -g perfekt`
+
+or
+
+`yarn global add perfekt`
 
 ## Badge
 

@@ -13,8 +13,8 @@ describe('fileExists', () => {
 
     const result = fileExists(mockFileName)
 
-    expect(fsMock.existsSync).toBeCalledTimes(1)
-    expect(fsMock.existsSync).toBeCalledWith(mockFileName)
+    expect(fsMock.existsSync).toHaveBeenCalledTimes(1)
+    expect(fsMock.existsSync).toHaveBeenCalledWith(mockFileName)
     expect(result).toBe(false)
   })
 
@@ -23,8 +23,8 @@ describe('fileExists', () => {
 
     const result = fileExists(mockFileName)
 
-    expect(fsMock.existsSync).toBeCalledTimes(1)
-    expect(fsMock.existsSync).toBeCalledWith(mockFileName)
+    expect(fsMock.existsSync).toHaveBeenCalledTimes(1)
+    expect(fsMock.existsSync).toHaveBeenCalledWith(mockFileName)
     expect(result).toBe(true)
   })
 })

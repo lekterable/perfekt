@@ -1,43 +1,23 @@
-import getChangesType from './get-changes-type'
-import Config from '../../config'
-
-const generateError = (type: string) =>
-  `Unexpected commit type \`${type}\` received.`
+import getChangesType, { sortChangeTypes } from './get-changes-type'
+import Config from '~core/config'
 
 describe('getChangesType', () => {
   const { config } = new Config()
 
-  let warnSpy: jest.SpiedFunction<typeof console.warn>
-
-  beforeEach(() => {
-    warnSpy = jest.spyOn(console, 'warn')
-  })
-
-  it('should return `undefined` and warn when cannot determine version update', () => {
-    const mockTypes = ['refactor', 'chore']
-
-    warnSpy.mockImplementation()
-
-    const type = getChangesType(mockTypes, config)
-
-    expect(warnSpy).toBeCalledTimes(2)
-    expect(warnSpy).toHaveBeenNthCalledWith(1, generateError('refactor'))
-    expect(warnSpy).toHaveBeenNthCalledWith(2, generateError('chore'))
-    expect(type).toBeUndefined()
-  })
-
   it('should determine version update with unknown types', () => {
     const mockTypes = ['feat', 'refactor', 'fix', 'unknown', 'custom']
 
-    warnSpy.mockImplementation()
+    const type = getChangesType(mockTypes, config)
+
+    expect(type).toBe('minor')
+  })
+
+  it('should return `undefined` when no supported bump types are present', () => {
+    const mockTypes = ['chore', 'docs', 'test']
 
     const type = getChangesType(mockTypes, config)
 
-    expect(warnSpy).toBeCalledTimes(3)
-    expect(warnSpy).toHaveBeenNthCalledWith(1, generateError('refactor'))
-    expect(warnSpy).toHaveBeenNthCalledWith(2, generateError('unknown'))
-    expect(warnSpy).toHaveBeenNthCalledWith(3, generateError('custom'))
-    expect(type).toBe('minor')
+    expect(type).toBeUndefined()
   })
 
   it('should return `major` for `breaking`', () => {
@@ -45,7 +25,6 @@ describe('getChangesType', () => {
 
     const type = getChangesType(mockTypes, config)
 
-    expect(warnSpy).not.toBeCalled()
     expect(type).toBe('major')
   })
 
@@ -54,20 +33,14 @@ describe('getChangesType', () => {
 
     const type = getChangesType(mockTypes, config)
 
-    expect(warnSpy).not.toBeCalled()
     expect(type).toBe('minor')
   })
 
-  it('should return `patch` for `fix`', () => {
+  it('should return `patch` for `fix` and `refactor`', () => {
     const mockTypes = ['refactor', 'fix', 'unknown']
-
-    warnSpy.mockImplementation()
 
     const type = getChangesType(mockTypes, config)
 
-    expect(warnSpy).toBeCalledTimes(2)
-    expect(warnSpy).toHaveBeenNthCalledWith(1, generateError('refactor'))
-    expect(warnSpy).toHaveBeenNthCalledWith(2, generateError('unknown'))
     expect(type).toBe('patch')
   })
 
@@ -76,7 +49,20 @@ describe('getChangesType', () => {
 
     const type = getChangesType(mockTypes, config)
 
-    expect(warnSpy).not.toBeCalled()
     expect(type).toBe('patch')
+  })
+
+  it('should sort undefined change types after supported ones', () => {
+    expect(sortChangeTypes(undefined, undefined)).toBe(0)
+    expect(sortChangeTypes(undefined, 'minor')).toBe(1)
+    expect(sortChangeTypes('patch', undefined)).toBe(-1)
+  })
+
+  it('should handle arrays that only resolve to undefined changes', () => {
+    const mockTypes = ['unknown', 'custom']
+
+    const type = getChangesType(mockTypes, config)
+
+    expect(type).toBeUndefined()
   })
 })

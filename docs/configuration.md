@@ -17,12 +17,12 @@ Default config looks like this:
     {
       "name": "## Features",
       "change": "minor",
-      "aliases": ["feat", "feature"]
+      "types": ["feat", "feature"]
     },
     {
       "name": "## Fixes",
       "change": "patch",
-      "aliases": ["fix"]
+      "types": ["fix"]
     }
   ],
   "ignoredScopes": ["changelog"]

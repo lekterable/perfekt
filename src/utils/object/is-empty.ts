@@ -1,3 +1,3 @@
-const isEmpty = (object: Object) => Object.keys(object).length === 0
+const isEmpty = (object: object) => Object.keys(object).length === 0
 
 export default isEmpty

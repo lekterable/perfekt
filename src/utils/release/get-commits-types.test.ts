@@ -1,5 +1,5 @@
 import getCommitsTypes from './get-commits-types'
-import Commit from '~libs/commit'
+import Commit from '~core/commit'
 
 const mockCommits = [
   new Commit(
@@ -40,5 +40,18 @@ describe('getCommitsTypes', () => {
     const types = getCommitsTypes(commits)
 
     expect(types).toMatchSnapshot()
+  })
+
+  it('should skip commits without a type when they are not breaking', () => {
+    const commits = [
+      ...mockCommits,
+      new Commit(
+        '8c56a8d694955eb02d665f9e78a95cd076e8fcf5 Add a new feature without convention'
+      )
+    ]
+
+    const types = getCommitsTypes(commits)
+
+    expect(types).toEqual(['feat', 'fix', 'chore'])
   })
 })

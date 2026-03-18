@@ -1,6 +1,10 @@
-import Commit from '~libs/commit'
+import Commit from '~core/commit'
 import { GroupedCommits, Config } from '~types'
 import generateLine from './generate-line'
+
+const hasCommits = (
+  entry: [string, Commit | Commit[] | undefined]
+): entry is [string, Commit[]] => Array.isArray(entry[1]) && entry[1].length > 0
 
 const generateChangelog = (
   groupedCommits: GroupedCommits,
@@ -19,13 +23,14 @@ const generateChangelog = (
       : config.unreleasedHeader
 
     const grouped = Object.entries(groups)
+      .filter(hasCommits)
       .sort()
       .map(([type, commits], groupIndex, groups) => {
         const matchingGroup = config.groups.find(({ types }) =>
           types.includes(type)
         )
 
-        const lines = (commits as Commit[]).map((commit, index) => {
+        const lines = commits.map((commit, index) => {
           const isLastRelease = releaseIndex + 1 === releases.length
           const isLastGroup = groupIndex + 1 === groups.length
           const isEnd = isLastRelease && isLastGroup

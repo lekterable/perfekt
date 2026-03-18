@@ -1,6 +1,6 @@
-import Commit from '~libs/commit'
+import Commit from '~core/commit'
 import { GroupedCommits } from '~types'
-import Config from '../../config'
+import Config from '~core/config'
 import generateChangelog from './generate-changelog'
 
 const mockGrouped: GroupedCommits = [

@@ -12,7 +12,7 @@ describe('printOutput', () => {
   it('should print to output', () => {
     printOutput(input)
 
-    expect(stdoutSpy).toBeCalledTimes(1)
-    expect(stdoutSpy).toBeCalledWith(input)
+    expect(stdoutSpy).toHaveBeenCalledTimes(1)
+    expect(stdoutSpy).toHaveBeenCalledWith(input)
   })
 })

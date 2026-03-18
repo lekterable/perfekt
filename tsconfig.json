@@ -1,5 +1,5 @@
 {
-  "include": ["src"],
+  "include": ["src/**/*", "__mocks__/**/*"],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "baseUrl": ".",
@@ -8,7 +8,10 @@
     "strict": true,
     "declaration": true,
     "esModuleInterop": true,
-    "target": "es6",
+    "target": "es2020",
+    "lib": ["es2020"],
+    "skipLibCheck": true,
+    "module": "commonjs",
     "moduleResolution": "node"
   }
 }

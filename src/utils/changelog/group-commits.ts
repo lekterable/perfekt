@@ -1,9 +1,14 @@
-import { Commit } from '~libs'
+import Commit from '~core/commit'
 import isObjectEmpty from '../object/is-empty'
 import { Config, GroupedCommits } from '~types'
 
+const getExistingGroup = (value: Commit | Commit[] | undefined) =>
+  Array.isArray(value) ? value : []
+
+const createGroup = (): GroupedCommits[number] => ({})
+
 const groupCommits = (commits: Commit[], config: Config): GroupedCommits =>
-  commits.reduce(
+  commits.reduce<GroupedCommits>(
     (grouped, commit) => {
       const group = grouped[grouped.length - 1]
       const rest = grouped.slice(0, -1)
@@ -22,29 +27,26 @@ const groupCommits = (commits: Commit[], config: Config): GroupedCommits =>
         }
 
         if (commit.isBreaking) {
-          // @ts-expect-error -- Make type-safe later
-          const existing = group.breaking ? group.breaking : []
+          const existing = getExistingGroup(group.breaking)
           return [...rest, { ...group, breaking: [...existing, commit] }]
         }
       }
 
-      const matchingGroup = config.groups.find(({ types }) =>
-        // @ts-expect-error -- Make type-safe later
-        types.includes(commit.type)
-      )
+      const commitType = commit.type
+      const matchingGroup = commitType
+        ? config.groups.find(({ types }) => types.includes(commitType))
+        : undefined
 
       if (!matchingGroup) {
-        // @ts-expect-error -- Make type-safe later
-        const existing = group.misc ? group.misc : []
+        const existing = getExistingGroup(group.misc)
         return [...rest, { ...group, misc: [...existing, commit] }]
       }
 
       const key = matchingGroup.types[0]
-      // @ts-expect-error -- Make type-safe later
-      const existing = group[key] ? group[key] : []
+      const existing = getExistingGroup(group[key])
       return [...rest, { ...group, [key]: [...existing, commit] }]
     },
-    [{}]
+    [createGroup()]
   )
 
 export default groupCommits

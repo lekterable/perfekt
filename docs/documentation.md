@@ -4,7 +4,7 @@ For the list of available commands you can always run:
 
 `perfekt help`
 
-## `init` [WIP]
+## `init`
 
 Usage: `perfekt init [options]`
 
@@ -22,14 +22,21 @@ Executes a release
 
 This will:
 
-- Update the version in your `package.json` and `package-lock.json`
+- Update the version in your `package.json` using the detected package manager command
+- Refresh the matching lockfile when your package manager writes one
 - Generate and save the [changelog](#changelog) using passed `version`
-- Create a release commit with the changes in your `package.json`, `package-lock.json` and `CHANGELOG.md`
+- Create a release commit with the changes in your `package.json`, matching lockfile and `CHANGELOG.md`
 - Create a git tag
+
+`perfekt` detects the package manager from the `packageManager` field in `package.json` when available, otherwise from `pnpm-lock.yaml`, `package-lock.json`, or `yarn.lock`. If none of those are present, it falls back to `npm`.
 
 Options:
 
 `-h, --help` - display help for command
+
+`--dry-run` - preview the release without changing files or git state
+
+`--json` - print the release result as JSON instead of human-readable output
 
 `--from <commit>` - SHA of the last commit which will **NOT** be included in this release
 
@@ -54,6 +61,8 @@ Options:
 
 `-h, --help` - display help for command
 
+`--json` - print the changelog result as JSON instead of markdown output
+
 `--write` - write the output to file
 
 `--root` - generate changelog for the entire history
@@ -63,3 +72,5 @@ Options:
 Arguments:
 
 `version` - _(optional)_ version which will be used for generating the changelog, fallbacks to [unreleased format](#unreleasedHeader) if not passed
+
+When `--json` is used, `perfekt` prints only JSON to `stdout`. This is useful for CI jobs, scripts, and agents that want structured release or changelog data.

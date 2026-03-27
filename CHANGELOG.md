@@ -1,3 +1,9 @@
+# 3.0.2
+
+## Fixes
+
+- handle missing release tags [988dd3cf](https://github.com/lekterable/perfekt/commit/988dd3cf6c1fa6d8f9e0b925fceef660f060a266)
+
 # 3.0.1
 
 ## Fixes

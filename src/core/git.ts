@@ -2,6 +2,11 @@ import Commit from './commit'
 import exec, { execFile } from '~utils/misc/exec'
 import { getReleaseFiles } from '~utils/npm/get-package-manager'
 
+type ReleaseBoundary = {
+  ref: string
+  version: string
+}
+
 class Git {
   release(version: string, tagMessage: string) {
     this.add(getReleaseFiles())
@@ -30,21 +35,90 @@ class Git {
   }
 
   get latestTag() {
-    const latestTag = exec('git tag | tail -n 1')?.toString().trimEnd()
+    let latestTag: Buffer | string | undefined
+
+    try {
+      latestTag = exec('git describe --tags --abbrev=0')
+    } catch {
+      return undefined
+    }
+
+    latestTag = latestTag?.toString().trimEnd()
 
     return latestTag && latestTag.replace('\n', '')
   }
 
-  getUnreleasedCommits() {
-    const tag = this.latestTag
+  get latestReleaseCommit() {
+    const commit = exec(
+      'git log --format="%H %s" --grep="^chore(release): " -n 1'
+    )
+      ?.toString()
+      .trimEnd()
 
-    if (!tag) {
+    if (!commit) return undefined
+
+    const parsed = new Commit(commit)
+
+    return parsed.scope?.toLowerCase() === 'release' ? parsed : undefined
+  }
+
+  get latestRelease(): ReleaseBoundary | undefined {
+    const latestTag = this.latestTag
+    const latestReleaseCommit = this.latestReleaseCommit
+
+    if (!latestTag && !latestReleaseCommit) return undefined
+
+    if (!latestTag && latestReleaseCommit) {
+      return {
+        ref: latestReleaseCommit.hash,
+        version: latestReleaseCommit.message
+      }
+    }
+
+    if (latestTag && !latestReleaseCommit) {
+      return { ref: latestTag, version: latestTag }
+    }
+
+    const currentTag = latestTag as string
+
+    const latestTagCommit = exec(`git rev-list -n 1 ${currentTag}`)
+      ?.toString()
+      .trim()
+
+    if (!latestTagCommit || !latestReleaseCommit) {
+      return { ref: currentTag, version: currentTag }
+    }
+
+    if (latestTagCommit === latestReleaseCommit.hash) {
+      return { ref: currentTag, version: currentTag }
+    }
+
+    const isTagAncestor = exec(
+      `if git merge-base --is-ancestor ${latestTagCommit} ${latestReleaseCommit.hash}; then echo true; else echo false; fi`
+    )
+      ?.toString()
+      .trim()
+
+    if (isTagAncestor === 'true') {
+      return {
+        ref: latestReleaseCommit.hash,
+        version: latestReleaseCommit.message
+      }
+    }
+
+    return { ref: currentTag, version: currentTag }
+  }
+
+  getUnreleasedCommits() {
+    const latestRelease = this.latestRelease
+
+    if (!latestRelease) {
       throw new Error(
-        "Couldn't get unreleased commits without an existing tag."
+        "Couldn't get unreleased commits without an existing tag or release commit."
       )
     }
 
-    return this.getCommits(tag)
+    return this.getCommits(latestRelease.ref)
   }
 
   getCommits(from?: string) {

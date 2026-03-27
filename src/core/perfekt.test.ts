@@ -114,12 +114,25 @@ describe('Perfekt', () => {
       'should renders the changelog %s',
       async (_label, options, expectedLogCommand) => {
         execMock.mockReturnValueOnce('2.2.2')
+        execMock.mockReturnValueOnce('2.2.2')
+        execMock.mockReturnValueOnce(undefined)
         execMock.mockReturnValueOnce(mockLog)
 
         await perfekt.changelog('2.2.2', options)
 
-        expect(execMock).toHaveBeenNthCalledWith(1, 'git tag | tail -n 1')
-        expect(execMock).toHaveBeenNthCalledWith(2, expectedLogCommand)
+        expect(execMock).toHaveBeenNthCalledWith(
+          1,
+          'git describe --tags --abbrev=0'
+        )
+        expect(execMock).toHaveBeenNthCalledWith(
+          2,
+          'git describe --tags --abbrev=0'
+        )
+        expect(execMock).toHaveBeenNthCalledWith(
+          3,
+          'git log --format="%H %s" --grep="^chore(release): " -n 1'
+        )
+        expect(execMock).toHaveBeenNthCalledWith(4, expectedLogCommand)
         expect(stdoutSpy).toHaveBeenCalledTimes(1)
         expect(stdoutSpy.mock.calls[0]?.[0]).toBe(expectedChangelog)
       }
@@ -132,6 +145,8 @@ describe('Perfekt', () => {
         '8c56a8d694955eb02d665f9e78a95cd076e8fcf5 Add a new feature'
       ].join('\n')
 
+      execMock.mockReturnValueOnce(undefined)
+      execMock.mockReturnValueOnce(undefined)
       execMock.mockReturnValueOnce(undefined)
       execMock.mockReturnValueOnce(log)
 
@@ -182,10 +197,70 @@ describe('Perfekt', () => {
       })
     })
 
+    it('should use the latest release commit as the changelog boundary when a newer tag is missing', async () => {
+      fsMock.existsSync.mockReturnValueOnce(true)
+      fsMock.readFile.mockImplementationOnce(
+        resolveReadFile(`# 1.1.0
+
+## Features
+
+- add source removal command and polish test structure 87857821
+
+# 1.0.0
+
+## Features
+
+- init :seedling: afdc5f4f
+`)
+      )
+
+      const unreleasedLog = [
+        '29d6eb7f00000000000000000000000000000000 chore: add release script',
+        '0408144700000000000000000000000000000000 feat(cli): show last sync dates in project list'
+      ].join('\n')
+
+      execMock
+        .mockReturnValueOnce('1.0.0')
+        .mockReturnValueOnce('1.0.0')
+        .mockReturnValueOnce(
+          '60a2d0a9b503d6c8bd0209ac4971dae463c67b34 chore(release): 1.1.0'
+        )
+        .mockReturnValueOnce('6b83b6ab0f7d6e2bdf4f1794dc3d3e2df59a7d45')
+        .mockReturnValueOnce('true')
+        .mockReturnValueOnce(unreleasedLog)
+
+      await perfekt.changelog('1.2.0', {})
+
+      expect(stdoutSpy.mock.calls[0]?.[0]).toBe(`# 1.2.0
+
+## Features
+
+- show last sync dates in project list 04081447
+
+## Misc
+
+- add release script 29d6eb7f
+
+# 1.1.0
+
+## Features
+
+- add source removal command and polish test structure 87857821
+
+# 1.0.0
+
+## Features
+
+- init :seedling: afdc5f4f
+`)
+    })
+
     it('should write the changelog to disk when write is enabled', async () => {
       fsMock.existsSync.mockReturnValue(false)
       fsMock.writeFile.mockImplementationOnce(resolveWriteFile())
       execMock.mockReturnValueOnce('2.2.2')
+      execMock.mockReturnValueOnce('2.2.2')
+      execMock.mockReturnValueOnce(undefined)
       execMock.mockReturnValueOnce(mockLog)
 
       const result = await perfekt.changelog('2.2.2', { write: true }, 'silent')
@@ -209,15 +284,28 @@ describe('Perfekt', () => {
       fsMock.writeFile.mockImplementationOnce(resolveWriteFile())
       execMock.mockReturnValue('')
       execMock.mockReturnValueOnce('1.2.0')
+      execMock.mockReturnValueOnce('1.2.0')
+      execMock.mockReturnValueOnce(undefined)
       execMock.mockReturnValueOnce(mockLog)
     })
 
     it('should write the release changelog and executes the release commands', async () => {
       const result = await perfekt.release('2.2.2', {})
 
-      expect(execMock).toHaveBeenNthCalledWith(1, 'git tag | tail -n 1')
+      expect(execMock).toHaveBeenNthCalledWith(
+        1,
+        'git describe --tags --abbrev=0'
+      )
       expect(execMock).toHaveBeenNthCalledWith(
         2,
+        'git describe --tags --abbrev=0'
+      )
+      expect(execMock).toHaveBeenNthCalledWith(
+        3,
+        'git log --format="%H %s" --grep="^chore(release): " -n 1'
+      )
+      expect(execMock).toHaveBeenNthCalledWith(
+        4,
         'git log --format="%H %s" 1.2.0..'
       )
       expect(fsMock.writeFile.mock.calls[0]?.[1]).toMatchInlineSnapshot(`
@@ -314,11 +402,17 @@ describe('Perfekt', () => {
         .mockReset()
         .mockImplementationOnce(resolveReadFile('{ "version": "1.2.0" }'))
         .mockImplementationOnce(resolveReadFile(existingChangelog))
+      execMock.mockReset()
+      execMock.mockReturnValue('')
+      execMock.mockReturnValueOnce('1.2.0')
+      execMock.mockReturnValueOnce('1.2.0')
+      execMock.mockReturnValueOnce(undefined)
+      execMock.mockReturnValueOnce(mockLog)
 
       await perfekt.release('2.2.2', { from: '4e02179c' })
 
       expect(execMock).toHaveBeenNthCalledWith(
-        2,
+        4,
         'git log --format="%H %s" 4e02179c..'
       )
       expect(execMock).toHaveBeenCalledWith(
@@ -335,24 +429,33 @@ describe('Perfekt', () => {
       execMock.mockReset()
       jest.spyOn(console, 'warn').mockImplementation(() => undefined)
       execMock.mockReturnValueOnce('1.2.0')
+      execMock.mockReturnValueOnce(undefined)
       execMock.mockReturnValueOnce(mockLog)
       execMock.mockReturnValueOnce('1.2.0')
+      execMock.mockReturnValueOnce('1.2.0')
+      execMock.mockReturnValueOnce(undefined)
       execMock.mockReturnValueOnce(mockLog)
 
       const result = await perfekt.release('new', { dryRun: true })
 
       expect(fsMock.writeFile).not.toHaveBeenCalled()
-      expect(execMock).toHaveBeenNthCalledWith(1, 'git tag | tail -n 1')
       expect(execMock).toHaveBeenNthCalledWith(
-        2,
+        1,
+        'git describe --tags --abbrev=0'
+      )
+      expect(execMock).toHaveBeenNthCalledWith(
+        3,
         'git log --format="%H %s" 1.2.0..'
       )
-      expect(execMock).toHaveBeenNthCalledWith(3, 'git tag | tail -n 1')
       expect(execMock).toHaveBeenNthCalledWith(
         4,
+        'git describe --tags --abbrev=0'
+      )
+      expect(execMock).toHaveBeenNthCalledWith(
+        7,
         'git log --format="%H %s" 1.2.0..'
       )
-      expect(execMock).toHaveBeenCalledTimes(4)
+      expect(execMock).toHaveBeenCalledTimes(7)
       expect(result).toMatchObject({
         dryRun: true,
         requestedVersion: 'new',
@@ -379,6 +482,8 @@ describe('Perfekt', () => {
       fsMock.writeFile.mockClear()
       execMock.mockReset()
       execMock.mockReturnValueOnce('1.2.0')
+      execMock.mockReturnValueOnce('1.2.0')
+      execMock.mockReturnValueOnce(undefined)
       execMock.mockReturnValueOnce(mockLog)
       execMock.mockReturnValueOnce(' M README.md')
 
@@ -386,7 +491,7 @@ describe('Perfekt', () => {
         'Working tree must be clean before creating a release.'
       )
 
-      expect(execMock).toHaveBeenNthCalledWith(3, 'git status --porcelain')
+      expect(execMock).toHaveBeenNthCalledWith(5, 'git status --porcelain')
       expect(fsMock.writeFile).not.toHaveBeenCalled()
       expect(execFileMock).not.toHaveBeenCalled()
     })
@@ -399,13 +504,15 @@ describe('Perfekt', () => {
       fsMock.writeFile.mockClear()
       execMock.mockReset()
       execMock.mockReturnValueOnce('1.2.0')
+      execMock.mockReturnValueOnce('1.2.0')
+      execMock.mockReturnValueOnce(undefined)
       execMock.mockReturnValueOnce(mockLog)
 
       await expect(
         perfekt.release('2.2.2', { dryRun: true })
       ).resolves.toBeDefined()
 
-      expect(execMock).toHaveBeenCalledTimes(2)
+      expect(execMock).toHaveBeenCalledTimes(4)
       expect(fsMock.writeFile).not.toHaveBeenCalled()
       expect(execFileMock).not.toHaveBeenCalled()
     })
@@ -423,6 +530,8 @@ describe('Perfekt', () => {
       execMock.mockReset()
       execMock.mockReturnValue('')
       execMock.mockReturnValueOnce('1.2.0')
+      execMock.mockReturnValueOnce('1.2.0')
+      execMock.mockReturnValueOnce(undefined)
       execMock.mockReturnValueOnce(mockLog)
 
       const result = await perfekt.release('2.2.2', {})
@@ -454,6 +563,8 @@ describe('Perfekt', () => {
       execMock.mockReset()
       execMock.mockReturnValue('')
       execMock.mockReturnValueOnce('1.2.0')
+      execMock.mockReturnValueOnce('1.2.0')
+      execMock.mockReturnValueOnce(undefined)
       execMock.mockReturnValueOnce(mockLog)
 
       const result = await perfekt.release('2.2.2', {})

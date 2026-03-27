@@ -123,6 +123,34 @@ describe('generateChangelog', () => {
     expect(changelog).toMatchSnapshot()
   })
 
+  it('should skip empty historical release headers', () => {
+    const grouped: GroupedCommits = [
+      {
+        feat: [
+          new Commit(
+            '04081447d7f85b91f761bf35d9fabc90790f25a1 feat: show last sync dates in project list'
+          )
+        ],
+        misc: [
+          new Commit(
+            '29d6eb7f4f3da2a7f3bf0fa4d3ef8aa1df86b8bf chore: add release script'
+          )
+        ]
+      },
+      {
+        release: new Commit(
+          '60a2d0a9b503d6c8bd0209ac4971dae463c67b34 chore(release): 1.1.0'
+        )
+      }
+    ]
+
+    const changelog = generateChangelog(grouped, '1.2.0', config)
+
+    expect(changelog).toBe(
+      '# 1.2.0\n\n## Features\n\n- show last sync dates in project list 04081447\n\n## Misc\n\n- add release script 29d6eb7f\n'
+    )
+  })
+
   it('should generate changelog with breaking changes', () => {
     const mockVersion = '2.0.0'
 

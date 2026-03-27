@@ -67,6 +67,7 @@ describe('determineVersion', () => {
     fsMock.readFile.mockImplementationOnce(resolveReadFile(mockFile))
 
     execMock.mockReturnValueOnce('1.2.0')
+    execMock.mockReturnValueOnce(undefined)
     execMock.mockReturnValueOnce(mockLog)
 
     const version = await determineVersion(mockInput, config)

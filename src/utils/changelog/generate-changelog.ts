@@ -15,17 +15,21 @@ const generateChangelog = (
     throw new Error('Cannot generate a changelog, no commits passed.')
   }
 
-  const releases = groupedCommits.map((group, releaseIndex, releases) => {
-    const { release, ...groups } = group
-    const releaseVersion = release?.message || version
-    const title = releaseVersion
-      ? config.releaseHeader.replace(/%version%/g, releaseVersion)
-      : config.unreleasedHeader
+  const releases = groupedCommits
+    .map(group => {
+      const { release, ...groups } = group
+      const releaseVersion = release?.message || version
+      const title = releaseVersion
+        ? config.releaseHeader.replace(/%version%/g, releaseVersion)
+        : config.unreleasedHeader
 
-    const grouped = Object.entries(groups)
-      .filter(hasCommits)
-      .sort()
-      .map(([type, commits], groupIndex, groups) => {
+      const entries = Object.entries(groups).filter(hasCommits).sort()
+
+      return { title, entries }
+    })
+    .filter(({ entries }) => entries.length > 0)
+    .map(({ title, entries }, releaseIndex, releases) => {
+      const grouped = entries.map(([type, commits], groupIndex, groups) => {
         const matchingGroup = config.groups.find(({ types }) =>
           types.includes(type)
         )
@@ -49,8 +53,8 @@ const generateChangelog = (
         return groupHeader + '\n\n' + lines.join('')
       })
 
-    return title + '\n\n' + grouped.join('')
-  })
+      return title + '\n\n' + grouped.join('')
+    })
 
   return releases.join('')
 }

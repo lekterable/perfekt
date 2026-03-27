@@ -95,6 +95,7 @@ class Perfekt {
     options: Partial<ChangelogOptions>
   ): Promise<ChangelogResult> {
     const latestTag = this.#git.latestTag ?? null
+    const latestRelease = this.#git.latestRelease
 
     this.#changelog.options = options
 
@@ -102,14 +103,14 @@ class Perfekt {
     const write = this.#changelog.options.write
     const from = root
       ? undefined
-      : this.#changelog.options.from || latestTag || undefined
+      : this.#changelog.options.from || latestRelease?.ref || undefined
 
     const commits = this.#git.getCommits(from)
     const groupedCommits = groupCommits(commits, this.#config)
     const markdown = await this.#changelog.render(
       groupedCommits,
       version,
-      latestTag ?? undefined
+      latestRelease?.version
     )
 
     return {

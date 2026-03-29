@@ -10,19 +10,21 @@ describe('exec', () => {
     exec(mockCommand)
 
     expect(process.execSync).toHaveBeenCalledTimes(1)
-    expect(process.execSync).toHaveBeenCalledWith(mockCommand)
+    expect(process.execSync).toHaveBeenCalledWith(mockCommand, {
+      stdio: 'pipe'
+    })
   })
 
   it('should execute command files with args', () => {
     execFile('git', ['tag', '-a', '3.0.0', '-m', 'notes'])
 
     expect(process.execFileSync).toHaveBeenCalledTimes(1)
-    expect(process.execFileSync).toHaveBeenCalledWith('git', [
-      'tag',
-      '-a',
-      '3.0.0',
-      '-m',
-      'notes'
-    ])
+    expect(process.execFileSync).toHaveBeenCalledWith(
+      'git',
+      ['tag', '-a', '3.0.0', '-m', 'notes'],
+      {
+        stdio: 'pipe'
+      }
+    )
   })
 })

@@ -367,16 +367,6 @@ describe('Perfekt', () => {
 - extract line generating logic to function and promisify exec bffc2f9e
 - add core tests b2f59019
 - update dependencies 2ea04355
-
-# 1.2.0
-
-## Features
-
-- existing released feature 11111111
-
-## Fixes
-
-- existing released fix 22222222
 `
       ])
       expect(result).toMatchObject({

@@ -18,6 +18,10 @@ import {
 } from '~types'
 import Commit from './commit'
 
+type BuildChangelogResult = ChangelogResult & {
+  releaseMarkdown: string
+}
+
 class Perfekt {
   #config: Config
   #changelog: Changelog
@@ -93,7 +97,7 @@ class Perfekt {
   async #buildChangelogResult(
     version: string | undefined,
     options: Partial<ChangelogOptions>
-  ): Promise<ChangelogResult> {
+  ): Promise<BuildChangelogResult> {
     const latestTag = this.#git.latestTag ?? null
     const latestRelease = this.#git.latestRelease
 
@@ -107,6 +111,7 @@ class Perfekt {
 
     const commits = this.#git.getCommits(from)
     const groupedCommits = groupCommits(commits, this.#config)
+    const releaseMarkdown = this.#changelog.generate(groupedCommits, version)
     const markdown = await this.#changelog.render(
       groupedCommits,
       version,
@@ -122,7 +127,8 @@ class Perfekt {
       commitCount: commits.length,
       commits: commits.map(commit => this.#serializeCommit(commit)),
       groups: this.#serializeGroups(groupedCommits),
-      markdown
+      markdown,
+      releaseMarkdown
     }
   }
 
@@ -160,7 +166,7 @@ class Perfekt {
       await this.#changelog.save(changelog.markdown)
 
       this.#release.options = options
-      this.#release.finish(resolvedVersion, changelog.markdown)
+      this.#release.finish(resolvedVersion, changelog.releaseMarkdown)
     }
 
     return {

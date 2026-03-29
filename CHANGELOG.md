@@ -1,3 +1,9 @@
+# 3.0.3
+
+## Fixes
+
+- refine release notes and changelog [3d518ebd](https://github.com/lekterable/perfekt/commit/3d518ebd805f1e5899d8e2d3697178a022654a78)
+
 # 3.0.2
 
 ## Fixes

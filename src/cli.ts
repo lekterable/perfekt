@@ -82,20 +82,58 @@ export const createPerfekt = (overrides = loadConfig()) => {
 const writeJson = (response: JsonResponse) =>
   process.stdout.write(JSON.stringify(response, null, 2) + '\n')
 
-const printReleaseSummary = (result: ReleaseResult) => {
-  const label = result.dryRun ? 'Release plan' : 'Release summary'
+type DetailRow = [label: string, value: string]
+
+const formatDetailBlock = (
+  title: string,
+  rows: DetailRow[],
+  writer: typeof process.stdout.write = process.stdout.write.bind(
+    process.stdout
+  )
+) => {
+  const labels = rows.map(([label]) => `${label}:`)
+  const width = Math.max(...labels.map(label => label.length))
   const lines = [
-    label,
-    `version: ${result.currentVersion} -> ${result.resolvedVersion}`,
-    `package manager: ${result.packageManager}`,
-    `from: ${result.from ?? 'root'}`,
-    `files: ${result.files.join(', ')}`,
-    `commit: ${result.git.commitMessage}`,
-    `tag: ${result.git.tag}`,
-    `commits included: ${result.commitCount}`
+    title,
+    '',
+    ...rows.map(([label, value]) => `  ${`${label}:`.padEnd(width)}  ${value}`)
   ]
 
-  process.stdout.write(lines.join('\n') + '\n')
+  writer(lines.join('\n') + '\n')
+}
+
+const printReleaseSummary = (result: ReleaseResult) => {
+  const title = result.dryRun ? '🧭 Release plan' : '📦 Release summary'
+
+  formatDetailBlock(title, [
+    ['Version', `${result.currentVersion} -> ${result.resolvedVersion}`],
+    ['Package manager', result.packageManager],
+    ['From', result.from ?? 'root'],
+    ['Files', result.files.join(', ')],
+    ['Commit', result.git.commitMessage],
+    ['Tag', result.git.tag],
+    ['Commits included', String(result.commitCount)]
+  ])
+}
+
+const capitalize = (value: string) =>
+  value.charAt(0).toUpperCase() + value.slice(1)
+
+const printCliError = (
+  command: ReturnType<typeof getCommandName>,
+  error: unknown
+) => {
+  const message = error instanceof Error ? error.message : String(error)
+  const title =
+    command === 'unknown'
+      ? '⛔️ Command failed'
+      : `⛔️ ${capitalize(command)} failed`
+
+  formatDetailBlock(
+    title,
+    [['Reason', message]],
+    process.stderr.write.bind(process.stderr)
+  )
 }
 
 const createChangelogResponse = (result: ChangelogResult): JsonResponse => ({
@@ -174,13 +212,16 @@ export const createProgram = (
   const program = new Command()
 
   program.exitOverride()
-
-  if (jsonOutput) {
-    program.configureOutput({
-      writeErr: () => undefined,
-      writeOut: () => undefined
-    })
-  }
+  program.configureOutput(
+    jsonOutput
+      ? {
+          writeErr: () => undefined,
+          writeOut: () => undefined
+        }
+      : {
+          writeErr: () => undefined
+        }
+  )
 
   program.name('perfekt').version(version)
 
@@ -250,12 +291,9 @@ export const run = async (argv = process.argv) => {
     await createProgram(perfekt, version, jsonOutput).parseAsync(argv)
   } catch (error) {
     if (!jsonOutput) {
-      if (error instanceof CommanderError) {
-        process.exitCode = error.exitCode
-        return
-      }
-
-      throw error
+      printCliError(getCommandName(argv), error)
+      process.exitCode = error instanceof CommanderError ? error.exitCode : 1
+      return
     }
 
     writeJson({

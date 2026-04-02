@@ -217,6 +217,20 @@ describe('cli', () => {
       configureOutputSpy.mockRestore()
     })
 
+    it('should configure commander stderr output in normal mode', () => {
+      const configureOutputSpy = jest.spyOn(
+        Command.prototype,
+        'configureOutput'
+      )
+
+      createProgram(createPerfektDouble(), '3.0.0')
+
+      expect(configureOutputSpy).toHaveBeenCalledWith({
+        writeErr: expect.any(Function)
+      })
+      configureOutputSpy.mockRestore()
+    })
+
     it('should suppress commander help output when top-level json mode is enabled', async () => {
       await expect(
         createProgram(createPerfektDouble(), '3.0.0', true).parseAsync([
@@ -302,7 +316,10 @@ describe('cli', () => {
         from: 'def456'
       })
       expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Release summary')
+        expect.stringContaining('📦 Release summary')
+      )
+      expect(stdoutSpy).toHaveBeenCalledWith(
+        expect.stringContaining('  Version:')
       )
     })
 
@@ -324,11 +341,9 @@ describe('cli', () => {
       ])
 
       expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Release plan')
+        expect.stringContaining('🧭 Release plan')
       )
-      expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('from: root')
-      )
+      expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining('root'))
     })
 
     it('should parse release dry-run json options and prints release json', async () => {
@@ -399,21 +414,33 @@ describe('cli', () => {
       warnSpy.mockRestore()
     })
 
-    it('should return commander exit codes in normal mode', async () => {
+    it('should print friendly commander errors in normal mode', async () => {
       mockLoadedPerfekt()
 
       await expect(run(['node', 'perfekt', 'wat'])).resolves.toBe(undefined)
+      expect(stderrSpy).toHaveBeenCalledWith(
+        expect.stringContaining('⛔️ Command failed')
+      )
+      expect(stderrSpy).toHaveBeenCalledWith(
+        expect.stringContaining("error: unknown command 'wat'")
+      )
       expect(process.exitCode).toBe(1)
     })
 
-    it('should rethrow non-commander errors in normal mode', async () => {
+    it('should print friendly non-commander errors in normal mode', async () => {
       const perfekt = mockLoadedPerfekt()
 
       perfekt.release.mockRejectedValueOnce(new Error('boom'))
 
-      await expect(run(['node', 'perfekt', 'release', 'new'])).rejects.toThrow(
-        'boom'
+      await expect(run(['node', 'perfekt', 'release', 'new'])).resolves.toBe(
+        undefined
       )
+
+      expect(stderrSpy).toHaveBeenCalledWith(
+        expect.stringContaining('⛔️ Release failed')
+      )
+      expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('boom'))
+      expect(process.exitCode).toBe(1)
     })
 
     it('should print json errors for unknown commands in json mode', async () => {

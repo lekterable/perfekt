@@ -1,3 +1,9 @@
+# 3.0.4
+
+## Fixes
+
+- improve release output and error handling [77636100](https://github.com/lekterable/perfekt/commit/77636100e6ce3ce3ffae89ba76079b630f8c59ac)
+
 # 3.0.3
 
 ## Fixes

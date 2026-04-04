@@ -223,7 +223,7 @@ export const createProgram = (
         }
   )
 
-  program.name('perfekt').version(version)
+  program.name('perfekt').version(version, '-v, --version')
 
   program
     .command('init')
@@ -277,6 +277,9 @@ export const createProgram = (
   return program
 }
 
+const isCommanderDisplayExit = (error: unknown) =>
+  error instanceof CommanderError && error.exitCode === 0
+
 export const run = async (argv = process.argv) => {
   const version = readPackageVersion()
   const perfekt = createPerfekt()
@@ -290,6 +293,10 @@ export const run = async (argv = process.argv) => {
 
     await createProgram(perfekt, version, jsonOutput).parseAsync(argv)
   } catch (error) {
+    if (isCommanderDisplayExit(error)) {
+      return
+    }
+
     if (!jsonOutput) {
       printCliError(getCommandName(argv), error)
       process.exitCode = error instanceof CommanderError ? error.exitCode : 1

@@ -245,6 +245,20 @@ describe('cli', () => {
       expect(stdoutSpy).not.toHaveBeenCalled()
     })
 
+    it('should print the version for the short -v flag', async () => {
+      await expect(
+        createProgram(createPerfektDouble(), '3.0.0').parseAsync([
+          'node',
+          'perfekt',
+          '-v'
+        ])
+      ).rejects.toMatchObject({
+        code: 'commander.version'
+      })
+
+      expect(stdoutSpy).toHaveBeenCalledWith('3.0.0\n')
+    })
+
     it('should run the init command', async () => {
       const perfekt = createPerfektDouble()
 
@@ -391,6 +405,28 @@ describe('cli', () => {
       expect(perfekt.changelog).toHaveBeenCalledWith(undefined, {}, 'default')
 
       process.argv = argv
+    })
+
+    it('should not print a failure block for the short version flag', async () => {
+      mockLoadedPerfekt()
+
+      await expect(run(['node', 'perfekt', '-v'])).resolves.toBe(undefined)
+
+      expect(stdoutSpy).toHaveBeenCalledWith('3.0.0\n')
+      expect(stderrSpy).not.toHaveBeenCalled()
+      expect(process.exitCode).toBe(undefined)
+    })
+
+    it('should not print a failure block for help output', async () => {
+      mockLoadedPerfekt()
+
+      await expect(run(['node', 'perfekt', 'help'])).resolves.toBe(undefined)
+
+      expect(stdoutSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Usage: perfekt')
+      )
+      expect(stderrSpy).not.toHaveBeenCalled()
+      expect(process.exitCode).toBe(undefined)
     })
 
     it('should suppress warnings in json mode and restores console.warn afterwards', async () => {

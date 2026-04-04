@@ -1,3 +1,9 @@
+# 3.0.5
+
+## Fixes
+
+- refine cli output and display exits [62055fcf](https://github.com/lekterable/perfekt/commit/62055fcff7120812bcf69c36875e143f976fd665)
+
 # 3.0.4
 
 ## Fixes

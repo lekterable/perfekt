@@ -111,6 +111,22 @@ The `name` property will be used as the group's header in changelog, `change` is
 
 All commits with unmatched types will become a part of the `Misc` group.
 
+Custom groups extend the defaults. If a custom group reuses one of the default commit types, it replaces that default group instead of creating a duplicate.
+
+For example, this keeps the default `Features` and `Fixes` groups and adds a dedicated `Refactors` group:
+
+```json
+{
+  "groups": [
+    {
+      "name": "## Refactors",
+      "change": "patch",
+      "types": ["refactor"]
+    }
+  ]
+}
+```
+
 > commit type comes from: `type(scope?): message`
 
 Default:

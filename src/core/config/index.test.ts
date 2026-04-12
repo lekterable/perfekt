@@ -23,6 +23,28 @@ describe('Config', () => {
       expect(config).toMatchSnapshot()
     })
 
+    it('should extend default groups with custom groups', () => {
+      const { config } = new Config({
+        groups: [{ name: '## Refactors', change: 'patch', types: ['refactor'] }]
+      })
+
+      expect(config.groups).toEqual([
+        ...defaultConfig.groups,
+        { name: '## Refactors', change: 'patch', types: ['refactor'] }
+      ])
+    })
+
+    it('should replace overlapping default groups when custom groups reuse their types', () => {
+      const { config } = new Config({
+        groups: [{ name: '## Bug Fixes', change: 'patch', types: ['fix'] }]
+      })
+
+      expect(config.groups).toEqual([
+        { name: '## Features', change: 'minor', types: ['feat', 'feature'] },
+        { name: '## Bug Fixes', change: 'patch', types: ['fix'] }
+      ])
+    })
+
     it('should throw when config is not an object', () => {
       expect(() => new Config('nope')).toThrow(
         'Invalid perfekt config: expected an object.'

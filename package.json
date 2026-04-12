@@ -7,6 +7,7 @@
     "perfect",
     "release",
     "version",
+    "changelog",
     "manager",
     "cli",
     "semver"

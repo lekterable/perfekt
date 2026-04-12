@@ -183,12 +183,9 @@ describe('groupCommits', () => {
     ])
   })
 
-  it('should support custom release groups and ignored scopes', () => {
+  it('should extend default release groups with a refactors group', () => {
     const grouped = groupCommits(
       [
-        createCommit(
-          'b2f5901922505efbfb6dd684252e8df0cdffeeb2 custom: make changelog customizable'
-        ),
         ...createCommits(mockLog),
         createCommit(
           'abfb3d86c05b3680a6aed505d0f9194f13912878 chore(ignored): update README badges'
@@ -196,10 +193,7 @@ describe('groupCommits', () => {
       ],
       createConfig({
         groups: [
-          { name: '## Feat', change: 'minor', types: ['feat', 'feature'] },
-          { name: '## Fix', change: 'patch', types: ['fix'] },
-          { name: '## Refactor', change: 'patch', types: ['refactor'] },
-          { name: '## Custom', change: 'patch', types: ['custom'] }
+          { name: '## Refactors', change: 'patch', types: ['refactor'] }
         ],
         ignoredScopes: ['ignored']
       })
@@ -207,13 +201,29 @@ describe('groupCommits', () => {
 
     expect(summarizeGroupedCommits(grouped)).toEqual([
       {
-        custom: ['make changelog customizable'],
         feat: defaultSummary.feat,
         fix: defaultSummary.fix,
         refactor: [
           'extract line generating logic to function and promisify exec'
         ],
         misc: ['add core tests', 'update dependencies']
+      }
+    ])
+  })
+
+  it('should let custom groups replace default groups when their types overlap', () => {
+    const grouped = groupCommits(
+      createCommits(mockLog),
+      createConfig({
+        groups: [{ name: '## Bug Fixes', change: 'patch', types: ['fix'] }]
+      })
+    )
+
+    expect(summarizeGroupedCommits(grouped)).toEqual([
+      {
+        feat: defaultSummary.feat,
+        fix: defaultSummary.fix,
+        misc: defaultSummary.misc
       }
     ])
   })

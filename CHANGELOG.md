@@ -1,3 +1,9 @@
+# 3.1.0
+
+## Features
+
+- extend default groups with custom config [7d9743d6](https://github.com/lekterable/perfekt/commit/7d9743d621d94990f3972f35afff1b77a1015285)
+
 # 3.0.5
 
 ## Fixes

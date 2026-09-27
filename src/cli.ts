@@ -49,7 +49,7 @@ type JsonResponse =
       installCommand: string
       prepareHint: string
       defaultBranch: SetupCommitsResult['defaultBranch']
-      initCommit: SetupCommitsResult['initCommit']
+      lekterableTip: string
     }
   | {
       success: true
@@ -128,8 +128,8 @@ const printSetupCommitsSummary = (result: SetupCommitsResult) => {
     ['Skipped', skipped.join(', ') || 'none'],
     ['Install', result.installCommand],
     ['Prepare', result.prepareHint],
-    ['Default branch', result.defaultBranch],
-    ['First commit', result.initCommit]
+    ['Default branch', result.defaultBranch ?? 'not detected'],
+    ['Tip', result.lekterableTip]
   ])
 
   process.stdout.write(`\n  ${SQUASH_MERGE_NOTE}\n`)
@@ -191,7 +191,7 @@ const createSetupResponse = (result: SetupCommitsResult): JsonResponse => ({
   installCommand: result.installCommand,
   prepareHint: result.prepareHint,
   defaultBranch: result.defaultBranch,
-  initCommit: result.initCommit
+  lekterableTip: result.lekterableTip
 })
 
 const createReleaseResponse = (result: ReleaseResult): JsonResponse => ({
@@ -285,13 +285,8 @@ export const createProgram = (
 
   setup
     .command('commits')
-    .description(
-      'add commitlint and a husky commit-msg hook (default branch master; first commit feat: init :seedling:)'
-    )
-    .option(
-      '--ci',
-      'write a GitHub Action on master that lints pull request titles'
-    )
+    .description('add commitlint and a husky commit-msg hook')
+    .option('--ci', 'write a GitHub Action that lints pull request titles')
     .option('--force', 'overwrite existing generated files')
     .option('--json', 'print the command result as JSON')
     .action(async (options: SetupCommitsOptions & { json?: boolean }) => {

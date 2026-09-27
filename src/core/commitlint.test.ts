@@ -6,8 +6,7 @@ import {
   COMMITLINT_CONFIG_CJS,
   COMMITLINT_CONFIG_PATH,
   INIT_COMMIT,
-  subjectHasGithubRef,
-  subjectNoGithubRef
+  getCommitlintCiWorkflow
 } from './commitlint'
 
 const repoRoot = path.resolve(__dirname, '../..')
@@ -27,22 +26,18 @@ describe('commitlint', () => {
     ).toBe(COMMITLINT_CONFIG_CJS)
   })
 
-  it('should detect GitHub squash references in subjects', () => {
-    expect(subjectHasGithubRef('add x (#12)')).toBe(true)
-    expect(subjectHasGithubRef('add x')).toBe(false)
-    expect(subjectHasGithubRef(undefined)).toBe(false)
-  })
-
-  it('should return a failing commitlint outcome for squash references', () => {
-    expect(subjectNoGithubRef({ subject: 'add x (#99)' })[0]).toBe(false)
-    expect(subjectNoGithubRef({ subject: 'add x' })[0]).toBe(true)
-  })
-
   it('should include a PR title workflow in the optional CI template', () => {
     expect(COMMITLINT_CI_WORKFLOW).toContain('pull_request')
     expect(COMMITLINT_CI_WORKFLOW).not.toContain('branches: [master]')
     expect(COMMITLINT_CI_WORKFLOW).toContain('echo "$PR_TITLE"')
     expect(COMMITLINT_CI_WORKFLOW).toContain('npx --no commitlint')
+  })
+
+  it('should pin the CI template to a detected branch when one is given', () => {
+    expect(getCommitlintCiWorkflow('main')).toContain('branches: [main]')
+    expect(getCommitlintCiWorkflow('master')).toContain('branches: [master]')
+    expect(getCommitlintCiWorkflow()).not.toContain('branches:')
+    expect(getCommitlintCiWorkflow('bad branch')).not.toContain('branches:')
   })
 
   it('should not encode a master-only lock in the overlay', () => {

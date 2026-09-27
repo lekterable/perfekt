@@ -1,22 +1,30 @@
 import fs from 'fs'
+import exec from '~utils/misc/exec'
 import * as writeFile from '../utils/misc/write-file'
 import setupCommits, {
   getCommitlintInstallCommand,
+  getDefaultBranch,
   getPrepareHint,
   getScaffoldFiles
 } from './setup-commits'
 import {
-  COMMITLINT_CI_WORKFLOW,
   COMMITLINT_CI_WORKFLOW_PATH,
   COMMITLINT_CONFIG_CJS,
   COMMITLINT_CONFIG_PATH,
   HUSKY_COMMIT_MSG,
-  HUSKY_COMMIT_MSG_PATH
+  HUSKY_COMMIT_MSG_PATH,
+  LEKTERABLE_TIP,
+  getCommitlintCiWorkflow
 } from './commitlint'
 
 jest.mock('fs')
+jest.mock('~utils/misc/exec', () => ({
+  __esModule: true,
+  default: jest.fn()
+}))
 
 const fsMock = jest.mocked(fs)
+const execMock = jest.mocked(exec)
 
 describe('setup-commits', () => {
   let writeFileSpy: jest.SpiedFunction<typeof writeFile.default>
@@ -34,6 +42,10 @@ describe('setup-commits', () => {
     )
     fsMock.mkdirSync.mockImplementation(() => undefined)
     fsMock.chmodSync.mockImplementation(() => undefined)
+    execMock.mockImplementation(command => {
+      if (String(command).includes('origin/HEAD')) return 'origin/main'
+      return ''
+    })
   })
 
   it('should return package-manager install commands', () => {
@@ -58,6 +70,33 @@ describe('setup-commits', () => {
       HUSKY_COMMIT_MSG_PATH,
       COMMITLINT_CI_WORKFLOW_PATH
     ])
+  })
+
+  it('should detect origin HEAD, then config, then main or master', () => {
+    expect(getDefaultBranch()).toBe('main')
+
+    execMock.mockImplementation(command => {
+      if (String(command).includes('init.defaultBranch')) return 'develop'
+      return ''
+    })
+    expect(getDefaultBranch()).toBe('develop')
+
+    execMock.mockImplementation(command => {
+      if (String(command).includes('show-current')) return 'master'
+      return ''
+    })
+    expect(getDefaultBranch()).toBe('master')
+
+    execMock.mockImplementation(command => {
+      if (String(command).includes('show-current')) return 'topic'
+      return ''
+    })
+    expect(getDefaultBranch()).toBe(null)
+
+    execMock.mockImplementation(() => {
+      throw new Error('no git')
+    })
+    expect(getDefaultBranch()).toBe(null)
   })
 
   it('should describe an existing husky prepare script', () => {
@@ -125,8 +164,8 @@ describe('setup-commits', () => {
       installCommand:
         'pnpm add -D @commitlint/cli @commitlint/config-conventional husky',
       prepareHint: 'package.json already runs husky in scripts.prepare',
-      defaultBranch: 'master',
-      initCommit: 'feat: init :seedling:'
+      defaultBranch: 'main',
+      lekterableTip: LEKTERABLE_TIP
     })
   })
 
@@ -150,13 +189,13 @@ describe('setup-commits', () => {
     ])
   })
 
-  it('should write the optional GitHub Action when ci is enabled', async () => {
+  it('should write the optional GitHub Action for the detected branch', async () => {
     const result = await setupCommits({ ci: true })
 
     expect(writeFileSpy).toHaveBeenCalledTimes(3)
     expect(writeFileSpy).toHaveBeenCalledWith(
       COMMITLINT_CI_WORKFLOW_PATH,
-      COMMITLINT_CI_WORKFLOW
+      getCommitlintCiWorkflow('main')
     )
     expect(fsMock.mkdirSync).toHaveBeenCalledWith('.github/workflows', {
       recursive: true
@@ -165,5 +204,6 @@ describe('setup-commits', () => {
       path: COMMITLINT_CI_WORKFLOW_PATH,
       status: 'written'
     })
+    expect(result.defaultBranch).toBe('main')
   })
 })

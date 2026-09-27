@@ -73,8 +73,9 @@ const createSetupCommitsResult = () => ({
   installCommand:
     'pnpm add -D @commitlint/cli @commitlint/config-conventional husky',
   prepareHint: 'package.json already runs husky in scripts.prepare',
-  defaultBranch: 'master' as const,
-  initCommit: 'feat: init :seedling:' as const
+  defaultBranch: 'main',
+  lekterableTip:
+    'lekterable repos use master and first commit feat: init :seedling:. Advisory only. Setup does not fail on other default branches.'
 })
 
 const createPerfektDouble = () => ({
@@ -286,7 +287,7 @@ describe('cli', () => {
       expect(perfekt.init).toHaveBeenCalledTimes(1)
     })
 
-    it('should document master and the init commit in setup commits help', async () => {
+    it('should describe setup commits without pinning master', async () => {
       await expect(
         createProgram(createPerfektDouble(), '3.0.0').parseAsync([
           'node',
@@ -300,12 +301,11 @@ describe('cli', () => {
       })
 
       expect(stdoutSpy).toHaveBeenCalledWith(
+        expect.stringContaining('add commitlint and a husky commit-msg hook')
+      )
+      expect(stdoutSpy).not.toHaveBeenCalledWith(
         expect.stringContaining('default branch master')
       )
-      expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('feat: init :seedling:')
-      )
-      expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining('master'))
     })
 
     it('should run the setup commits command', async () => {
@@ -331,9 +331,9 @@ describe('cli', () => {
       expect(stdoutSpy).toHaveBeenCalledWith(
         expect.stringContaining('commitlint.config.cjs')
       )
-      expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining('master'))
+      expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining('main'))
       expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('feat: init :seedling:')
+        expect.stringContaining('Advisory only')
       )
     })
 

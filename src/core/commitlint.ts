@@ -12,7 +12,6 @@ export const COMMIT_TYPES = [
   'revert'
 ] as const
 
-export const DEFAULT_BRANCH = 'master'
 export const INIT_COMMIT = 'feat: init :seedling:'
 
 export const COMMITLINT_CONFIG_PATH = 'commitlint.config.cjs'
@@ -22,37 +21,16 @@ export const COMMITLINT_CI_WORKFLOW_PATH = '.github/workflows/commitlint.yml'
 export const HUSKY_COMMIT_MSG = 'npx --no -- commitlint --edit "$1"\n'
 
 export const SQUASH_MERGE_NOTE =
-  'GitHub squash titles still need repo settings or merge habit to strip (#N). commitlint only catches local commits, and CI if you add --ci.'
+  'commitlint catches local commits, and CI if you add --ci. A trailing (#N) from GitHub squash is allowed.'
 
-export const subjectHasGithubRef = (subject?: string | null) =>
-  Boolean(subject && /\(#\d+\)/.test(subject))
+export const LEKTERABLE_TIP =
+  'lekterable repos use master and first commit feat: init :seedling:. Advisory only. Setup does not fail on other default branches.'
 
-export const subjectNoGithubRef = (parsed: { subject?: string | null }) => {
-  const pass = !subjectHasGithubRef(parsed.subject)
+export const isSafeBranchName = (value: string) =>
+  /^[A-Za-z0-9._/-]+$/.test(value) && !value.includes('..')
 
-  return [
-    pass,
-    'subject must not contain a GitHub squash reference like (#123)'
-  ] as const
-}
-
-export const COMMITLINT_CONFIG_CJS = `// Default branch is always master (never main).
-// First commit is always feat: init :seedling: and must pass.
-module.exports = {
+export const COMMITLINT_CONFIG_CJS = `module.exports = {
   extends: ['@commitlint/config-conventional'],
-  plugins: [
-    {
-      rules: {
-        'subject-no-github-ref': ({ subject }) => {
-          const pass = !subject || !/\\(#\\d+\\)/.test(subject)
-          return [
-            pass,
-            'subject must not contain a GitHub squash reference like (#123)'
-          ]
-        }
-      }
-    }
-  ],
   rules: {
     'type-enum': [
       2,
@@ -71,17 +49,19 @@ module.exports = {
         'revert'
       ]
     ],
-    'subject-full-stop': [2, 'never', '.'],
-    'subject-no-github-ref': [2, 'always']
+    'subject-full-stop': [2, 'never', '.']
   }
 }
 `
 
-export const COMMITLINT_CI_WORKFLOW = `name: Commitlint
+export const getCommitlintCiWorkflow = (branch?: string | null) => {
+  const branchLine =
+    branch && isSafeBranchName(branch) ? `\n    branches: [${branch}]` : ''
+
+  return `name: Commitlint
 
 on:
-  pull_request:
-    branches: [master]
+  pull_request:${branchLine}
     types: [opened, edited, reopened, synchronize]
 
 jobs:
@@ -101,3 +81,6 @@ jobs:
           PR_TITLE: \${{ github.event.pull_request.title }}
         run: echo "$PR_TITLE" | npx --no commitlint
 `
+}
+
+export const COMMITLINT_CI_WORKFLOW = getCommitlintCiWorkflow()

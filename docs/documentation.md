@@ -24,13 +24,14 @@ Scaffolds Conventional Commits linting in the current repo:
 - Writes `.husky/commit-msg` so local commits are linted
 - Prints the exact `commitlint` + `husky` install command for the detected package manager
 - Reminds you to run `husky` from `package.json` `scripts.prepare`
-- Defaults new scaffolds to default branch `master` (never `main`) and first commit `feat: init :seedling:`
+- Detects the current default branch for the optional `--ci` workflow
+- Prints a lekterable tip. Our repos use `master` and first commit `feat: init :seedling:`. That is advisory. Setup does not fail on `main`.
 
 The generated config:
 
-- Accepts the required first commit `feat: init :seedling:` and scoped subjects like `feat(web): add x`
+- Accepts `feat: init :seedling:` and scoped subjects like `feat(web): add x`
+- Accepts a trailing GitHub squash suffix like `(#123)`
 - Rejects subjects that end with `.`
-- Rejects subjects that contain a GitHub squash suffix like `(#123)`
 - Allows only `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `ci`, `build`, `style`, `perf`, `revert`
 
 Existing files are left alone unless you pass `--force`.
@@ -41,7 +42,7 @@ Options:
 
 `-h, --help` - display help for command
 
-`--ci` - also write `.github/workflows/commitlint.yml`, which lints pull request titles targeting `master`
+`--ci` - also write `.github/workflows/commitlint.yml`, which lints pull request titles. The `pull_request` filter uses the detected default branch when git exposes one.
 
 `--force` - overwrite generated files if they already exist
 

@@ -5,7 +5,6 @@ import {
   COMMITLINT_CI_WORKFLOW,
   COMMITLINT_CONFIG_CJS,
   COMMITLINT_CONFIG_PATH,
-  DEFAULT_BRANCH,
   INIT_COMMIT,
   subjectHasGithubRef,
   subjectNoGithubRef
@@ -39,19 +38,18 @@ describe('commitlint', () => {
     expect(subjectNoGithubRef({ subject: 'add x' })[0]).toBe(true)
   })
 
-  it('should include a PR title workflow on master in the optional CI template', () => {
+  it('should include a PR title workflow in the optional CI template', () => {
     expect(COMMITLINT_CI_WORKFLOW).toContain('pull_request')
-    expect(COMMITLINT_CI_WORKFLOW).toContain(`branches: [${DEFAULT_BRANCH}]`)
-    expect(COMMITLINT_CI_WORKFLOW).not.toContain('main')
+    expect(COMMITLINT_CI_WORKFLOW).not.toContain('branches: [master]')
     expect(COMMITLINT_CI_WORKFLOW).toContain('echo "$PR_TITLE"')
     expect(COMMITLINT_CI_WORKFLOW).toContain('npx --no commitlint')
   })
 
-  it('should document the master branch and init commit locks in the overlay', () => {
-    expect(COMMITLINT_CONFIG_CJS).toContain(
+  it('should not encode a master-only lock in the overlay', () => {
+    expect(COMMITLINT_CONFIG_CJS).not.toContain(
       'Default branch is always master (never main).'
     )
-    expect(COMMITLINT_CONFIG_CJS).toContain(INIT_COMMIT)
+    expect(COMMITLINT_CONFIG_CJS).not.toContain('subject-no-github-ref')
   })
 
   it('should accept the required first commit subject', () => {
@@ -63,7 +61,7 @@ describe('commitlint', () => {
     ['feat(web): add x', 0],
     ['chore(release): 3.1.0', 0],
     ['feat: add x.', 1],
-    ['feat: add x (#12)', 1],
+    ['feat: add x (#12)', 0],
     ['wip: try this', 1],
     ['content: add page', 1]
   ])('should lint %s with status %s', (message, status) => {

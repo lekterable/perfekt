@@ -39,7 +39,7 @@ For **perfekt** to run with its full power, your project must follow the [conven
 
 If you want help enforcing that locally, run `perfekt setup commits`. That writes a Conventional Commits [commitlint](https://commitlint.js.org/) config and a husky `commit-msg` hook, then prints the exact dependencies to install.
 
-The overlay rejects subjects that end with `.` or include a GitHub squash suffix like `(#123)`, keeps the usual types (`feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `ci`, `build`, `style`, `perf`, `revert`), and allows first commits such as `feat: init :seedling:`.
+New lekterable repos use default branch `master` (never `main`) and start with `feat: init :seedling:`. The overlay must accept that first commit. It also rejects subjects that end with `.` or include a GitHub squash suffix like `(#123)`, and keeps the usual types (`feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `ci`, `build`, `style`, `perf`, `revert`).
 
 GitHub squash titles still need repo settings or merge habit to strip `(#N)` — commitlint only catches local commits, and CI if you add `perfekt setup commits --ci`.
 

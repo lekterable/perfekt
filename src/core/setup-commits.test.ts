@@ -124,7 +124,9 @@ describe('setup-commits', () => {
       packageManager: 'pnpm',
       installCommand:
         'pnpm add -D @commitlint/cli @commitlint/config-conventional husky',
-      prepareHint: 'package.json already runs husky in scripts.prepare'
+      prepareHint: 'package.json already runs husky in scripts.prepare',
+      defaultBranch: 'master',
+      initCommit: 'feat: init :seedling:'
     })
   })
 

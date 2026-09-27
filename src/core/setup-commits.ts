@@ -12,8 +12,10 @@ import {
   COMMITLINT_CI_WORKFLOW_PATH,
   COMMITLINT_CONFIG_CJS,
   COMMITLINT_CONFIG_PATH,
+  DEFAULT_BRANCH,
   HUSKY_COMMIT_MSG,
-  HUSKY_COMMIT_MSG_PATH
+  HUSKY_COMMIT_MSG_PATH,
+  INIT_COMMIT
 } from './commitlint'
 
 const installCommands: Record<PackageManagerName, string> = {
@@ -106,7 +108,9 @@ const setupCommits = async (
     files,
     packageManager,
     installCommand: getCommitlintInstallCommand(packageManager),
-    prepareHint: getPrepareHint()
+    prepareHint: getPrepareHint(),
+    defaultBranch: DEFAULT_BRANCH,
+    initCommit: INIT_COMMIT
   }
 }
 

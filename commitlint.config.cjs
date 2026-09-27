@@ -1,3 +1,5 @@
+// Default branch is always master (never main).
+// First commit is always feat: init :seedling: and must pass.
 module.exports = {
   extends: ['@commitlint/config-conventional'],
   plugins: [

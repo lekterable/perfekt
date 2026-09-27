@@ -12,6 +12,9 @@ export const COMMIT_TYPES = [
   'revert'
 ] as const
 
+export const DEFAULT_BRANCH = 'master'
+export const INIT_COMMIT = 'feat: init :seedling:'
+
 export const COMMITLINT_CONFIG_PATH = 'commitlint.config.cjs'
 export const HUSKY_COMMIT_MSG_PATH = '.husky/commit-msg'
 export const COMMITLINT_CI_WORKFLOW_PATH = '.github/workflows/commitlint.yml'
@@ -33,7 +36,9 @@ export const subjectNoGithubRef = (parsed: { subject?: string | null }) => {
   ] as const
 }
 
-export const COMMITLINT_CONFIG_CJS = `module.exports = {
+export const COMMITLINT_CONFIG_CJS = `// Default branch is always master (never main).
+// First commit is always feat: init :seedling: and must pass.
+module.exports = {
   extends: ['@commitlint/config-conventional'],
   plugins: [
     {
@@ -76,6 +81,7 @@ export const COMMITLINT_CI_WORKFLOW = `name: Commitlint
 
 on:
   pull_request:
+    branches: [master]
     types: [opened, edited, reopened, synchronize]
 
 jobs:

@@ -24,10 +24,11 @@ Scaffolds Conventional Commits linting in the current repo:
 - Writes `.husky/commit-msg` so local commits are linted
 - Prints the exact `commitlint` + `husky` install command for the detected package manager
 - Reminds you to run `husky` from `package.json` `scripts.prepare`
+- Defaults new scaffolds to default branch `master` (never `main`) and first commit `feat: init :seedling:`
 
 The generated config:
 
-- Accepts `feat: init :seedling:` and `feat(web): add x`
+- Accepts the required first commit `feat: init :seedling:` and scoped subjects like `feat(web): add x`
 - Rejects subjects that end with `.`
 - Rejects subjects that contain a GitHub squash suffix like `(#123)`
 - Allows only `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `ci`, `build`, `style`, `perf`, `revert`
@@ -40,7 +41,7 @@ Options:
 
 `-h, --help` - display help for command
 
-`--ci` - also write `.github/workflows/commitlint.yml`, which lints the pull request title
+`--ci` - also write `.github/workflows/commitlint.yml`, which lints pull request titles targeting `master`
 
 `--force` - overwrite generated files if they already exist
 

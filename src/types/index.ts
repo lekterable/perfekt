@@ -36,6 +36,8 @@ export type SetupCommitsResult = {
   packageManager: PackageManagerName
   installCommand: string
   prepareHint: string
+  defaultBranch: 'master'
+  initCommit: 'feat: init :seedling:'
 }
 
 export type Config = {

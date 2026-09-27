@@ -5,17 +5,20 @@ import { cosmiconfigSync } from 'cosmiconfig'
 import fs from 'node:fs'
 import path from 'node:path'
 import { Config, Perfekt } from './core'
+import { SQUASH_MERGE_NOTE } from './core/commitlint'
 import {
   ChangelogOptions,
   ChangelogResult,
   ReleaseOptions,
-  ReleaseResult
+  ReleaseResult,
+  SetupCommitsOptions,
+  SetupCommitsResult
 } from '~types'
 
 type ChangelogCommandOptions = ChangelogOptions & { json?: boolean }
 type ReleaseCommandOptions = ReleaseOptions & { json?: boolean }
 
-type PerfektCLI = Pick<Perfekt, 'init'> & {
+type PerfektCLI = Pick<Perfekt, 'init' | 'setupCommits'> & {
   changelog: (
     version: string | undefined,
     options: Partial<ChangelogOptions>,
@@ -40,6 +43,16 @@ type JsonResponse =
     }
   | {
       success: true
+      command: 'setup'
+      files: SetupCommitsResult['files']
+      packageManager: SetupCommitsResult['packageManager']
+      installCommand: string
+      prepareHint: string
+      defaultBranch: SetupCommitsResult['defaultBranch']
+      lekterableTip: string
+    }
+  | {
+      success: true
       command: 'release'
       dryRun: boolean
       requestedVersion: string
@@ -58,7 +71,7 @@ type JsonResponse =
     }
   | {
       success: false
-      command: 'changelog' | 'release' | 'init' | 'unknown'
+      command: 'changelog' | 'release' | 'init' | 'setup' | 'unknown'
       error: {
         code: string
         message: string
@@ -100,6 +113,26 @@ const formatDetailBlock = (
   ]
 
   writer(lines.join('\n') + '\n')
+}
+
+const printSetupCommitsSummary = (result: SetupCommitsResult) => {
+  const written = result.files
+    .filter(file => file.status === 'written')
+    .map(file => file.path)
+  const skipped = result.files
+    .filter(file => file.status === 'skipped')
+    .map(file => file.path)
+
+  formatDetailBlock('🌱 Commitlint setup', [
+    ['Written', written.join(', ') || 'none'],
+    ['Skipped', skipped.join(', ') || 'none'],
+    ['Install', result.installCommand],
+    ['Prepare', result.prepareHint],
+    ['Default branch', result.defaultBranch ?? 'not detected'],
+    ['Tip', result.lekterableTip]
+  ])
+
+  process.stdout.write(`\n  ${SQUASH_MERGE_NOTE}\n`)
 }
 
 const printReleaseSummary = (result: ReleaseResult) => {
@@ -150,6 +183,17 @@ const createChangelogResponse = (result: ChangelogResult): JsonResponse => ({
   markdown: result.markdown
 })
 
+const createSetupResponse = (result: SetupCommitsResult): JsonResponse => ({
+  success: true,
+  command: 'setup',
+  files: result.files,
+  packageManager: result.packageManager,
+  installCommand: result.installCommand,
+  prepareHint: result.prepareHint,
+  defaultBranch: result.defaultBranch,
+  lekterableTip: result.lekterableTip
+})
+
 const createReleaseResponse = (result: ReleaseResult): JsonResponse => ({
   success: true,
   command: 'release',
@@ -171,10 +215,15 @@ const createReleaseResponse = (result: ReleaseResult): JsonResponse => ({
 
 export const getCommandName = (
   argv = process.argv
-): 'changelog' | 'release' | 'init' | 'unknown' => {
+): 'changelog' | 'release' | 'init' | 'setup' | 'unknown' => {
   const command = argv[2]
 
-  if (command === 'changelog' || command === 'release' || command === 'init') {
+  if (
+    command === 'changelog' ||
+    command === 'release' ||
+    command === 'init' ||
+    command === 'setup'
+  ) {
     return command
   }
 
@@ -229,6 +278,31 @@ export const createProgram = (
     .command('init')
     .description('initialize config')
     .action(() => perfekt.init())
+
+  const setup = program
+    .command('setup')
+    .description('scaffold project conventions')
+
+  setup
+    .command('commits')
+    .description('add commitlint and a husky commit-msg hook')
+    .option('--ci', 'write a GitHub Action that lints pull request titles')
+    .option('--force', 'overwrite existing generated files')
+    .option('--json', 'print the command result as JSON')
+    .action(async (options: SetupCommitsOptions & { json?: boolean }) => {
+      const { json = false, ...setupOptions } = options
+      const result = await perfekt.setupCommits({
+        ci: Boolean(setupOptions.ci),
+        force: Boolean(setupOptions.force)
+      })
+
+      if (json) {
+        writeJson(createSetupResponse(result))
+        return
+      }
+
+      printSetupCommitsSummary(result)
+    })
 
   program
     .command('changelog [version]')

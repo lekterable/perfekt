@@ -2,12 +2,15 @@ import initialize from './initialize'
 import Changelog from './changelog'
 import Git from './git'
 import Release from './release'
+import setupCommits from './setup-commits'
 import { fileExists, groupCommits, resolveVersion } from '~utils'
 import getPackageManager from '~utils/npm/get-package-manager'
 import {
   ChangelogOptions,
   ChangelogResult,
   Config,
+  SetupCommitsOptions,
+  SetupCommitsResult,
   GroupedCommits,
   OutputCommit,
   OutputGroup,
@@ -37,6 +40,12 @@ class Perfekt {
 
   async init() {
     await initialize()
+  }
+
+  async setupCommits(
+    options: SetupCommitsOptions = {}
+  ): Promise<SetupCommitsResult> {
+    return setupCommits(options)
   }
 
   #serializeCommit(commit: Commit): OutputCommit {

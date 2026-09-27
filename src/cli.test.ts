@@ -64,8 +64,23 @@ const createReleaseResult = () => ({
   }
 })
 
+const createSetupCommitsResult = () => ({
+  files: [
+    { path: 'commitlint.config.cjs', status: 'written' as const },
+    { path: '.husky/commit-msg', status: 'written' as const }
+  ],
+  packageManager: 'pnpm' as const,
+  installCommand:
+    'pnpm add -D @commitlint/cli @commitlint/config-conventional husky',
+  prepareHint: 'package.json already runs husky in scripts.prepare',
+  defaultBranch: 'main',
+  lekterableTip:
+    'lekterable repos use master and first commit feat: init :seedling:. Advisory only. Setup does not fail on other default branches.'
+})
+
 const createPerfektDouble = () => ({
   init: jest.fn(),
+  setupCommits: jest.fn().mockResolvedValue(createSetupCommitsResult()),
   changelog: jest.fn().mockResolvedValue(createChangelogResult()),
   release: jest.fn().mockResolvedValue(createReleaseResult())
 })
@@ -160,6 +175,7 @@ describe('cli', () => {
       expect(getCommandName(['node', 'perfekt', 'release'])).toBe('release')
       expect(getCommandName(['node', 'perfekt', 'changelog'])).toBe('changelog')
       expect(getCommandName(['node', 'perfekt', 'init'])).toBe('init')
+      expect(getCommandName(['node', 'perfekt', 'setup'])).toBe('setup')
       expect(getCommandName(['node', 'perfekt', 'wat'])).toBe('unknown')
     })
 
@@ -269,6 +285,76 @@ describe('cli', () => {
       ])
 
       expect(perfekt.init).toHaveBeenCalledTimes(1)
+    })
+
+    it('should describe setup commits without pinning master', async () => {
+      await expect(
+        createProgram(createPerfektDouble(), '3.0.0').parseAsync([
+          'node',
+          'perfekt',
+          'setup',
+          'commits',
+          '--help'
+        ])
+      ).rejects.toMatchObject({
+        code: 'commander.helpDisplayed'
+      })
+
+      expect(stdoutSpy).toHaveBeenCalledWith(
+        expect.stringContaining('add commitlint and a husky commit-msg hook')
+      )
+      expect(stdoutSpy).not.toHaveBeenCalledWith(
+        expect.stringContaining('default branch master')
+      )
+    })
+
+    it('should run the setup commits command', async () => {
+      const perfekt = createPerfektDouble()
+
+      await createProgram(perfekt, '3.0.0').parseAsync([
+        'node',
+        'perfekt',
+        'setup',
+        'commits',
+        '--ci',
+        '--force'
+      ])
+
+      expect(perfekt.setupCommits).toHaveBeenCalledTimes(1)
+      expect(perfekt.setupCommits).toHaveBeenCalledWith({
+        ci: true,
+        force: true
+      })
+      expect(stdoutSpy).toHaveBeenCalledWith(
+        expect.stringContaining('🌱 Commitlint setup')
+      )
+      expect(stdoutSpy).toHaveBeenCalledWith(
+        expect.stringContaining('commitlint.config.cjs')
+      )
+      expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining('main'))
+      expect(stdoutSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Advisory only')
+      )
+    })
+
+    it('should print setup commits json output', async () => {
+      const perfekt = createPerfektDouble()
+
+      await createProgram(perfekt, '3.0.0').parseAsync([
+        'node',
+        'perfekt',
+        'setup',
+        'commits',
+        '--json'
+      ])
+
+      expect(perfekt.setupCommits).toHaveBeenCalledWith({
+        ci: false,
+        force: false
+      })
+      expect(stdoutSpy).toHaveBeenCalledWith(
+        expect.stringContaining('"command": "setup"')
+      )
     })
 
     it('should parse changelog options', async () => {

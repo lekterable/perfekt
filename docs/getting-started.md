@@ -30,7 +30,15 @@ If the output is empty, you should be able to run:
 
 where `<version>` is the version of your new release.
 
-Refer to the [release documentation](./documentation.md#release) for more information.
+lekterable repos often use `master` and first commit `feat: init :seedling:`. Other default branches work.
+
+To enforce Conventional Commits before they land, run:
+
+`perfekt setup commits`
+
+Then install the printed `commitlint` and `husky` dependencies. Use `perfekt setup commits --ci` if you also want a GitHub Action that lints pull request titles. The workflow uses the detected default branch when git exposes one.
+
+Refer to the [release documentation](./documentation.md#release) and [setup commits documentation](./documentation.md#setup-commits) for more information.
 
 ## Old projects
 

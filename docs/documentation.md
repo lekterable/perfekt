@@ -14,6 +14,40 @@ Options:
 
 `-h, --help` - display help for command
 
+## `setup commits`
+
+Usage: `perfekt setup commits [options]`
+
+Scaffolds Conventional Commits linting in the current repo:
+
+- Writes `commitlint.config.cjs` on top of `@commitlint/config-conventional`
+- Writes `.husky/commit-msg` so local commits are linted
+- Prints the exact `commitlint` + `husky` install command for the detected package manager
+- Reminds you to run `husky` from `package.json` `scripts.prepare`
+- Detects the current default branch for the optional `--ci` workflow
+- Prints a lekterable tip. Our repos use `master` and first commit `feat: init :seedling:`. That is advisory. Setup does not fail on `main`.
+
+The generated config:
+
+- Accepts `feat: init :seedling:` and scoped subjects like `feat(web): add x`
+- Accepts a trailing GitHub squash suffix like `(#123)`
+- Rejects subjects that end with `.`
+- Allows only `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `ci`, `build`, `style`, `perf`, `revert`
+
+Existing files are left alone unless you pass `--force`.
+
+`perfekt setup commits` only guards local commits and CI you add yourself. GitHub squash-merge titles still need repo settings or merge habit to strip `(#N)`.
+
+Options:
+
+`-h, --help` - display help for command
+
+`--ci` - also write `.github/workflows/commitlint.yml`, which lints pull request titles. The `pull_request` filter uses the detected default branch when git exposes one.
+
+`--force` - overwrite generated files if they already exist
+
+`--json` - print the command result as JSON instead of human-readable output
+
 ## `release`
 
 Usage: `perfekt release [options] <version>`

@@ -30,7 +30,13 @@ If the output is empty, you should be able to run:
 
 where `<version>` is the version of your new release.
 
-Refer to the [release documentation](./documentation.md#release) for more information.
+To enforce Conventional Commits before they land, run:
+
+`perfekt setup commits`
+
+Then install the printed `commitlint` and `husky` dependencies. Use `perfekt setup commits --ci` if you also want a GitHub Action that lints pull request titles.
+
+Refer to the [release documentation](./documentation.md#release) and [setup commits documentation](./documentation.md#setup-commits) for more information.
 
 ## Old projects
 

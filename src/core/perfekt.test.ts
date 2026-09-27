@@ -93,6 +93,30 @@ describe('Perfekt', () => {
     )
   })
 
+  it('should scaffold commitlint files', async () => {
+    fsMock.existsSync.mockImplementation(
+      fileName => fileName === 'package.json'
+    )
+    fsMock.readFileSync.mockReturnValue(
+      JSON.stringify({
+        packageManager: 'pnpm@10.32.0',
+        scripts: { prepare: 'husky' }
+      }) as never
+    )
+    fsMock.mkdirSync.mockImplementation(() => undefined)
+    fsMock.chmodSync.mockImplementation(() => undefined)
+    fsMock.writeFile.mockImplementation(resolveWriteFile())
+
+    const result = await perfekt.setupCommits({ ci: true })
+
+    expect(result.files.map(file => file.path)).toEqual([
+      'commitlint.config.cjs',
+      '.husky/commit-msg',
+      '.github/workflows/commitlint.yml'
+    ])
+    expect(result.packageManager).toBe('pnpm')
+  })
+
   describe('changelog', () => {
     let stdoutSpy: jest.SpiedFunction<typeof process.stdout.write>
 

@@ -37,7 +37,11 @@ It can also return structured JSON for `release` and `changelog`, which makes it
 
 For **perfekt** to run with its full power, your project must follow the [conventional commits](https://www.conventionalcommits.org) specification, this allows it to know the type of changes introduced in a given commit.
 
-If you want help enforcing that locally, [commitlint](https://commitlint.js.org/) is a good companion tool for validating commit messages before they land in git history.
+If you want help enforcing that locally, run `perfekt setup commits`. That writes a Conventional Commits [commitlint](https://commitlint.js.org/) config and a husky `commit-msg` hook, then prints the exact dependencies to install.
+
+The overlay rejects subjects that end with `.` or include a GitHub squash suffix like `(#123)`, keeps the usual types (`feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `ci`, `build`, `style`, `perf`, `revert`), and allows first commits such as `feat: init :seedling:`.
+
+GitHub squash titles still need repo settings or merge habit to strip `(#N)` — commitlint only catches local commits, and CI if you add `perfekt setup commits --ci`.
 
 If your project doesn't do it yet, you can start any time as there is no need for rewriting any git history, simply create an initial release which will contain all of the _unconventional_ commits and after that start naming your commits accordingly.
 

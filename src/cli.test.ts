@@ -64,8 +64,20 @@ const createReleaseResult = () => ({
   }
 })
 
+const createSetupCommitsResult = () => ({
+  files: [
+    { path: 'commitlint.config.cjs', status: 'written' as const },
+    { path: '.husky/commit-msg', status: 'written' as const }
+  ],
+  packageManager: 'pnpm' as const,
+  installCommand:
+    'pnpm add -D @commitlint/cli @commitlint/config-conventional husky',
+  prepareHint: 'package.json already runs husky in scripts.prepare'
+})
+
 const createPerfektDouble = () => ({
   init: jest.fn(),
+  setupCommits: jest.fn().mockResolvedValue(createSetupCommitsResult()),
   changelog: jest.fn().mockResolvedValue(createChangelogResult()),
   release: jest.fn().mockResolvedValue(createReleaseResult())
 })
@@ -160,6 +172,7 @@ describe('cli', () => {
       expect(getCommandName(['node', 'perfekt', 'release'])).toBe('release')
       expect(getCommandName(['node', 'perfekt', 'changelog'])).toBe('changelog')
       expect(getCommandName(['node', 'perfekt', 'init'])).toBe('init')
+      expect(getCommandName(['node', 'perfekt', 'setup'])).toBe('setup')
       expect(getCommandName(['node', 'perfekt', 'wat'])).toBe('unknown')
     })
 
@@ -269,6 +282,51 @@ describe('cli', () => {
       ])
 
       expect(perfekt.init).toHaveBeenCalledTimes(1)
+    })
+
+    it('should run the setup commits command', async () => {
+      const perfekt = createPerfektDouble()
+
+      await createProgram(perfekt, '3.0.0').parseAsync([
+        'node',
+        'perfekt',
+        'setup',
+        'commits',
+        '--ci',
+        '--force'
+      ])
+
+      expect(perfekt.setupCommits).toHaveBeenCalledTimes(1)
+      expect(perfekt.setupCommits).toHaveBeenCalledWith({
+        ci: true,
+        force: true
+      })
+      expect(stdoutSpy).toHaveBeenCalledWith(
+        expect.stringContaining('🌱 Commitlint setup')
+      )
+      expect(stdoutSpy).toHaveBeenCalledWith(
+        expect.stringContaining('commitlint.config.cjs')
+      )
+    })
+
+    it('should print setup commits json output', async () => {
+      const perfekt = createPerfektDouble()
+
+      await createProgram(perfekt, '3.0.0').parseAsync([
+        'node',
+        'perfekt',
+        'setup',
+        'commits',
+        '--json'
+      ])
+
+      expect(perfekt.setupCommits).toHaveBeenCalledWith({
+        ci: false,
+        force: false
+      })
+      expect(stdoutSpy).toHaveBeenCalledWith(
+        expect.stringContaining('"command": "setup"')
+      )
     })
 
     it('should parse changelog options', async () => {

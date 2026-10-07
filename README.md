@@ -45,7 +45,8 @@ To lint pull request titles in any repo, call the shared workflow:
 
 ```yaml
 jobs:
-  pr-title:
+  commitlint:
+    name: Commitlint
     permissions:
       contents: read
     uses: lekterable/perfekt/.github/workflows/commitlint.yml@master

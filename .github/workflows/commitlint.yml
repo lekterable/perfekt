@@ -9,6 +9,7 @@ on:
 
 jobs:
   pr-title:
+    name: PR title
     runs-on: ubuntu-latest
     permissions:
       contents: read

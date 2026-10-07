@@ -50,7 +50,8 @@ on:
     types: [opened, edited, reopened, synchronize]
 
 jobs:
-  pr-title:
+  commitlint:
+    name: Commitlint
     permissions:
       contents: read
     uses: ${COMMITLINT_REUSABLE_WORKFLOW}

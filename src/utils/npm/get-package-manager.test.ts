@@ -94,7 +94,7 @@ describe('getVersionCommand', () => {
     )
 
     expect(getVersionCommand('1.2.3')).toBe(
-      'pnpm version 1.2.3 --no-git-tag-version'
+      'pnpm version 1.2.3 --no-git-tag-version --no-git-checks'
     )
   })
 

@@ -16,7 +16,8 @@ jobs:
       - uses: actions/checkout@v6
         with:
           repository: lekterable/perfekt
-          ref: master
+          # perfekt's own PRs lint against their own rules; callers use master
+          ref: ${{ github.repository == 'lekterable/perfekt' && github.event.pull_request.head.sha || 'master' }}
           path: perfekt
           sparse-checkout: commitlint.cjs
           sparse-checkout-cone-mode: false

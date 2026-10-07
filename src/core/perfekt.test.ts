@@ -363,7 +363,7 @@ describe('Perfekt', () => {
         "
       `)
       expect(execMock).toHaveBeenCalledWith(
-        'pnpm version 2.2.2 --no-git-tag-version'
+        'pnpm version 2.2.2 --no-git-tag-version --no-git-checks'
       )
       expect(execMock).toHaveBeenCalledWith(
         'git add CHANGELOG.md package.json pnpm-lock.yaml'
@@ -430,7 +430,7 @@ describe('Perfekt', () => {
         'git log --format="%H %s" 4e02179c..'
       )
       expect(execMock).toHaveBeenCalledWith(
-        'pnpm version 2.2.2 --no-git-tag-version'
+        'pnpm version 2.2.2 --no-git-tag-version --no-git-checks'
       )
     })
 

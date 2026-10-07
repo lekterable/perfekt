@@ -13,7 +13,7 @@ const getVersionCommandMock = jest.mocked(getVersionCommand)
 describe('updateVersion', () => {
   it('should update version', () => {
     const version = '3.3.3'
-    const command = `pnpm version ${version} --no-git-tag-version`
+    const command = `pnpm version ${version} --no-git-tag-version --no-git-checks`
 
     getVersionCommandMock.mockReturnValueOnce(command)
     execMock.mockReturnValueOnce('')

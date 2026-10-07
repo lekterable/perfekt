@@ -11,7 +11,7 @@ const packageManagers = {
   pnpm: {
     lockfile: 'pnpm-lock.yaml',
     versionCommand: (version: string) =>
-      `pnpm version ${version} --no-git-tag-version`
+      `pnpm version ${version} --no-git-tag-version --no-git-checks`
   },
   yarn: {
     lockfile: 'yarn.lock',

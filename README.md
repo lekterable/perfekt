@@ -54,6 +54,8 @@ jobs:
 
 `perfekt setup commits --ci` writes that caller for you.
 
+To release from CI instead of your machine, call the shared `lekterable/perfekt/.github/workflows/release.yml@master` workflow from a manually triggered one. It runs `perfekt release`, pushes the commit and tag, and publishes a GitHub release. See [releasing from GitHub Actions](https://lekterable.github.io/perfekt/#/documentation?id=releasing-from-github-actions).
+
 lekterable repos use `master` and start with `feat: init :seedling:`. That is a house tip, not a package rule. `perfekt setup commits` detects the consumer default branch for `--ci` and does not fail on `main`.
 
 GitHub squash titles still need repo settings or merge habit to strip `(#N)` — commitlint only catches local commits, and CI if you add `perfekt setup commits --ci`.

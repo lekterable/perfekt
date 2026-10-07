@@ -1,0 +1,96 @@
+name: Release
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Version to release, or major, minor, patch or new to pick it from the unreleased commits
+        type: string
+        default: new
+      dry-run:
+        description: Preview the release without committing, tagging or pushing
+        type: boolean
+        default: false
+      github-release:
+        description: Also publish a GitHub release with the changelog section as notes
+        type: boolean
+        default: true
+    outputs:
+      released:
+        description: "'true' when a release commit and tag were pushed"
+        value: ${{ jobs.release.outputs.released }}
+      version:
+        description: Released (or, on a dry run, planned) version, also the tag name
+        value: ${{ jobs.release.outputs.version }}
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      released: ${{ steps.release.outputs.released }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - name: Require a branch
+        if: github.ref_type != 'branch'
+        run: |
+          echo "::error::Run releases from a branch, not ${GITHUB_REF}"
+          exit 1
+      - uses: actions/checkout@v6
+        with:
+          # perfekt needs the tags and full history to find unreleased commits
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Enable corepack
+        # lets perfekt bump the version with the package manager the repo pins
+        run: corepack enable
+      - name: Install perfekt
+        # outside the repo, so the release never touches its lockfile
+        run: npm install --prefix "$RUNNER_TEMP/perfekt" --no-save --no-package-lock perfekt@3
+      - name: Configure git
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+      - name: Release
+        id: release
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+          DRY_RUN: ${{ inputs.dry-run }}
+          RESULT: ${{ runner.temp }}/release.json
+          NOTES: ${{ runner.temp }}/notes.md
+          VERSION: ${{ inputs.version }}
+        run: |
+          flags=(--json)
+          if [ "$DRY_RUN" = true ]; then flags+=(--dry-run); fi
+
+          if ! "$RUNNER_TEMP/perfekt/node_modules/.bin/perfekt" release "$VERSION" "${flags[@]}" > "$RESULT"; then
+            jq -r '"::error::\(.error.code): \(.error.message)"' "$RESULT" || cat "$RESULT"
+            exit 1
+          fi
+
+          version=$(jq -r .resolvedVersion "$RESULT")
+          # the changelog holds every release; keep only the new section
+          jq -r .changelog.markdown "$RESULT" | awk '/^# / && seen++ { exit } { print }' > "$NOTES"
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "released=$([ "$DRY_RUN" = true ] && echo false || echo true)" >> "$GITHUB_OUTPUT"
+          {
+            if [ "$DRY_RUN" = true ]; then echo "> Dry run, nothing was committed or pushed."; echo; fi
+            cat "$NOTES"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Push release commit and tag
+        if: ${{ !inputs.dry-run }}
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: git push --atomic origin "HEAD:${GITHUB_REF_NAME}" "refs/tags/${VERSION}"
+      - name: Publish GitHub release
+        if: ${{ !inputs.dry-run && inputs.github-release }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NOTES: ${{ runner.temp }}/notes.md
+          VERSION: ${{ steps.release.outputs.version }}
+        run: gh release create "$VERSION" --verify-tag --title "$VERSION" --notes-file <(tail -n +2 "$NOTES")

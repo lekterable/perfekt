@@ -84,6 +84,64 @@ Arguments:
 
 `version` - _(required)_ version which will be used while executing the release. You can use `major`, `minor` and `patch` instead of a specific version number to bump it or `new` to make **perfekt** determine the version for you automatically based on the unreleased changes.
 
+### Releasing from GitHub Actions
+
+To cut releases from CI instead of your machine, call the shared release workflow from a manually triggered one. It runs `perfekt release` on the branch you pick, pushes the release commit and tag, and publishes a GitHub release with the new changelog section as notes. Every run, dry or not, shows that section in the job summary.
+
+```yaml
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version, or major, minor, patch or new
+        default: new
+      dry-run:
+        description: Preview without committing or pushing
+        type: boolean
+        default: false
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    uses: lekterable/perfekt/.github/workflows/release.yml@master
+    with:
+      version: ${{ inputs.version }}
+      dry-run: ${{ inputs.dry-run }}
+```
+
+Inputs:
+
+`version` - passed to `perfekt release`, defaults to `new`
+
+`dry-run` - preview the release in the job summary without committing, tagging or pushing, defaults to `false`
+
+`github-release` - also publish a GitHub release for the tag, defaults to `true`
+
+Outputs:
+
+`released` - `'true'` when a release commit and tag were pushed
+
+`version` - the released version, which is also the tag name (tags have no `v` prefix)
+
+Tags pushed with the workflow's `GITHUB_TOKEN` don't start other workflows, so publish in a job of the same run instead of on `push: tags`:
+
+```yaml
+publish:
+  needs: release
+  if: needs.release.outputs.released == 'true'
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v6
+      with:
+        ref: ${{ needs.release.outputs.version }}
+    # set up your package manager, build and publish
+```
+
+The release needs at least one earlier tag or `chore(release):` commit to know where the unreleased changes start, and the branch must accept pushes from `github-actions[bot]`.
+
 ## `changelog`
 
 Usage: `perfekt changelog [options] [version]`

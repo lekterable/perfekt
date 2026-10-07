@@ -17,12 +17,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/lekterable/perfekt"
+    "url": "git+https://github.com/lekterable/perfekt.git"
   },
   "license": "MIT",
   "author": "Kornel Dubieniecki (https://kornel.me)",
   "bin": {
-    "perfekt": "./dist/cli.cjs"
+    "perfekt": "dist/cli.cjs"
   },
   "exports": {
     "./commitlint": "./commitlint.cjs",

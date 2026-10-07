@@ -1,0 +1,52 @@
+name: Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version, or major, minor, patch or new
+        default: new
+      dry-run:
+        description: Preview without committing, pushing or publishing
+        type: boolean
+        default: false
+
+jobs:
+  release:
+    name: Release
+    permissions:
+      contents: write
+    uses: ./.github/workflows/release.yml
+    with:
+      version: ${{ inputs.version }}
+      dry-run: ${{ inputs.dry-run }}
+
+  # tags pushed by the release job don't trigger other workflows, so publish here
+  publish:
+    name: Publish to npm
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # npm trusted publishing and provenance
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.release.outputs.version }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run ci
+      - name: Publish
+        # uses NPM_TOKEN when set, otherwise npm trusted publishing
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --provenance --access public

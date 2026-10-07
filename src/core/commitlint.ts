@@ -29,30 +29,15 @@ export const LEKTERABLE_TIP =
 export const isSafeBranchName = (value: string) =>
   /^[A-Za-z0-9._/-]+$/.test(value) && !value.includes('..')
 
+export const SHARED_COMMITLINT_CONFIG = 'perfekt/commitlint'
+
 export const COMMITLINT_CONFIG_CJS = `module.exports = {
-  extends: ['@commitlint/config-conventional'],
-  rules: {
-    'type-enum': [
-      2,
-      'always',
-      [
-        'feat',
-        'fix',
-        'chore',
-        'refactor',
-        'docs',
-        'test',
-        'ci',
-        'build',
-        'style',
-        'perf',
-        'revert'
-      ]
-    ],
-    'subject-full-stop': [2, 'never', '.']
-  }
+  extends: [require.resolve('${SHARED_COMMITLINT_CONFIG}')]
 }
 `
+
+export const COMMITLINT_REUSABLE_WORKFLOW =
+  'lekterable/perfekt/.github/workflows/commitlint.yml@master'
 
 export const getCommitlintCiWorkflow = (branch?: string | null) => {
   const branchLine =
@@ -65,21 +50,10 @@ on:
     types: [opened, edited, reopened, synchronize]
 
 jobs:
-  commitlint:
-    runs-on: ubuntu-latest
+  pr-title:
     permissions:
       contents: read
-      pull-requests: read
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm install --no-package-lock --no-save @commitlint/cli@20 @commitlint/config-conventional@20
-      - name: Lint PR title
-        env:
-          PR_TITLE: \${{ github.event.pull_request.title }}
-        run: echo "$PR_TITLE" | npx --no commitlint
+    uses: ${COMMITLINT_REUSABLE_WORKFLOW}
 `
 }
 

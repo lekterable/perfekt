@@ -20,19 +20,23 @@ Usage: `perfekt setup commits [options]`
 
 Scaffolds Conventional Commits linting in the current repo:
 
-- Writes `commitlint.config.cjs` on top of `@commitlint/config-conventional`
+- Writes a one-line `commitlint.config.cjs` that extends the shared `perfekt/commitlint` rules, so every repo follows the same rules and a rule change ships with a `perfekt` bump
 - Writes `.husky/commit-msg` so local commits are linted
-- Prints the exact `commitlint` + `husky` install command for the detected package manager
+- Prints the exact `@commitlint/cli` + `husky` + `perfekt` install command for the detected package manager
 - Reminds you to run `husky` from `package.json` `scripts.prepare`
 - Detects the current default branch for the optional `--ci` workflow
 - Prints a lekterable tip. Our repos use `master` and first commit `feat: init :seedling:`. That is advisory. Setup does not fail on `main`.
 
-The generated config:
+The shared rules (`perfekt/commitlint`, on top of `@commitlint/config-conventional`):
 
-- Accepts `feat: init :seedling:` and scoped subjects like `feat(web): add x`
-- Accepts a trailing GitHub squash suffix like `(#123)`
-- Rejects subjects that end with `.`
-- Allows only `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `ci`, `build`, `style`, `perf`, `revert`
+- Allow only `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `ci`, `build`, `style`, `perf`, `revert`
+- Accept `feat: init :seedling:` and scoped subjects like `feat(web): add x`
+- Accept a trailing GitHub squash suffix like `(#123)`
+- Reject subjects that end with `.` and headers longer than 72 characters
+- Warn when the subject is longer than 50 characters
+- Warn when the subject does not start with an imperative verb (`add`, not `added`, `adding` or `adds`)
+
+Add a scope only when it narrows the change to one area (`fix(seo): ...`); leave it out for repo-wide changes.
 
 Existing files are left alone unless you pass `--force`.
 
@@ -42,7 +46,7 @@ Options:
 
 `-h, --help` - display help for command
 
-`--ci` - also write `.github/workflows/commitlint.yml`, which lints pull request titles. The `pull_request` filter uses the detected default branch when git exposes one.
+`--ci` - also write `.github/workflows/commitlint.yml`, which lints pull request titles by calling the shared `lekterable/perfekt/.github/workflows/commitlint.yml@master` workflow. That workflow always reads the rules from perfekt's `master`, so title rules change everywhere at once. The `pull_request` filter uses the detected default branch when git exposes one.
 
 `--force` - overwrite generated files if they already exist
 

@@ -1,0 +1,33 @@
+name: Commitlint
+
+on:
+  workflow_call:
+
+  pull_request:
+    branches: [master]
+    types: [opened, edited, reopened, synchronize]
+
+jobs:
+  pr-title:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          repository: lekterable/perfekt
+          ref: master
+          path: perfekt
+          sparse-checkout: commitlint.cjs
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install commitlint
+        working-directory: perfekt
+        run: npm install --no-save --no-package-lock @commitlint/cli@20 @commitlint/config-conventional@20
+      - name: Lint PR title
+        working-directory: perfekt
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: echo "$PR_TITLE" | npx --no -- commitlint --config commitlint.cjs

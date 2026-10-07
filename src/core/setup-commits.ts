@@ -20,9 +20,9 @@ import {
 } from './commitlint'
 
 const installCommands: Record<PackageManagerName, string> = {
-  pnpm: 'pnpm add -D @commitlint/cli @commitlint/config-conventional husky',
-  npm: 'npm install -D @commitlint/cli @commitlint/config-conventional husky',
-  yarn: 'yarn add -D @commitlint/cli @commitlint/config-conventional husky'
+  pnpm: 'pnpm add -D @commitlint/cli husky perfekt',
+  npm: 'npm install -D @commitlint/cli husky perfekt',
+  yarn: 'yarn add -D @commitlint/cli husky perfekt'
 }
 
 type ScaffoldFile = {

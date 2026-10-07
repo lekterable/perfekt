@@ -50,13 +50,13 @@ describe('setup-commits', () => {
 
   it('should return package-manager install commands', () => {
     expect(getCommitlintInstallCommand('pnpm')).toBe(
-      'pnpm add -D @commitlint/cli @commitlint/config-conventional husky'
+      'pnpm add -D @commitlint/cli husky perfekt'
     )
     expect(getCommitlintInstallCommand('npm')).toBe(
-      'npm install -D @commitlint/cli @commitlint/config-conventional husky'
+      'npm install -D @commitlint/cli husky perfekt'
     )
     expect(getCommitlintInstallCommand('yarn')).toBe(
-      'yarn add -D @commitlint/cli @commitlint/config-conventional husky'
+      'yarn add -D @commitlint/cli husky perfekt'
     )
   })
 
@@ -161,8 +161,7 @@ describe('setup-commits', () => {
         { path: HUSKY_COMMIT_MSG_PATH, status: 'written' }
       ],
       packageManager: 'pnpm',
-      installCommand:
-        'pnpm add -D @commitlint/cli @commitlint/config-conventional husky',
+      installCommand: 'pnpm add -D @commitlint/cli husky perfekt',
       prepareHint: 'package.json already runs husky in scripts.prepare',
       defaultBranch: 'main',
       lekterableTip: LEKTERABLE_TIP

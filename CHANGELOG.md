@@ -1,3 +1,21 @@
+# 3.1.1
+
+## Misc
+
+- release and publish perfekt from Actions (#16) [df7cbc21](https://github.com/lekterable/perfekt/commit/df7cbc2117d08b37c79f8909b2cf1a953ccf9beb)
+
+# skip pnpm git checks when bumping version (#15)
+
+## Features
+
+- share commitlint rules and PR title workflow (#12) [3d79aecf](https://github.com/lekterable/perfekt/commit/3d79aecf4158f273fb3114e560166e18b39c5eef)
+- add setup commits command (#11) [680fba17](https://github.com/lekterable/perfekt/commit/680fba17ab8a56bfb6fc5a5bdf50f5029e329d75)
+
+## Misc
+
+- add opt-in shared release workflow (#14) [d4ec2d77](https://github.com/lekterable/perfekt/commit/d4ec2d77f4f5b20d369a94961830ce9e3138d6bb)
+- name title check jobs Commitlint / PR title (#13) [375de347](https://github.com/lekterable/perfekt/commit/375de34734579bd658a5f536433cda4f3d40493b)
+
 # 3.1.0
 
 ## Features

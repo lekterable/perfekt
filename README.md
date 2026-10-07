@@ -37,9 +37,21 @@ It can also return structured JSON for `release` and `changelog`, which makes it
 
 For **perfekt** to run with its full power, your project must follow the [conventional commits](https://www.conventionalcommits.org) specification, this allows it to know the type of changes introduced in a given commit.
 
-If you want help enforcing that locally, run `perfekt setup commits`. That writes a Conventional Commits [commitlint](https://commitlint.js.org/) config and a husky `commit-msg` hook, then prints the exact dependencies to install.
+If you want help enforcing that locally, run `perfekt setup commits`. That writes a [commitlint](https://commitlint.js.org/) config extending the shared `perfekt/commitlint` rules and a husky `commit-msg` hook, then prints the exact dependencies to install.
 
-The overlay rejects subjects that end with `.` and keeps the usual types (`feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `ci`, `build`, `style`, `perf`, `revert`). It accepts `feat: init :seedling:` and a trailing GitHub squash suffix like `(#123)`.
+The shared rules keep the usual types (`feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `ci`, `build`, `style`, `perf`, `revert`), reject subjects that end with `.` and headers over 72 characters, and warn on subjects over 50 characters or ones that don't start with an imperative verb. They accept `feat: init :seedling:` and a trailing GitHub squash suffix like `(#123)`.
+
+To lint pull request titles in any repo, call the shared workflow:
+
+```yaml
+jobs:
+  pr-title:
+    permissions:
+      contents: read
+    uses: lekterable/perfekt/.github/workflows/commitlint.yml@master
+```
+
+`perfekt setup commits --ci` writes that caller for you.
 
 lekterable repos use `master` and start with `feat: init :seedling:`. That is a house tip, not a package rule. `perfekt setup commits` detects the consumer default branch for `--ci` and does not fail on `main`.
 

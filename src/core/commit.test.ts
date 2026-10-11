@@ -3,7 +3,7 @@ import Commit from './commit'
 describe('Commit', () => {
   it('should throw if invalid commit passed', () => {
     expect(
-      () => new Commit('Add a feature')
+      () => new Commit('Add a feature'),
     ).toThrowErrorMatchingInlineSnapshot(`"Received commit is invalid."`)
   })
 
@@ -18,7 +18,7 @@ describe('Commit', () => {
       isConventional,
       isBreaking,
       type,
-      scope
+      scope,
     }).toMatchInlineSnapshot(`
       {
         "commit": "bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 Add a new feature",
@@ -35,7 +35,7 @@ describe('Commit', () => {
   it('should parse conventional commit', () => {
     const { commit, hash, message, isConventional, isBreaking, type, scope } =
       new Commit(
-        'd34a9f12500df6ea21a17b85b783a41b1fca5347 feat: make changelog ignored scopes configurable'
+        'd34a9f12500df6ea21a17b85b783a41b1fca5347 feat: make changelog ignored scopes configurable',
       )
 
     expect({
@@ -45,7 +45,7 @@ describe('Commit', () => {
       isConventional,
       isBreaking,
       type,
-      scope
+      scope,
     }).toMatchInlineSnapshot(`
       {
         "commit": "d34a9f12500df6ea21a17b85b783a41b1fca5347 feat: make changelog ignored scopes configurable",
@@ -62,7 +62,7 @@ describe('Commit', () => {
   it('should parse commit with scope', () => {
     const { commit, hash, message, isConventional, isBreaking, type, scope } =
       new Commit(
-        'c02bbda1489af11372198c01e75110cbac1ebbf3 refactor(config): update `groups` configuration option'
+        'c02bbda1489af11372198c01e75110cbac1ebbf3 refactor(config): update `groups` configuration option',
       )
 
     expect({
@@ -72,7 +72,7 @@ describe('Commit', () => {
       isConventional,
       isBreaking,
       type,
-      scope
+      scope,
     }).toMatchInlineSnapshot(`
       {
         "commit": "c02bbda1489af11372198c01e75110cbac1ebbf3 refactor(config): update \`groups\` configuration option",
@@ -89,7 +89,7 @@ describe('Commit', () => {
   it('should parse breaking commit', () => {
     const { commit, hash, message, isConventional, isBreaking, type, scope } =
       new Commit(
-        'a357a61a4197d01201a84b9ae7ed7f447e16c7d7 feat!: make no-commits error more specific'
+        'a357a61a4197d01201a84b9ae7ed7f447e16c7d7 feat!: make no-commits error more specific',
       )
 
     expect({
@@ -99,7 +99,7 @@ describe('Commit', () => {
       isConventional,
       isBreaking,
       type,
-      scope
+      scope,
     }).toMatchInlineSnapshot(`
       {
         "commit": "a357a61a4197d01201a84b9ae7ed7f447e16c7d7 feat!: make no-commits error more specific",
@@ -119,7 +119,7 @@ describe('Commit', () => {
 
     matchSpy.mockImplementation(function (
       this: string,
-      matcher: { [Symbol.match](string: string): RegExpMatchArray | null }
+      matcher: { [Symbol.match](string: string): RegExpMatchArray | null },
     ) {
       const pattern = matcher as RegExp
 
@@ -136,10 +136,10 @@ describe('Commit', () => {
     expect(
       () =>
         new Commit(
-          'd34a9f12500df6ea21a17b85b783a41b1fca5347 feat: make changelog ignored scopes configurable'
-        )
+          'd34a9f12500df6ea21a17b85b783a41b1fca5347 feat: make changelog ignored scopes configurable',
+        ),
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Error while parsing commit details."`
+      `"Error while parsing commit details."`,
     )
 
     matchSpy.mockRestore()

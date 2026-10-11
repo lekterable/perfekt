@@ -1,8 +1,8 @@
-import fs from 'fs'
+import type fs from 'fs'
 
 type ReadFileCallback = (
   error: NodeJS.ErrnoException | null,
-  data: string
+  data: string,
 ) => void
 type WriteFileCallback = (error: NodeJS.ErrnoException | null) => void
 

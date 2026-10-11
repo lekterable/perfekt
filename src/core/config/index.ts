@@ -1,6 +1,6 @@
+import type { Config as TConfig } from '~types'
 import defaultConfig from './default'
 import mergeGroups from './merge-groups'
-import { Config as TConfig } from '~types'
 import validateConfig from './validate'
 
 class Config {
@@ -12,7 +12,7 @@ class Config {
     this.#config = {
       ...defaultConfig,
       ...validated,
-      groups: mergeGroups(defaultConfig.groups, validated?.groups)
+      groups: mergeGroups(defaultConfig.groups, validated?.groups),
     }
   }
 

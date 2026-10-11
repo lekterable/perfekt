@@ -18,7 +18,7 @@ describe('initialize', () => {
     const mockConfigFormat = '.prettierrc'
 
     inquirerMock.prompt.mockResolvedValueOnce({
-      configFormat: mockConfigFormat
+      configFormat: mockConfigFormat,
     })
 
     await initialize()

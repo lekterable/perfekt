@@ -1,4 +1,4 @@
-import Commit from '~core/commit'
+import type Commit from '~core/commit'
 
 export type ReleaseChange = 'major' | 'minor' | 'patch'
 export type PackageManagerName = 'npm' | 'pnpm' | 'yarn'

@@ -1,5 +1,5 @@
-import Optionable from './optionable'
 import { defaults } from '.'
+import Optionable from './optionable'
 
 describe('Optionable', () => {
   let optionable: Optionable<{ from?: string; root?: boolean; write?: boolean }>
@@ -17,7 +17,7 @@ describe('Optionable', () => {
 
     expect(optionable.options).toStrictEqual({
       ...defaults.releaseOptions,
-      from: '1.1.1'
+      from: '1.1.1',
     })
   })
 
@@ -34,7 +34,7 @@ describe('Optionable', () => {
 
     expect(optionable.options).toStrictEqual({
       ...defaults.releaseOptions,
-      from: '2.2.2'
+      from: '2.2.2',
     })
   })
 })

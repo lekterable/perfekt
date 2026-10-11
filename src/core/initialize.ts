@@ -10,10 +10,10 @@ export const questions = [
       '.perfektrc',
       'perfekt.config.js',
       'perfekt.yaml',
-      'perfekt.json'
+      'perfekt.json',
     ],
-    default: '.perfektrc'
-  }
+    default: '.perfektrc',
+  },
 ]
 
 const initialize = async () => {

@@ -5,5 +5,5 @@ module.exports = {
   restoreMocks: true,
   moduleNameMapper: { '^~(.+)$': '<rootDir>/src/$1' },
   modulePathIgnorePatterns: ['/dist/'],
-  testPathIgnorePatterns: ['/node_modules/', '/dist/']
+  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
 }

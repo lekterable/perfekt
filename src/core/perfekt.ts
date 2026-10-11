@@ -1,25 +1,25 @@
-import initialize from './initialize'
-import Changelog from './changelog'
-import Git from './git'
-import Release from './release'
-import setupCommits from './setup-commits'
-import { fileExists, groupCommits, resolveVersion } from '~utils'
-import getPackageManager from '~utils/npm/get-package-manager'
-import {
+import type {
   ChangelogOptions,
   ChangelogResult,
   Config,
-  SetupCommitsOptions,
-  SetupCommitsResult,
   GroupedCommits,
   OutputCommit,
   OutputGroup,
   OutputSection,
   ReleaseChange,
   ReleaseOptions,
-  ReleaseResult
+  ReleaseResult,
+  SetupCommitsOptions,
+  SetupCommitsResult,
 } from '~types'
-import Commit from './commit'
+import { fileExists, groupCommits, resolveVersion } from '~utils'
+import getPackageManager from '~utils/npm/get-package-manager'
+import Changelog from './changelog'
+import type Commit from './commit'
+import Git from './git'
+import initialize from './initialize'
+import Release from './release'
+import setupCommits from './setup-commits'
 
 type BuildChangelogResult = ChangelogResult & {
   releaseMarkdown: string
@@ -43,7 +43,7 @@ class Perfekt {
   }
 
   async setupCommits(
-    options: SetupCommitsOptions = {}
+    options: SetupCommitsOptions = {},
   ): Promise<SetupCommitsResult> {
     return setupCommits(options)
   }
@@ -55,7 +55,7 @@ class Perfekt {
       scope: commit.scope ?? null,
       message: commit.message,
       isBreaking: Boolean(commit.isBreaking),
-      isRelease: commit.scope?.toLowerCase() === 'release'
+      isRelease: commit.scope?.toLowerCase() === 'release',
     }
   }
 
@@ -78,7 +78,7 @@ class Perfekt {
   }
 
   #serializeGroups(groupedCommits: GroupedCommits): OutputGroup[] {
-    return groupedCommits.map(group => {
+    return groupedCommits.map((group) => {
       const release = group.release
         ? this.#serializeCommit(group.release)
         : null
@@ -87,7 +87,7 @@ class Perfekt {
           (entry): entry is [string, Commit[]] =>
             entry[0] !== 'release' &&
             Array.isArray(entry[1]) &&
-            entry[1].length > 0
+            entry[1].length > 0,
         )
         .sort(([left], [right]) => left.localeCompare(right))
         .map(
@@ -95,8 +95,8 @@ class Perfekt {
             key,
             title: this.#getSectionTitle(key),
             change: this.#getSectionChange(key),
-            commits: commits.map(commit => this.#serializeCommit(commit))
-          })
+            commits: commits.map((commit) => this.#serializeCommit(commit)),
+          }),
         )
 
       return { release, sections }
@@ -105,7 +105,7 @@ class Perfekt {
 
   async #buildChangelogResult(
     version: string | undefined,
-    options: Partial<ChangelogOptions>
+    options: Partial<ChangelogOptions>,
   ): Promise<BuildChangelogResult> {
     const latestTag = this.#git.latestTag ?? null
     const latestRelease = this.#git.latestRelease
@@ -124,7 +124,7 @@ class Perfekt {
     const markdown = await this.#changelog.render(
       groupedCommits,
       version,
-      latestRelease?.version
+      latestRelease?.version,
     )
 
     return {
@@ -134,16 +134,16 @@ class Perfekt {
       root,
       write,
       commitCount: commits.length,
-      commits: commits.map(commit => this.#serializeCommit(commit)),
+      commits: commits.map((commit) => this.#serializeCommit(commit)),
       groups: this.#serializeGroups(groupedCommits),
       markdown,
-      releaseMarkdown
+      releaseMarkdown,
     }
   }
 
   async release(
     version: string,
-    options: ReleaseOptions
+    options: ReleaseOptions,
   ): Promise<ReleaseResult> {
     const { currentVersion, resolvedVersion, resolvedBump } =
       await resolveVersion(version, this.#config)
@@ -151,7 +151,7 @@ class Perfekt {
     const changelog = await this.#buildChangelogResult(resolvedVersion, {
       root: false,
       write: true,
-      from: options.from
+      from: options.from,
     })
     const files = ['CHANGELOG.md', 'package.json']
 
@@ -190,21 +190,21 @@ class Perfekt {
       files,
       git: {
         commitMessage: `chore(release): ${resolvedVersion}`,
-        tag: resolvedVersion
+        tag: resolvedVersion,
       },
       commitCount: changelog.commitCount,
       commits: changelog.commits,
       groups: changelog.groups,
       changelog: {
-        markdown: changelog.markdown
-      }
+        markdown: changelog.markdown,
+      },
     }
   }
 
   async changelog(
     version: string | undefined,
     options: Partial<ChangelogOptions>,
-    output: 'default' | 'silent' = 'default'
+    output: 'default' | 'silent' = 'default',
   ): Promise<ChangelogResult> {
     const result = await this.#buildChangelogResult(version, options)
 

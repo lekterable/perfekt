@@ -7,6 +7,6 @@ export default defineConfig({
   target: 'node20',
   clean: true,
   alias: {
-    '~': './src/'
-  }
+    '~': './src/',
+  },
 })

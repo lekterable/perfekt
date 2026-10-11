@@ -1,4 +1,4 @@
-import Commit from '~core/commit'
+import type Commit from '~core/commit'
 
 const getCommitsTypes = (commits: Commit[]) => [
   ...new Set(
@@ -7,8 +7,8 @@ const getCommitsTypes = (commits: Commit[]) => [
       if (type) return [type]
 
       return []
-    })
-  )
+    }),
+  ),
 ]
 
 export default getCommitsTypes

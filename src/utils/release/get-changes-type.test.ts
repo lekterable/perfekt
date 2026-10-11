@@ -1,5 +1,5 @@
-import getChangesType, { sortChangeTypes } from './get-changes-type'
 import Config from '~core/config'
+import getChangesType, { sortChangeTypes } from './get-changes-type'
 
 describe('getChangesType', () => {
   const { config } = new Config()

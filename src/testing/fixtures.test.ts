@@ -7,16 +7,16 @@ describe('testing fixtures', () => {
         release: undefined,
         misc: [
           createCommit(
-            '8c56a8d694955eb02d665f9e78a95cd076e8fcf5 Add a new feature'
-          )
-        ]
-      }
+            '8c56a8d694955eb02d665f9e78a95cd076e8fcf5 Add a new feature',
+          ),
+        ],
+      },
     ])
 
     expect(summary).toEqual([
       {
-        misc: ['Add a new feature']
-      }
+        misc: ['Add a new feature'],
+      },
     ])
   })
 })

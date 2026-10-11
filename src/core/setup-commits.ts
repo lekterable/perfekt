@@ -1,28 +1,28 @@
 import fs from 'fs'
 import path from 'path'
+import type {
+  PackageManagerName,
+  SetupCommitsOptions,
+  SetupCommitsResult,
+} from '~types'
 import { fileExists, writeFile } from '~utils'
 import exec from '~utils/misc/exec'
 import getPackageManager from '~utils/npm/get-package-manager'
 import {
-  PackageManagerName,
-  SetupCommitsOptions,
-  SetupCommitsResult
-} from '~types'
-import {
   COMMITLINT_CI_WORKFLOW_PATH,
   COMMITLINT_CONFIG_CJS,
   COMMITLINT_CONFIG_PATH,
+  getCommitlintCiWorkflow,
   HUSKY_COMMIT_MSG,
   HUSKY_COMMIT_MSG_PATH,
+  isSafeBranchName,
   LEKTERABLE_TIP,
-  getCommitlintCiWorkflow,
-  isSafeBranchName
 } from './commitlint'
 
 const installCommands: Record<PackageManagerName, string> = {
   pnpm: 'pnpm add -D @commitlint/cli husky perfekt',
   npm: 'npm install -D @commitlint/cli husky perfekt',
-  yarn: 'yarn add -D @commitlint/cli husky perfekt'
+  yarn: 'yarn add -D @commitlint/cli husky perfekt',
 }
 
 type ScaffoldFile = {
@@ -42,7 +42,7 @@ const readGitLine = (command: string) => {
 
 export const getDefaultBranch = () => {
   const originHead = readGitLine(
-    'git symbolic-ref --quiet --short refs/remotes/origin/HEAD'
+    'git symbolic-ref --quiet --short refs/remotes/origin/HEAD',
   )
   const fromOrigin = originHead?.replace(/^origin\//, '')
 
@@ -65,7 +65,7 @@ export const getDefaultBranch = () => {
 }
 
 export const getCommitlintInstallCommand = (
-  packageManager: PackageManagerName
+  packageManager: PackageManagerName,
 ) => installCommands[packageManager]
 
 export const getPrepareHint = () => {
@@ -90,7 +90,7 @@ export const getPrepareHint = () => {
 
 const writeScaffoldFile = async (
   file: ScaffoldFile,
-  force: boolean
+  force: boolean,
 ): Promise<SetupCommitsResult['files'][number]> => {
   if (!force && fileExists(file.path)) {
     return { path: file.path, status: 'skipped' }
@@ -113,33 +113,33 @@ const writeScaffoldFile = async (
 
 export const getScaffoldFiles = (
   ci: boolean,
-  defaultBranch: string | null = null
+  defaultBranch: string | null = null,
 ): ScaffoldFile[] => [
   { path: COMMITLINT_CONFIG_PATH, content: COMMITLINT_CONFIG_CJS },
   {
     path: HUSKY_COMMIT_MSG_PATH,
     content: HUSKY_COMMIT_MSG,
-    executable: true
+    executable: true,
   },
   ...(ci
     ? [
         {
           path: COMMITLINT_CI_WORKFLOW_PATH,
-          content: getCommitlintCiWorkflow(defaultBranch)
-        }
+          content: getCommitlintCiWorkflow(defaultBranch),
+        },
       ]
-    : [])
+    : []),
 ]
 
 const setupCommits = async (
-  options: SetupCommitsOptions = {}
+  options: SetupCommitsOptions = {},
 ): Promise<SetupCommitsResult> => {
   const packageManager = getPackageManager()
   const defaultBranch = getDefaultBranch()
   const files = await Promise.all(
-    getScaffoldFiles(Boolean(options.ci), defaultBranch).map(file =>
-      writeScaffoldFile(file, Boolean(options.force))
-    )
+    getScaffoldFiles(Boolean(options.ci), defaultBranch).map((file) =>
+      writeScaffoldFile(file, Boolean(options.force)),
+    ),
   )
 
   return {
@@ -148,7 +148,7 @@ const setupCommits = async (
     installCommand: getCommitlintInstallCommand(packageManager),
     prepareHint: getPrepareHint(),
     defaultBranch,
-    lekterableTip: LEKTERABLE_TIP
+    lekterableTip: LEKTERABLE_TIP,
   }
 }
 

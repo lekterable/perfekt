@@ -1,6 +1,6 @@
-import Commit from '~core/commit'
+import type Commit from '~core/commit'
+import type { Config, GroupedCommits } from '~types'
 import isObjectEmpty from '../object/is-empty'
-import { Config, GroupedCommits } from '~types'
 
 const getExistingGroup = (value: Commit | Commit[] | undefined) =>
   Array.isArray(value) ? value : []
@@ -46,7 +46,7 @@ const groupCommits = (commits: Commit[], config: Config): GroupedCommits =>
       const existing = getExistingGroup(group[key])
       return [...rest, { ...group, [key]: [...existing, commit] }]
     },
-    [createGroup()]
+    [createGroup()],
   )
 
 export default groupCommits

@@ -1,4 +1,4 @@
-import { Config as TConfig, ConfigGroup, ReleaseChange } from '~types'
+import type { ConfigGroup, ReleaseChange, Config as TConfig } from '~types'
 
 const configKeys = [
   'unreleasedHeader',
@@ -7,7 +7,7 @@ const configKeys = [
   'miscHeader',
   'lineFormat',
   'ignoredScopes',
-  'groups'
+  'groups',
 ] as const
 
 const groupKeys = ['name', 'change', 'types'] as const
@@ -18,10 +18,10 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const getUnknownKeys = (
   value: Record<string, unknown>,
-  keys: readonly string[]
-) => Object.keys(value).filter(key => !keys.includes(key))
+  keys: readonly string[],
+) => Object.keys(value).filter((key) => !keys.includes(key))
 
-const joinKeys = (keys: string[]) => keys.map(key => `\`${key}\``).join(', ')
+const joinKeys = (keys: string[]) => keys.map((key) => `\`${key}\``).join(', ')
 
 const assertString = (value: unknown, path: string): string => {
   if (typeof value !== 'string') {
@@ -32,9 +32,12 @@ const assertString = (value: unknown, path: string): string => {
 }
 
 const assertStringArray = (value: unknown, path: string): string[] => {
-  if (!Array.isArray(value) || value.some(entry => typeof entry !== 'string')) {
+  if (
+    !Array.isArray(value) ||
+    value.some((entry) => typeof entry !== 'string')
+  ) {
     throw new Error(
-      `Invalid perfekt config: \`${path}\` must be an array of strings.`
+      `Invalid perfekt config: \`${path}\` must be an array of strings.`,
     )
   }
 
@@ -52,7 +55,7 @@ const validateGroup = (value: unknown, index: number): ConfigGroup => {
 
   if (unknownKeys.length) {
     throw new Error(
-      `Invalid perfekt config: \`${path}\` contains unknown properties ${joinKeys(unknownKeys)}.`
+      `Invalid perfekt config: \`${path}\` contains unknown properties ${joinKeys(unknownKeys)}.`,
     )
   }
 
@@ -61,7 +64,7 @@ const validateGroup = (value: unknown, index: number): ConfigGroup => {
 
   if (!releaseChanges.includes(change as ReleaseChange)) {
     throw new Error(
-      `Invalid perfekt config: \`${path}.change\` must be one of ${joinKeys(releaseChanges)}.`
+      `Invalid perfekt config: \`${path}.change\` must be one of ${joinKeys(releaseChanges)}.`,
     )
   }
 
@@ -70,7 +73,7 @@ const validateGroup = (value: unknown, index: number): ConfigGroup => {
   return {
     name,
     change: change as ReleaseChange,
-    types
+    types,
   }
 }
 
@@ -85,7 +88,7 @@ const validateConfig = (value?: unknown): Partial<TConfig> | undefined => {
 
   if (unknownKeys.length) {
     throw new Error(
-      `Invalid perfekt config: contains unknown properties ${joinKeys(unknownKeys)}.`
+      `Invalid perfekt config: contains unknown properties ${joinKeys(unknownKeys)}.`,
     )
   }
 
@@ -94,7 +97,7 @@ const validateConfig = (value?: unknown): Partial<TConfig> | undefined => {
   if ('unreleasedHeader' in value) {
     config.unreleasedHeader = assertString(
       value.unreleasedHeader,
-      'unreleasedHeader'
+      'unreleasedHeader',
     )
   }
 
@@ -117,7 +120,7 @@ const validateConfig = (value?: unknown): Partial<TConfig> | undefined => {
   if ('ignoredScopes' in value) {
     config.ignoredScopes = assertStringArray(
       value.ignoredScopes,
-      'ignoredScopes'
+      'ignoredScopes',
     )
   }
 

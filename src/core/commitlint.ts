@@ -9,7 +9,7 @@ export const COMMIT_TYPES = [
   'build',
   'style',
   'perf',
-  'revert'
+  'revert',
 ] as const
 
 export const INIT_COMMIT = 'feat: init :seedling:'

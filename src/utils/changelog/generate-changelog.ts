@@ -1,22 +1,22 @@
-import Commit from '~core/commit'
-import { GroupedCommits, Config } from '~types'
+import type Commit from '~core/commit'
+import type { Config, GroupedCommits } from '~types'
 import generateLine from './generate-line'
 
 const hasCommits = (
-  entry: [string, Commit | Commit[] | undefined]
+  entry: [string, Commit | Commit[] | undefined],
 ): entry is [string, Commit[]] => Array.isArray(entry[1]) && entry[1].length > 0
 
 const generateChangelog = (
   groupedCommits: GroupedCommits,
   version: string | undefined,
-  config: Config
+  config: Config,
 ) => {
   if (!groupedCommits.length) {
     throw new Error('Cannot generate a changelog, no commits passed.')
   }
 
   const releases = groupedCommits
-    .map(group => {
+    .map((group) => {
       const { release, ...groups } = group
       const releaseVersion = release?.message || version
       const title = releaseVersion
@@ -31,7 +31,7 @@ const generateChangelog = (
     .map(({ title, entries }, releaseIndex, releases) => {
       const grouped = entries.map(([type, commits], groupIndex, groups) => {
         const matchingGroup = config.groups.find(({ types }) =>
-          types.includes(type)
+          types.includes(type),
         )
 
         const lines = commits.map((commit, index) => {

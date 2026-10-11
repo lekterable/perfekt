@@ -1,7 +1,7 @@
 import fs from 'fs'
-import Changelog from './changelog'
 import { createCommit, createConfig } from '~testing/fixtures'
 import { rejectReadFile, resolveReadFile, resolveWriteFile } from '~testing/fs'
+import Changelog from './changelog'
 
 jest.mock('fs')
 
@@ -14,58 +14,58 @@ const mockGrouped = [
   {
     feat: [
       createCommit(
-        'd0e72481e9b9dc2bed8e495b8943d2d90399db32 feat: replace all placeholder occurrences'
+        'd0e72481e9b9dc2bed8e495b8943d2d90399db32 feat: replace all placeholder occurrences',
       ),
       createCommit(
-        'a357a61a4197d01201a84b9ae7ed7f447e16c7d7 feat: make no-commits error more specific'
+        'a357a61a4197d01201a84b9ae7ed7f447e16c7d7 feat: make no-commits error more specific',
       ),
       createCommit(
-        '17feea4af5e339532d680a6ef6e9ec331f8abd2e feat: add release version bumping'
-      )
+        '17feea4af5e339532d680a6ef6e9ec331f8abd2e feat: add release version bumping',
+      ),
     ],
     fix: [
       createCommit(
-        '5fa8e6c9996444fa0d17493cf1e379a696682696 fix: throw error if there are no commits'
-      )
+        '5fa8e6c9996444fa0d17493cf1e379a696682696 fix: throw error if there are no commits',
+      ),
     ],
     misc: [
       createCommit(
-        'ee24740b920b22e916ca5ab0449abb08e99143c4 ci: setup CI with GitHub Actions'
+        'ee24740b920b22e916ca5ab0449abb08e99143c4 ci: setup CI with GitHub Actions',
       ),
       createCommit(
-        '1a0b3f3e91a9a71bf52882b75c7306046db13c8e refactor: rename function and format tests'
-      )
-    ]
+        '1a0b3f3e91a9a71bf52882b75c7306046db13c8e refactor: rename function and format tests',
+      ),
+    ],
   },
   {
     feat: [
       createCommit(
-        '6b05a3b8430eb18af4c2d9fa67addc78c7357cfb feat: make breaking and misc headers configurable'
+        '6b05a3b8430eb18af4c2d9fa67addc78c7357cfb feat: make breaking and misc headers configurable',
       ),
       createCommit(
-        '86aa5dc18c363514e518b16b6eeb0bb2c5d94617 feat: add release `new` keyword'
+        '86aa5dc18c363514e518b16b6eeb0bb2c5d94617 feat: add release `new` keyword',
       ),
       createCommit(
-        'd34a9f12500df6ea21a17b85b783a41b1fca5347 feat: make changelog ignored scopes configurable'
-      )
+        'd34a9f12500df6ea21a17b85b783a41b1fca5347 feat: make changelog ignored scopes configurable',
+      ),
     ],
     fix: [
       createCommit(
-        '5fa8e6c9996444fa0d17493cf1e379a696682696 fix: throw error if there are no commits'
+        '5fa8e6c9996444fa0d17493cf1e379a696682696 fix: throw error if there are no commits',
       ),
       createCommit(
-        '4d95659f302e0fe968154e17214876849172509f fix: check if changelog exists before accessing'
-      )
+        '4d95659f302e0fe968154e17214876849172509f fix: check if changelog exists before accessing',
+      ),
     ],
     misc: [
       createCommit(
-        '8f622021665bc6076d00fde6527800980eba836a chore: include commit links in the changelog'
-      )
+        '8f622021665bc6076d00fde6527800980eba836a chore: include commit links in the changelog',
+      ),
     ],
     release: createCommit(
-      '73f2ecbf494ed97fcf34fce833014241fe74a6b6 chore(release): 1.2.0'
-    )
-  }
+      '73f2ecbf494ed97fcf34fce833014241fe74a6b6 chore(release): 1.2.0',
+    ),
+  },
 ]
 
 const generateMockUnreleased = (title = 'Latest') =>
@@ -76,7 +76,7 @@ const generateMockReleased = (version = '1.0.0') =>
 
 const generateMockChangelog = (
   version = '1.0.0',
-  unreleasedVersion?: string
+  unreleasedVersion?: string,
 ) =>
   unreleasedVersion
     ? generateMockUnreleased(unreleasedVersion) +
@@ -119,7 +119,7 @@ describe('Changelog', () => {
       expect(fsMock.readFile).toHaveBeenCalledWith(
         CHANGELOG,
         'utf8',
-        expect.any(Function)
+        expect.any(Function),
       )
     })
 
@@ -156,18 +156,18 @@ describe('Changelog', () => {
       fsMock.readFile.mockImplementationOnce(resolveReadFile(''))
 
       await expect(changelog.getHistory(mockVersion)).rejects.toThrow(
-        "CHANGELOG doesn't contain any history."
+        "CHANGELOG doesn't contain any history.",
       )
     })
 
     it('should return only the released history for the previous version', async () => {
       fsMock.existsSync.mockReturnValueOnce(true)
       fsMock.readFile.mockImplementationOnce(
-        resolveReadFile(generateMockChangelog(mockVersion))
+        resolveReadFile(generateMockChangelog(mockVersion)),
       )
 
       await expect(changelog.getHistory(mockVersion)).resolves.toBe(
-        generateMockReleased(mockVersion)
+        generateMockReleased(mockVersion),
       )
     })
   })
@@ -191,7 +191,7 @@ describe('Changelog', () => {
         CHANGELOG,
         mockChangelog,
         'utf8',
-        expect.any(Function)
+        expect.any(Function),
       )
     })
   })
@@ -227,13 +227,13 @@ describe('Changelog', () => {
     it('should append released history when a previous version is provided', async () => {
       fsMock.existsSync.mockReturnValueOnce(true)
       fsMock.readFile.mockImplementationOnce(
-        resolveReadFile(generateMockReleased('1.0.0'))
+        resolveReadFile(generateMockReleased('1.0.0')),
       )
 
       await changelog.finish([mockGrouped[0]], '2.0.0', '1.0.0')
 
       expect(stdoutSpy).toHaveBeenCalledWith(
-        generateMockChangelog('1.0.0', '2.0.0')
+        generateMockChangelog('1.0.0', '2.0.0'),
       )
     })
 
@@ -248,7 +248,7 @@ describe('Changelog', () => {
         CHANGELOG,
         generateMockUnreleased(),
         'utf8',
-        expect.any(Function)
+        expect.any(Function),
       )
       expect(stdoutSpy).not.toHaveBeenCalled()
     })
@@ -257,7 +257,7 @@ describe('Changelog', () => {
       changelog.options = { write: true }
       fsMock.existsSync.mockReturnValueOnce(true)
       fsMock.readFile.mockImplementationOnce(
-        resolveReadFile(generateMockReleased('1.0.0'))
+        resolveReadFile(generateMockReleased('1.0.0')),
       )
       fsMock.writeFile.mockImplementationOnce(resolveWriteFile())
 
@@ -267,7 +267,7 @@ describe('Changelog', () => {
         CHANGELOG,
         generateMockChangelog('1.0.0', '2.0.0'),
         'utf8',
-        expect.any(Function)
+        expect.any(Function),
       )
     })
   })

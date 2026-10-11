@@ -1,7 +1,7 @@
-import { defaults, Optionable } from './options'
+import type { ReleaseOptions } from '~types'
 import Git from './git'
 import NPM from './npm'
-import { ReleaseOptions } from '~types'
+import { defaults, Optionable } from './options'
 
 export const createTagMessage = (changelog: string) => {
   const [, ...rest] = changelog.split('\n')

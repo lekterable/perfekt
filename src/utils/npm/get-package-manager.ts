@@ -1,23 +1,23 @@
 import fs from 'fs'
+import type { PackageManagerName } from '~types'
 import fileExists from '~utils/misc/file-exists'
-import { PackageManagerName } from '~types'
 
 const packageManagers = {
   npm: {
     lockfile: 'package-lock.json',
     versionCommand: (version: string) =>
-      `npm version ${version} --no-git-tag-version`
+      `npm version ${version} --no-git-tag-version`,
   },
   pnpm: {
     lockfile: 'pnpm-lock.yaml',
     versionCommand: (version: string) =>
-      `pnpm version ${version} --no-git-tag-version --no-git-checks`
+      `pnpm version ${version} --no-git-tag-version --no-git-checks`,
   },
   yarn: {
     lockfile: 'yarn.lock',
     versionCommand: (version: string) =>
-      `yarn version --new-version ${version} --no-git-tag-version`
-  }
+      `yarn version --new-version ${version} --no-git-tag-version`,
+  },
 } as const
 
 const packageManagerOrder: PackageManagerName[] = ['npm', 'pnpm', 'yarn']
@@ -36,9 +36,7 @@ const getPackageManagerFromPackageJson = () => {
     const [packageManager] = packageJson.packageManager.split('@')
 
     if (isPackageManager(packageManager)) return packageManager
-  } catch {
-    return
-  }
+  } catch {}
 }
 
 export const getPackageManager = (): PackageManagerName => {
@@ -46,8 +44,8 @@ export const getPackageManager = (): PackageManagerName => {
 
   if (packageManager) return packageManager
 
-  const detected = packageManagerOrder.find(manager =>
-    fileExists(packageManagers[manager].lockfile)
+  const detected = packageManagerOrder.find((manager) =>
+    fileExists(packageManagers[manager].lockfile),
   )
 
   return detected ?? 'npm'
@@ -58,7 +56,7 @@ export const getReleaseFiles = () => {
   const files = [
     'CHANGELOG.md',
     'package.json',
-    packageManagers[packageManager].lockfile
+    packageManagers[packageManager].lockfile,
   ]
 
   return files.filter(fileExists)

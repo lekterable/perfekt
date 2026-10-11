@@ -1,10 +1,10 @@
 import exec from '../misc/exec'
-import updateVersion from './update-version'
 import { getVersionCommand } from './get-package-manager'
+import updateVersion from './update-version'
 
 jest.mock('../misc/exec')
 jest.mock('./get-package-manager', () => ({
-  getVersionCommand: jest.fn()
+  getVersionCommand: jest.fn(),
 }))
 
 const execMock = jest.mocked(exec)

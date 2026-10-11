@@ -1,5 +1,5 @@
 import semver from 'semver'
-import { Config, ReleaseChange } from '~types'
+import type { Config, ReleaseChange } from '~types'
 import { readFile } from '../misc'
 import determineBump from './determine-bump'
 
@@ -24,7 +24,7 @@ const getCurrentVersion = async () => {
 
 const resolveVersion = async (
   version: string,
-  config: Config
+  config: Config,
 ): Promise<ResolvedVersion> => {
   const currentVersion = await getCurrentVersion()
 

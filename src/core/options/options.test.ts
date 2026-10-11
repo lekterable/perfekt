@@ -16,7 +16,7 @@ describe('Options', () => {
 
     expect(options.options).toStrictEqual({
       ...defaults.releaseOptions,
-      from: '1.1.1'
+      from: '1.1.1',
     })
   })
 

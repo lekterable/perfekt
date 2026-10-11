@@ -1,6 +1,6 @@
 import fs from 'fs'
-import writeFile from './write-file'
 import { rejectWriteFile, resolveWriteFile } from '~testing/fs'
+import writeFile from './write-file'
 
 jest.mock('fs')
 
@@ -20,7 +20,7 @@ describe('writeFile', () => {
       fileName,
       content,
       'utf8',
-      expect.any(Function)
+      expect.any(Function),
     )
   })
 
@@ -34,7 +34,7 @@ describe('writeFile', () => {
       fileName,
       content,
       'utf8',
-      expect.any(Function)
+      expect.any(Function),
     )
   })
 })

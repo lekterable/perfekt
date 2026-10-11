@@ -8,14 +8,14 @@
   <a href="https://www.npmjs.com/package/perfekt">
     <img alt="npm version" src="https://img.shields.io/npm/v/perfekt.svg?style=for-the-badge">
   </a>
-  <a href="https://github.com/lekterable/perfekt/actions/workflows/CI.yml">
-    <img alt="CI" src="https://img.shields.io/github/actions/workflow/status/lekterable/perfekt/CI.yml?branch=master&label=CI&logo=github&style=for-the-badge">
+  <a href="https://github.com/lekterable/perfekt/actions/workflows/ci.yml">
+    <img alt="CI" src="https://img.shields.io/github/actions/workflow/status/lekterable/perfekt/ci.yml?branch=master&label=CI&logo=github&style=for-the-badge">
   </a>
   <a href="https://app.codecov.io/gh/lekterable/perfekt">
     <img alt="code coverage" src="https://img.shields.io/codecov/c/github/lekterable/perfekt?logo=codecov&style=for-the-badge" />
   </a>
-  <a href="https://github.com/prettier/prettier">
-    <img alt="code style: prettier" src="https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=for-the-badge">
+  <a href="https://biomejs.dev">
+    <img alt="code style: biome" src="https://img.shields.io/badge/code_style-biome-60a5fa.svg?style=for-the-badge">
   </a>
   <a href="https://twitter.com/acdlite/status/974390255393505280">
     <img alt="Blazing Fast" src="https://img.shields.io/badge/speed-blazing%20%F0%9F%94%A5-brightgreen.svg?style=for-the-badge">
@@ -63,6 +63,29 @@ GitHub squash titles still need repo settings or merge habit to strip `(#N)` —
 If your project doesn't do it yet, you can start any time as there is no need for rewriting any git history, simply create an initial release which will contain all of the _unconventional_ commits and after that start naming your commits accordingly.
 
 If for some reason you can't follow the convention for your commits' names, you can still use **perfekt** but you will lose some of the features, like grouping the commits by type or ability to automatically determine the next release version based on unreleased changes using `new` keyword in the `perfekt release new` command, about which you can read more [here](https://lekterable.github.io/perfekt/#/documentation?id=release).
+
+## Shared lint, format and CI
+
+perfekt also ships the house [Biome](https://biomejs.dev) config, which replaces Prettier and ESLint. It matches the website and influensea setup: single quotes, no semicolons, trailing commas, 80 columns, sorted imports and Tailwind classes, and an explicit rule list (types over interfaces, `import type`, no `console.log`). React and Next rules switch on by themselves when a repo depends on them. Install `@biomejs/biome` and `perfekt`, then:
+
+```json
+{ "extends": ["perfekt/biome"] }
+```
+
+Use `biome check` as your `lint` script and `biome check --write` as `format`. Biome doesn't format Markdown or YAML.
+
+For CI, call the shared workflow. It installs with pnpm and runs `lint`, `typecheck`, `test` and `build`, skipping any script your `package.json` doesn't have:
+
+```yaml
+jobs:
+  ci:
+    uses: lekterable/perfekt/.github/workflows/ci.yml@master
+    # with:
+    #   node-versions: '["22", "24"]'
+    #   bun: true
+```
+
+It needs a `packageManager` field in `package.json` for the pnpm version.
 
 ## Getting started
 

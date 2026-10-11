@@ -34,7 +34,7 @@ describe('filterReleased', () => {
   it('should filter released with custom config', async () => {
     const { config } = new Config({
       unreleasedHeader: '## **Unreleased**',
-      releaseHeader: '## Release version - @%version%'
+      releaseHeader: '## Release version - @%version%',
     })
     const filterReleased = createReleasedFilter(mockVersion, config)
 

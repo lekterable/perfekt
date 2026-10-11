@@ -1,6 +1,6 @@
-import Commit from './commit'
 import exec, { execFile } from '~utils/misc/exec'
 import { getReleaseFiles } from '~utils/npm/get-package-manager'
+import Commit from './commit'
 
 type ReleaseBoundary = {
   ref: string
@@ -45,12 +45,12 @@ class Git {
 
     latestTag = latestTag?.toString().trimEnd()
 
-    return latestTag && latestTag.replace('\n', '')
+    return latestTag?.replace('\n', '')
   }
 
   get latestReleaseCommit() {
     const commit = exec(
-      'git log --format="%H %s" --grep="^chore(release): " -n 1'
+      'git log --format="%H %s" --grep="^chore(release): " -n 1',
     )
       ?.toString()
       .trimEnd()
@@ -71,7 +71,7 @@ class Git {
     if (!latestTag && latestReleaseCommit) {
       return {
         ref: latestReleaseCommit.hash,
-        version: latestReleaseCommit.message
+        version: latestReleaseCommit.message,
       }
     }
 
@@ -94,7 +94,7 @@ class Git {
     }
 
     const isTagAncestor = exec(
-      `if git merge-base --is-ancestor ${latestTagCommit} ${latestReleaseCommit.hash}; then echo true; else echo false; fi`
+      `if git merge-base --is-ancestor ${latestTagCommit} ${latestReleaseCommit.hash}; then echo true; else echo false; fi`,
     )
       ?.toString()
       .trim()
@@ -102,7 +102,7 @@ class Git {
     if (isTagAncestor === 'true') {
       return {
         ref: latestReleaseCommit.hash,
-        version: latestReleaseCommit.message
+        version: latestReleaseCommit.message,
       }
     }
 
@@ -114,7 +114,7 @@ class Git {
 
     if (!latestRelease) {
       throw new Error(
-        "Couldn't get unreleased commits without an existing tag or release commit."
+        "Couldn't get unreleased commits without an existing tag or release commit.",
       )
     }
 
@@ -136,7 +136,7 @@ class Git {
 
     const commits = log.toString().trimEnd().split('\n')
 
-    return commits.map(commit => new Commit(commit))
+    return commits.map((commit) => new Commit(commit))
   }
 }
 

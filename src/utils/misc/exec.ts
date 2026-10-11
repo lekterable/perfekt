@@ -7,7 +7,7 @@ const exec = (command: string): Buffer | string | undefined =>
 
 export const execFile = (
   command: string,
-  args: readonly string[]
+  args: readonly string[],
 ): Buffer | string => process.execFileSync(command, [...args], defaultOptions)
 
 export default exec

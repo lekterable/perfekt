@@ -1,14 +1,13 @@
+import type { ChangelogOptions, Config, GroupedCommits } from '~types'
 import {
+  createReleasedFilter,
+  fileExists,
   generateChangelog,
+  printOutput,
   readFile,
   writeFile,
-  fileExists,
-  printOutput,
-  createReleasedFilter
 } from '~utils'
 import { defaults, Optionable } from './options'
-import { Config } from '~types'
-import { ChangelogOptions, GroupedCommits } from '~types'
 
 class Changelog extends Optionable<ChangelogOptions> {
   #config: Config
@@ -49,7 +48,7 @@ class Changelog extends Optionable<ChangelogOptions> {
   async render(
     commits: GroupedCommits,
     version: string | undefined,
-    previousVersion: string | undefined
+    previousVersion: string | undefined,
   ) {
     let changelog = this.generate(commits, version)
 
@@ -73,7 +72,7 @@ class Changelog extends Optionable<ChangelogOptions> {
   async finish(
     commits: GroupedCommits,
     version: string | undefined,
-    previousVersion: string | undefined
+    previousVersion: string | undefined,
   ) {
     const changelog = await this.render(commits, version, previousVersion)
 

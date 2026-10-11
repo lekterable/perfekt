@@ -1,4 +1,4 @@
-import { Config } from '~types'
+import type { Config } from '~types'
 
 const createReleasedFilter = (version: string, config: Config) => {
   let isUnreleased: boolean

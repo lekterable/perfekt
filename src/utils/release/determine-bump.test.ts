@@ -1,25 +1,25 @@
-import determineBump from './determine-bump'
-import * as getCommitsTypes from './get-commits-types'
-import * as getChangesType from './get-changes-type'
+import Commit from '~core/commit'
 import Config from '~core/config'
 import Git from '~core/git'
-import Commit from '~core/commit'
+import determineBump from './determine-bump'
+import * as getChangesType from './get-changes-type'
+import * as getCommitsTypes from './get-commits-types'
 
 jest.mock('../misc/exec')
 
 const mockCommits = [
   new Commit(
-    'd0e72481e9b9dc2bed8e495b8943d2d90399db32 feat: replace all placeholder occurrences'
+    'd0e72481e9b9dc2bed8e495b8943d2d90399db32 feat: replace all placeholder occurrences',
   ),
   new Commit(
-    'd34a9f12500df6ea21a17b85b783a41b1fca5347 feat: make changelog ignored scopes configurable'
+    'd34a9f12500df6ea21a17b85b783a41b1fca5347 feat: make changelog ignored scopes configurable',
   ),
   new Commit(
-    '5fa8e6c9996444fa0d17493cf1e379a696682696 fix: throw error if there are no commits'
+    '5fa8e6c9996444fa0d17493cf1e379a696682696 fix: throw error if there are no commits',
   ),
   new Commit(
-    '86aa5dc18c363514e518b16b6eeb0bb2c5d94617 feat: add release `new` keyword'
-  )
+    '86aa5dc18c363514e518b16b6eeb0bb2c5d94617 feat: add release `new` keyword',
+  ),
 ]
 
 describe('determineBump', () => {
@@ -41,7 +41,7 @@ describe('determineBump', () => {
     getUnreleasedCommitsSpy.mockReturnValueOnce([])
 
     expect(determineBump(config)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"No unreleased commits, nothing to release."`
+      `"No unreleased commits, nothing to release."`,
     )
     expect(getUnreleasedCommitsSpy).toHaveBeenCalledTimes(1)
   })
@@ -51,7 +51,7 @@ describe('determineBump', () => {
     getChangesTypeSpy.mockReturnValueOnce(undefined)
 
     expect(determineBump(config)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Couldn't determine a version bump from unreleased commits."`
+      `"Couldn't determine a version bump from unreleased commits."`,
     )
     expect(getUnreleasedCommitsSpy).toHaveBeenCalledTimes(1)
     expect(getCommitsTypesSpy).toHaveBeenCalledTimes(1)
@@ -78,8 +78,8 @@ describe('determineBump', () => {
     const commits = [
       ...mockCommits,
       new Commit(
-        'a357a61a4197d01201a84b9ae7ed7f447e16c7d7 feat!: make no-commits error more specific'
-      )
+        'a357a61a4197d01201a84b9ae7ed7f447e16c7d7 feat!: make no-commits error more specific',
+      ),
     ]
     const mockBump = 'major'
     const mockTypes = ['feat', 'fix', 'breaking']
@@ -100,11 +100,11 @@ describe('determineBump', () => {
     const commits = [
       ...mockCommits,
       new Commit(
-        'ee24740b920b22e916ca5ab0449abb08e99143c4 ci: setup CI with GitHub Actions'
+        'ee24740b920b22e916ca5ab0449abb08e99143c4 ci: setup CI with GitHub Actions',
       ),
       new Commit(
-        '1a0b3f3e91a9a71bf52882b75c7306046db13c8e refactor: rename function and format tests'
-      )
+        '1a0b3f3e91a9a71bf52882b75c7306046db13c8e refactor: rename function and format tests',
+      ),
     ]
     const mockBump = 'minor'
     const mockTypes = ['feat', 'fix', 'ci', 'refactor']

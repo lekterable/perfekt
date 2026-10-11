@@ -1,5 +1,5 @@
-import Commit from '~core/commit'
-import { Config } from '~types'
+import type Commit from '~core/commit'
+import type { Config } from '~types'
 
 const generateLine = ({ message, hash }: Commit, config: Config) =>
   config.lineFormat

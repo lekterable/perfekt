@@ -1,10 +1,10 @@
 import fs from 'fs'
 import semver from 'semver'
-import exec from '../misc/exec'
-import determineVersion from './determine-version'
 import Config from '~core/config'
-import * as determineBump from './determine-bump'
 import { resolveReadFile } from '~testing/fs'
+import exec from '../misc/exec'
+import * as determineBump from './determine-bump'
+import determineVersion from './determine-version'
 
 jest.mock('fs')
 jest.mock('child_process')
@@ -32,9 +32,9 @@ describe('determineVersion', () => {
     const mockInput = 'version'
 
     expect(
-      determineVersion(mockInput, config)
+      determineVersion(mockInput, config),
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Version \`version\` doesn't look right."`
+      `"Version \`version\` doesn't look right."`,
     )
   })
 
@@ -96,7 +96,7 @@ describe('determineVersion', () => {
     expect(coerceSpy).toHaveBeenCalledWith(mockInput)
     expect(validSpy).toHaveBeenCalledTimes(1)
     expect(validSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ version: mockOutput })
+      expect.objectContaining({ version: mockOutput }),
     )
     expect(version).toBe(mockOutput)
   })
@@ -115,7 +115,7 @@ describe('determineVersion', () => {
     expect(coerceSpy).toHaveBeenCalledWith(mockInput)
     expect(validSpy).toHaveBeenCalledTimes(1)
     expect(validSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ version: mockInput })
+      expect.objectContaining({ version: mockInput }),
     )
     expect(version).toBe(mockInput)
   })

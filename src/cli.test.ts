@@ -1,7 +1,6 @@
+import fs from 'node:fs'
 import { Command, CommanderError } from 'commander'
 import { cosmiconfigSync } from 'cosmiconfig'
-import fs from 'node:fs'
-import { Config, Perfekt } from './core'
 import {
   createPerfekt as createPerfektInstance,
   createProgram,
@@ -9,20 +8,21 @@ import {
   getErrorCode,
   loadConfig,
   readPackageVersion,
-  run
+  run,
 } from './cli'
+import { Config, Perfekt } from './core'
 
 jest.mock('node:fs', () => ({
-  readFileSync: jest.fn()
+  readFileSync: jest.fn(),
 }))
 
 jest.mock('cosmiconfig', () => ({
-  cosmiconfigSync: jest.fn()
+  cosmiconfigSync: jest.fn(),
 }))
 
 jest.mock('./core', () => ({
   Config: jest.fn(),
-  Perfekt: jest.fn()
+  Perfekt: jest.fn(),
 }))
 
 const readFileSyncMock = jest.mocked(fs.readFileSync)
@@ -39,7 +39,7 @@ const createChangelogResult = () => ({
   commitCount: 1,
   commits: [],
   groups: [],
-  markdown: '# 2.1.0'
+  markdown: '# 2.1.0',
 })
 
 const createReleaseResult = () => ({
@@ -54,20 +54,20 @@ const createReleaseResult = () => ({
   files: ['package.json', 'CHANGELOG.md', 'pnpm-lock.yaml'],
   git: {
     commitMessage: 'chore(release): 2.1.0',
-    tag: '2.1.0'
+    tag: '2.1.0',
   },
   commitCount: 1,
   commits: [],
   groups: [],
   changelog: {
-    markdown: '# 2.1.0'
-  }
+    markdown: '# 2.1.0',
+  },
 })
 
 const createSetupCommitsResult = () => ({
   files: [
     { path: 'commitlint.config.cjs', status: 'written' as const },
-    { path: '.husky/commit-msg', status: 'written' as const }
+    { path: '.husky/commit-msg', status: 'written' as const },
   ],
   packageManager: 'pnpm' as const,
   installCommand:
@@ -75,14 +75,14 @@ const createSetupCommitsResult = () => ({
   prepareHint: 'package.json already runs husky in scripts.prepare',
   defaultBranch: 'main',
   lekterableTip:
-    'lekterable repos use master and first commit feat: init :seedling:. Advisory only. Setup does not fail on other default branches.'
+    'lekterable repos use master and first commit feat: init :seedling:. Advisory only. Setup does not fail on other default branches.',
 })
 
 const createPerfektDouble = () => ({
   init: jest.fn(),
   setupCommits: jest.fn().mockResolvedValue(createSetupCommitsResult()),
   changelog: jest.fn().mockResolvedValue(createChangelogResult()),
-  release: jest.fn().mockResolvedValue(createReleaseResult())
+  release: jest.fn().mockResolvedValue(createReleaseResult()),
 })
 
 const mockLoadedConfig = (config: Record<string, unknown> = { answer: 42 }) => {
@@ -95,13 +95,13 @@ const mockLoadedConfig = (config: Record<string, unknown> = { answer: 42 }) => {
 
 const mockLoadedPerfekt = (
   instance = createPerfektDouble(),
-  overrides: Record<string, unknown> = { answer: 42 }
+  overrides: Record<string, unknown> = { answer: 42 },
 ) => {
   readFileSyncMock.mockReturnValue(
-    JSON.stringify({ version: '3.0.0' }) as never
+    JSON.stringify({ version: '3.0.0' }) as never,
   )
   mockLoadedConfig(overrides)
-  ConfigMock.mockImplementation(value => ({ config: { normalized: value } }))
+  ConfigMock.mockImplementation((value) => ({ config: { normalized: value } }))
   PerfektMock.mockImplementation(() => instance)
 
   return instance
@@ -131,13 +131,13 @@ describe('cli', () => {
   describe('helpers', () => {
     it('should read the package version from package.json', () => {
       readFileSyncMock.mockReturnValue(
-        JSON.stringify({ version: '3.1.4' }) as never
+        JSON.stringify({ version: '3.1.4' }) as never,
       )
 
       expect(readPackageVersion()).toBe('3.1.4')
       expect(readFileSyncMock).toHaveBeenCalledWith(
         expect.stringMatching(/package\.json$/),
-        'utf8'
+        'utf8',
       )
     })
 
@@ -157,15 +157,15 @@ describe('cli', () => {
 
     it('should create a perfekt instance from loaded config', () => {
       mockLoadedConfig({ foo: 'bar' })
-      ConfigMock.mockImplementation(value => ({
-        config: { normalized: value }
+      ConfigMock.mockImplementation((value) => ({
+        config: { normalized: value },
       }))
 
       const instance = createPerfektInstance()
 
       expect(ConfigMock).toHaveBeenCalledWith({ foo: 'bar' })
       expect(PerfektMock).toHaveBeenCalledWith({
-        normalized: { foo: 'bar' }
+        normalized: { foo: 'bar' },
       })
       expect(PerfektMock).toHaveBeenCalledTimes(1)
       expect(instance).toBeDefined()
@@ -192,29 +192,29 @@ describe('cli', () => {
     it.each([
       [
         new CommanderError(1, 'commander.unknownCommand', 'oops'),
-        'INVALID_COMMAND'
+        'INVALID_COMMAND',
       ],
       [
         new Error('Invalid perfekt config: `groups` must be an array.'),
-        'INVALID_CONFIG'
+        'INVALID_CONFIG',
       ],
       [new Error("version doesn't look right"), 'INVALID_VERSION'],
       [new Error("version couldn't be bumped"), 'INVALID_VERSION'],
       [new Error('No unreleased commits.'), 'NO_UNRELEASED_COMMITS'],
       [
         new Error('Working tree must be clean before creating a release.'),
-        'DIRTY_WORKTREE'
+        'DIRTY_WORKTREE',
       ],
       [
         new Error("Couldn't determine a version bump from unreleased commits."),
-        'INVALID_COMMIT_TYPES'
+        'INVALID_COMMIT_TYPES',
       ],
       [
         new Error("Couldn't get unreleased commits without an existing tag."),
-        'MISSING_RELEASE_TAG'
+        'MISSING_RELEASE_TAG',
       ],
       [new Error('wat'), 'UNKNOWN_ERROR'],
-      ['plain string failure', 'UNKNOWN_ERROR']
+      ['plain string failure', 'UNKNOWN_ERROR'],
     ])('should map %p to %s', (error, code) => {
       expect(getErrorCode(error)).toBe(code)
     })
@@ -224,7 +224,7 @@ describe('cli', () => {
     it('should configure commander output when top-level json mode is enabled', () => {
       const configureOutputSpy = jest.spyOn(
         Command.prototype,
-        'configureOutput'
+        'configureOutput',
       )
 
       createProgram(createPerfektDouble(), '3.0.0', true)
@@ -236,13 +236,13 @@ describe('cli', () => {
     it('should configure commander stderr output in normal mode', () => {
       const configureOutputSpy = jest.spyOn(
         Command.prototype,
-        'configureOutput'
+        'configureOutput',
       )
 
       createProgram(createPerfektDouble(), '3.0.0')
 
       expect(configureOutputSpy).toHaveBeenCalledWith({
-        writeErr: expect.any(Function)
+        writeErr: expect.any(Function),
       })
       configureOutputSpy.mockRestore()
     })
@@ -252,10 +252,10 @@ describe('cli', () => {
         createProgram(createPerfektDouble(), '3.0.0', true).parseAsync([
           'node',
           'perfekt',
-          '--help'
-        ])
+          '--help',
+        ]),
       ).rejects.toMatchObject({
-        code: 'commander.helpDisplayed'
+        code: 'commander.helpDisplayed',
       })
 
       expect(stdoutSpy).not.toHaveBeenCalled()
@@ -266,10 +266,10 @@ describe('cli', () => {
         createProgram(createPerfektDouble(), '3.0.0').parseAsync([
           'node',
           'perfekt',
-          '-v'
-        ])
+          '-v',
+        ]),
       ).rejects.toMatchObject({
-        code: 'commander.version'
+        code: 'commander.version',
       })
 
       expect(stdoutSpy).toHaveBeenCalledWith('3.0.0\n')
@@ -281,7 +281,7 @@ describe('cli', () => {
       await createProgram(perfekt, '3.0.0').parseAsync([
         'node',
         'perfekt',
-        'init'
+        'init',
       ])
 
       expect(perfekt.init).toHaveBeenCalledTimes(1)
@@ -294,17 +294,17 @@ describe('cli', () => {
           'perfekt',
           'setup',
           'commits',
-          '--help'
-        ])
+          '--help',
+        ]),
       ).rejects.toMatchObject({
-        code: 'commander.helpDisplayed'
+        code: 'commander.helpDisplayed',
       })
 
       expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('add commitlint and a husky commit-msg hook')
+        expect.stringContaining('add commitlint and a husky commit-msg hook'),
       )
       expect(stdoutSpy).not.toHaveBeenCalledWith(
-        expect.stringContaining('default branch master')
+        expect.stringContaining('default branch master'),
       )
     })
 
@@ -317,23 +317,23 @@ describe('cli', () => {
         'setup',
         'commits',
         '--ci',
-        '--force'
+        '--force',
       ])
 
       expect(perfekt.setupCommits).toHaveBeenCalledTimes(1)
       expect(perfekt.setupCommits).toHaveBeenCalledWith({
         ci: true,
-        force: true
+        force: true,
       })
       expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('🌱 Commitlint setup')
+        expect.stringContaining('🌱 Commitlint setup'),
       )
       expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('commitlint.config.cjs')
+        expect.stringContaining('commitlint.config.cjs'),
       )
       expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining('main'))
       expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Advisory only')
+        expect.stringContaining('Advisory only'),
       )
     })
 
@@ -345,15 +345,15 @@ describe('cli', () => {
         'perfekt',
         'setup',
         'commits',
-        '--json'
+        '--json',
       ])
 
       expect(perfekt.setupCommits).toHaveBeenCalledWith({
         ci: false,
-        force: false
+        force: false,
       })
       expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('"command": "setup"')
+        expect.stringContaining('"command": "setup"'),
       )
     })
 
@@ -368,7 +368,7 @@ describe('cli', () => {
         '--write',
         '--root',
         '--from',
-        'abc123'
+        'abc123',
       ])
 
       expect(perfekt.changelog).toHaveBeenCalledTimes(1)
@@ -377,9 +377,9 @@ describe('cli', () => {
         {
           from: 'abc123',
           root: true,
-          write: true
+          write: true,
         },
-        'default'
+        'default',
       )
     })
 
@@ -390,12 +390,12 @@ describe('cli', () => {
         'node',
         'perfekt',
         'changelog',
-        '--json'
+        '--json',
       ])
 
       expect(perfekt.changelog).toHaveBeenCalledWith(undefined, {}, 'silent')
       expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('"command": "changelog"')
+        expect.stringContaining('"command": "changelog"'),
       )
     })
 
@@ -408,18 +408,18 @@ describe('cli', () => {
         'release',
         'new',
         '--from',
-        'def456'
+        'def456',
       ])
 
       expect(perfekt.release).toHaveBeenCalledTimes(1)
       expect(perfekt.release).toHaveBeenCalledWith('new', {
-        from: 'def456'
+        from: 'def456',
       })
       expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('📦 Release summary')
+        expect.stringContaining('📦 Release summary'),
       )
       expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('  Version:')
+        expect.stringContaining('  Version:'),
       )
     })
 
@@ -429,7 +429,7 @@ describe('cli', () => {
       perfekt.release.mockResolvedValueOnce({
         ...createReleaseResult(),
         dryRun: true,
-        from: null
+        from: null,
       })
 
       await createProgram(perfekt, '3.0.0').parseAsync([
@@ -437,11 +437,11 @@ describe('cli', () => {
         'perfekt',
         'release',
         'new',
-        '--dry-run'
+        '--dry-run',
       ])
 
       expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('🧭 Release plan')
+        expect.stringContaining('🧭 Release plan'),
       )
       expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining('root'))
     })
@@ -457,16 +457,16 @@ describe('cli', () => {
         '--dry-run',
         '--json',
         '--from',
-        'def456'
+        'def456',
       ])
 
       expect(perfekt.release).toHaveBeenCalledTimes(1)
       expect(perfekt.release).toHaveBeenCalledWith('new', {
         dryRun: true,
-        from: 'def456'
+        from: 'def456',
       })
       expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('"command": "release"')
+        expect.stringContaining('"command": "release"'),
       )
     })
   })
@@ -509,7 +509,7 @@ describe('cli', () => {
       await expect(run(['node', 'perfekt', 'help'])).resolves.toBe(undefined)
 
       expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Usage: perfekt')
+        expect.stringContaining('Usage: perfekt'),
       )
       expect(stderrSpy).not.toHaveBeenCalled()
       expect(process.exitCode).toBe(undefined)
@@ -541,10 +541,10 @@ describe('cli', () => {
 
       await expect(run(['node', 'perfekt', 'wat'])).resolves.toBe(undefined)
       expect(stderrSpy).toHaveBeenCalledWith(
-        expect.stringContaining('⛔️ Command failed')
+        expect.stringContaining('⛔️ Command failed'),
       )
       expect(stderrSpy).toHaveBeenCalledWith(
-        expect.stringContaining("error: unknown command 'wat'")
+        expect.stringContaining("error: unknown command 'wat'"),
       )
       expect(process.exitCode).toBe(1)
     })
@@ -555,11 +555,11 @@ describe('cli', () => {
       perfekt.release.mockRejectedValueOnce(new Error('boom'))
 
       await expect(run(['node', 'perfekt', 'release', 'new'])).resolves.toBe(
-        undefined
+        undefined,
       )
 
       expect(stderrSpy).toHaveBeenCalledWith(
-        expect.stringContaining('⛔️ Release failed')
+        expect.stringContaining('⛔️ Release failed'),
       )
       expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('boom'))
       expect(process.exitCode).toBe(1)
@@ -569,7 +569,7 @@ describe('cli', () => {
       mockLoadedPerfekt()
 
       await expect(run(['node', 'perfekt', 'wat', '--json'])).resolves.toBe(
-        undefined
+        undefined,
       )
 
       const output = stdoutSpy.mock.calls[
@@ -581,8 +581,8 @@ describe('cli', () => {
         command: 'unknown',
         error: {
           code: 'INVALID_COMMAND',
-          message: "error: unknown command 'wat'"
-        }
+          message: "error: unknown command 'wat'",
+        },
       })
       expect(process.exitCode).toBe(1)
     })
@@ -591,11 +591,11 @@ describe('cli', () => {
       const perfekt = mockLoadedPerfekt()
 
       perfekt.release.mockRejectedValueOnce(
-        new Error("Couldn't determine a version bump from unreleased commits.")
+        new Error("Couldn't determine a version bump from unreleased commits."),
       )
 
       await expect(
-        run(['node', 'perfekt', 'release', 'new', '--json'])
+        run(['node', 'perfekt', 'release', 'new', '--json']),
       ).resolves.toBe(undefined)
 
       const output = stdoutSpy.mock.calls[
@@ -607,8 +607,8 @@ describe('cli', () => {
         command: 'release',
         error: {
           code: 'INVALID_COMMIT_TYPES',
-          message: "Couldn't determine a version bump from unreleased commits."
-        }
+          message: "Couldn't determine a version bump from unreleased commits.",
+        },
       })
       expect(process.exitCode).toBe(1)
     })
@@ -619,7 +619,7 @@ describe('cli', () => {
       perfekt.release.mockRejectedValueOnce('string failure')
 
       await expect(
-        run(['node', 'perfekt', 'release', 'new', '--json'])
+        run(['node', 'perfekt', 'release', 'new', '--json']),
       ).resolves.toBe(undefined)
 
       const output = stdoutSpy.mock.calls[
@@ -631,8 +631,8 @@ describe('cli', () => {
         command: 'release',
         error: {
           code: 'UNKNOWN_ERROR',
-          message: 'string failure'
-        }
+          message: 'string failure',
+        },
       })
       expect(process.exitCode).toBe(1)
     })

@@ -1,14 +1,14 @@
-import { Config, ReleaseChange } from '~types'
+import type { Config, ReleaseChange } from '~types'
 
 const changePriority: Record<ReleaseChange, number> = {
   major: 0,
   minor: 1,
-  patch: 2
+  patch: 2,
 }
 
 export const sortChangeTypes = (
   a: ReleaseChange | undefined,
-  b: ReleaseChange | undefined
+  b: ReleaseChange | undefined,
 ) => {
   if (!a && !b) return 0
   if (!a) return 1

@@ -1,9 +1,9 @@
 import Commit from '~core/commit'
-import generateLine from './generate-line'
 import Config from '~core/config'
+import generateLine from './generate-line'
 
 const mockCommit = new Commit(
-  'b2f5901922505efbfb6dd684252e8df0cdffeeb2 feat: generate changelog'
+  'b2f5901922505efbfb6dd684252e8df0cdffeeb2 feat: generate changelog',
 )
 
 describe('generateLine', () => {
@@ -21,7 +21,7 @@ describe('generateLine', () => {
     const line = generateLine(mockCommit, config)
 
     expect(line).toMatchInlineSnapshot(
-      `"* generate changelog b2f59019 b2f59019"`
+      `"* generate changelog b2f59019 b2f59019"`,
     )
   })
 })

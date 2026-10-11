@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 
-import { Command, CommanderError } from 'commander'
-import { cosmiconfigSync } from 'cosmiconfig'
 import fs from 'node:fs'
 import path from 'node:path'
-import { Config, Perfekt } from './core'
-import { SQUASH_MERGE_NOTE } from './core/commitlint'
-import {
+import { Command, CommanderError } from 'commander'
+import { cosmiconfigSync } from 'cosmiconfig'
+import type {
   ChangelogOptions,
   ChangelogResult,
   ReleaseOptions,
   ReleaseResult,
   SetupCommitsOptions,
-  SetupCommitsResult
+  SetupCommitsResult,
 } from '~types'
+import { Config, Perfekt } from './core'
+import { SQUASH_MERGE_NOTE } from './core/commitlint'
 
 type ChangelogCommandOptions = ChangelogOptions & { json?: boolean }
 type ReleaseCommandOptions = ReleaseOptions & { json?: boolean }
@@ -22,7 +22,7 @@ type PerfektCLI = Pick<Perfekt, 'init' | 'setupCommits'> & {
   changelog: (
     version: string | undefined,
     options: Partial<ChangelogOptions>,
-    output?: 'default' | 'silent'
+    output?: 'default' | 'silent',
   ) => Promise<ChangelogResult>
   release: (version: string, options: ReleaseOptions) => Promise<ReleaseResult>
 }
@@ -79,7 +79,7 @@ type JsonResponse =
     }
 
 export const readPackageVersion = (
-  packageJsonPath = path.resolve(__dirname, '../package.json')
+  packageJsonPath = path.resolve(__dirname, '../package.json'),
 ) =>
   (JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')) as { version: string })
     .version
@@ -101,15 +101,15 @@ const formatDetailBlock = (
   title: string,
   rows: DetailRow[],
   writer: typeof process.stdout.write = process.stdout.write.bind(
-    process.stdout
-  )
+    process.stdout,
+  ),
 ) => {
   const labels = rows.map(([label]) => `${label}:`)
-  const width = Math.max(...labels.map(label => label.length))
+  const width = Math.max(...labels.map((label) => label.length))
   const lines = [
     title,
     '',
-    ...rows.map(([label, value]) => `  ${`${label}:`.padEnd(width)}  ${value}`)
+    ...rows.map(([label, value]) => `  ${`${label}:`.padEnd(width)}  ${value}`),
   ]
 
   writer(lines.join('\n') + '\n')
@@ -117,11 +117,11 @@ const formatDetailBlock = (
 
 const printSetupCommitsSummary = (result: SetupCommitsResult) => {
   const written = result.files
-    .filter(file => file.status === 'written')
-    .map(file => file.path)
+    .filter((file) => file.status === 'written')
+    .map((file) => file.path)
   const skipped = result.files
-    .filter(file => file.status === 'skipped')
-    .map(file => file.path)
+    .filter((file) => file.status === 'skipped')
+    .map((file) => file.path)
 
   formatDetailBlock('🌱 Commitlint setup', [
     ['Written', written.join(', ') || 'none'],
@@ -129,7 +129,7 @@ const printSetupCommitsSummary = (result: SetupCommitsResult) => {
     ['Install', result.installCommand],
     ['Prepare', result.prepareHint],
     ['Default branch', result.defaultBranch ?? 'not detected'],
-    ['Tip', result.lekterableTip]
+    ['Tip', result.lekterableTip],
   ])
 
   process.stdout.write(`\n  ${SQUASH_MERGE_NOTE}\n`)
@@ -145,7 +145,7 @@ const printReleaseSummary = (result: ReleaseResult) => {
     ['Files', result.files.join(', ')],
     ['Commit', result.git.commitMessage],
     ['Tag', result.git.tag],
-    ['Commits included', String(result.commitCount)]
+    ['Commits included', String(result.commitCount)],
   ])
 }
 
@@ -154,7 +154,7 @@ const capitalize = (value: string) =>
 
 const printCliError = (
   command: ReturnType<typeof getCommandName>,
-  error: unknown
+  error: unknown,
 ) => {
   const message = error instanceof Error ? error.message : String(error)
   const title =
@@ -165,7 +165,7 @@ const printCliError = (
   formatDetailBlock(
     title,
     [['Reason', message]],
-    process.stderr.write.bind(process.stderr)
+    process.stderr.write.bind(process.stderr),
   )
 }
 
@@ -180,7 +180,7 @@ const createChangelogResponse = (result: ChangelogResult): JsonResponse => ({
   commitCount: result.commitCount,
   commits: result.commits,
   groups: result.groups,
-  markdown: result.markdown
+  markdown: result.markdown,
 })
 
 const createSetupResponse = (result: SetupCommitsResult): JsonResponse => ({
@@ -191,7 +191,7 @@ const createSetupResponse = (result: SetupCommitsResult): JsonResponse => ({
   installCommand: result.installCommand,
   prepareHint: result.prepareHint,
   defaultBranch: result.defaultBranch,
-  lekterableTip: result.lekterableTip
+  lekterableTip: result.lekterableTip,
 })
 
 const createReleaseResponse = (result: ReleaseResult): JsonResponse => ({
@@ -210,11 +210,11 @@ const createReleaseResponse = (result: ReleaseResult): JsonResponse => ({
   commitCount: result.commitCount,
   commits: result.commits,
   groups: result.groups,
-  changelog: result.changelog
+  changelog: result.changelog,
 })
 
 export const getCommandName = (
-  argv = process.argv
+  argv = process.argv,
 ): 'changelog' | 'release' | 'init' | 'setup' | 'unknown' => {
   const command = argv[2]
 
@@ -256,7 +256,7 @@ export const getErrorCode = (error: unknown) => {
 export const createProgram = (
   perfekt: PerfektCLI,
   version: string,
-  jsonOutput = false
+  jsonOutput = false,
 ) => {
   const program = new Command()
 
@@ -265,11 +265,11 @@ export const createProgram = (
     jsonOutput
       ? {
           writeErr: () => undefined,
-          writeOut: () => undefined
+          writeOut: () => undefined,
         }
       : {
-          writeErr: () => undefined
-        }
+          writeErr: () => undefined,
+        },
   )
 
   program.name('perfekt').version(version, '-v, --version')
@@ -293,7 +293,7 @@ export const createProgram = (
       const { json = false, ...setupOptions } = options
       const result = await perfekt.setupCommits({
         ci: Boolean(setupOptions.ci),
-        force: Boolean(setupOptions.force)
+        force: Boolean(setupOptions.force),
       })
 
       if (json) {
@@ -312,14 +312,14 @@ export const createProgram = (
     .option('--root', 'generate changelog for the entire history')
     .option(
       '--from <commit>',
-      'SHA of the last commit which will NOT be included in this changelog'
+      'SHA of the last commit which will NOT be included in this changelog',
     )
     .action(async (nextVersion, options: ChangelogCommandOptions) => {
       const { json = false, ...changelogOptions } = options
       const result = await perfekt.changelog(
         nextVersion,
         changelogOptions,
-        json ? 'silent' : 'default'
+        json ? 'silent' : 'default',
       )
 
       if (json) {
@@ -334,7 +334,7 @@ export const createProgram = (
     .option('--json', 'print the command result as JSON')
     .option(
       '--from <commit>',
-      'SHA of the last commit which will NOT be included in this release'
+      'SHA of the last commit which will NOT be included in this release',
     )
     .action(async (nextVersion, options: ReleaseCommandOptions) => {
       const { json = false, ...releaseOptions } = options
@@ -382,8 +382,8 @@ export const run = async (argv = process.argv) => {
       command: getCommandName(argv),
       error: {
         code: getErrorCode(error),
-        message: error instanceof Error ? error.message : String(error)
-      }
+        message: error instanceof Error ? error.message : String(error),
+      },
     })
     process.exitCode = error instanceof CommanderError ? error.exitCode : 1
   } finally {

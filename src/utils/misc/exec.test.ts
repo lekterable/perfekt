@@ -11,7 +11,7 @@ describe('exec', () => {
 
     expect(process.execSync).toHaveBeenCalledTimes(1)
     expect(process.execSync).toHaveBeenCalledWith(mockCommand, {
-      stdio: 'pipe'
+      stdio: 'pipe',
     })
   })
 
@@ -23,8 +23,8 @@ describe('exec', () => {
       'git',
       ['tag', '-a', '3.0.0', '-m', 'notes'],
       {
-        stdio: 'pipe'
-      }
+        stdio: 'pipe',
+      },
     )
   })
 })

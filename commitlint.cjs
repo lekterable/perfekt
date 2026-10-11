@@ -9,7 +9,7 @@ const COMMIT_TYPES = [
   'build',
   'style',
   'perf',
-  'revert'
+  'revert',
 ]
 
 const IMPERATIVE_EXCEPTIONS = new Set([
@@ -25,10 +25,10 @@ const IMPERATIVE_EXCEPTIONS = new Set([
   'spring',
   'string',
   'succeed',
-  'swing'
+  'swing',
 ])
 
-const isNonImperative = word =>
+const isNonImperative = (word) =>
   !IMPERATIVE_EXCEPTIONS.has(word) &&
   (/(ed|ing)$/.test(word) || /[^siua]s$/.test(word))
 
@@ -39,7 +39,7 @@ const subjectImperative = ({ subject }) => {
 
   return [
     !isNonImperative(firstWord),
-    `subject should start with an imperative verb ("add", not "${firstWord}")`
+    `subject should start with an imperative verb ("add", not "${firstWord}")`,
   ]
 }
 
@@ -51,6 +51,6 @@ module.exports = {
     'subject-full-stop': [2, 'never', '.'],
     'header-max-length': [2, 'always', 72],
     'subject-max-length': [1, 'always', 50],
-    'subject-imperative': [1, 'always']
-  }
+    'subject-imperative': [1, 'always'],
+  },
 }

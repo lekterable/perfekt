@@ -6,9 +6,9 @@ import {
   COMMITLINT_CONFIG_CJS,
   COMMITLINT_CONFIG_PATH,
   COMMITLINT_REUSABLE_WORKFLOW,
+  getCommitlintCiWorkflow,
   INIT_COMMIT,
   SHARED_COMMITLINT_CONFIG,
-  getCommitlintCiWorkflow
 } from './commitlint'
 
 const repoRoot = path.resolve(__dirname, '../..')
@@ -18,22 +18,22 @@ const lintCommit = (message: string) =>
   spawnSync(commitlintBin, [], {
     cwd: repoRoot,
     encoding: 'utf8',
-    input: `${message}\n`
+    input: `${message}\n`,
   })
 
 describe('commitlint', () => {
   it('should scaffold a config that extends the shared rules', () => {
     expect(COMMITLINT_CONFIG_CJS).toContain(
-      `require.resolve('${SHARED_COMMITLINT_CONFIG}')`
+      `require.resolve('${SHARED_COMMITLINT_CONFIG}')`,
     )
     expect(
-      fs.readFileSync(path.join(repoRoot, COMMITLINT_CONFIG_PATH), 'utf8')
+      fs.readFileSync(path.join(repoRoot, COMMITLINT_CONFIG_PATH), 'utf8'),
     ).toContain("'./commitlint.cjs'")
   })
 
   it('should export the shared rules from the package', () => {
     const packageJson = JSON.parse(
-      fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8')
+      fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8'),
     )
 
     expect(packageJson.exports['./commitlint']).toBe('./commitlint.cjs')
@@ -44,10 +44,10 @@ describe('commitlint', () => {
     expect(COMMITLINT_CI_WORKFLOW).toContain('pull_request')
     expect(COMMITLINT_CI_WORKFLOW).not.toContain('branches: [master]')
     expect(COMMITLINT_CI_WORKFLOW).toContain(
-      `uses: ${COMMITLINT_REUSABLE_WORKFLOW}`
+      `uses: ${COMMITLINT_REUSABLE_WORKFLOW}`,
     )
     expect(
-      fs.existsSync(path.join(repoRoot, '.github/workflows/commitlint.yml'))
+      fs.existsSync(path.join(repoRoot, '.github/workflows/commitlint.yml')),
     ).toBe(true)
   })
 
@@ -60,7 +60,7 @@ describe('commitlint', () => {
 
   it('should not encode a master-only lock in the overlay', () => {
     expect(COMMITLINT_CONFIG_CJS).not.toContain(
-      'Default branch is always master (never main).'
+      'Default branch is always master (never main).',
     )
     expect(COMMITLINT_CONFIG_CJS).not.toContain('subject-no-github-ref')
   })
@@ -79,7 +79,7 @@ describe('commitlint', () => {
     ['content: add page', 1],
     ['Feat: add x', 1],
     ['feat: Add x', 1],
-    [`feat: ${'add '.repeat(17)}x`, 1]
+    [`feat: ${'add '.repeat(17)}x`, 1],
   ])('should lint %s with status %s', (message, status) => {
     expect(lintCommit(message).status).toBe(status)
   })
@@ -90,8 +90,8 @@ describe('commitlint', () => {
     ['fix: fixes x', 'subject-imperative'],
     [
       'feat: add a subject that runs well past the fifty character mark',
-      'subject-max-length'
-    ]
+      'subject-max-length',
+    ],
   ])('should warn on %s without failing', (message, rule) => {
     const result = lintCommit(message)
 
@@ -105,8 +105,8 @@ describe('commitlint', () => {
     'refactor: focus x',
     'chore: bump x',
     'feat: embed x',
-    'chore(release): 3.1.0'
-  ])('should not warn on %s', message => {
+    'chore(release): 3.1.0',
+  ])('should not warn on %s', (message) => {
     expect(lintCommit(message).stdout).not.toContain('subject-imperative')
   })
 })

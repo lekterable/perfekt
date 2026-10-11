@@ -5,7 +5,7 @@ import Release, { createTagMessage } from './release'
 jest.mock('~utils/misc/exec', () => ({
   __esModule: true,
   default: jest.fn(),
-  execFile: jest.fn()
+  execFile: jest.fn(),
 }))
 
 describe('Release', () => {
@@ -32,7 +32,7 @@ describe('Release', () => {
       expect(releaseSpy).toHaveBeenCalledTimes(1)
       expect(releaseSpy).toHaveBeenCalledWith(
         mockVersion,
-        '## Misc\n\n- tidy up things'
+        '## Misc\n\n- tidy up things',
       )
     })
   })
@@ -40,13 +40,13 @@ describe('Release', () => {
   describe('createTagMessage', () => {
     it('should remove the release heading and the following blank line', () => {
       expect(createTagMessage('# 2.0.1\n\n## Misc\n\n- docs')).toBe(
-        '## Misc\n\n- docs'
+        '## Misc\n\n- docs',
       )
     })
 
     it('should keep the remaining body when there is no blank separator', () => {
       expect(createTagMessage('# 2.0.1\n## Misc\n\n- docs')).toBe(
-        '## Misc\n\n- docs'
+        '## Misc\n\n- docs',
       )
     })
   })

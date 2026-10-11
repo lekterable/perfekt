@@ -18,7 +18,7 @@ class Commit {
     this.#commit = commit
 
     const commitDetails = title.match(
-      /(?<type>[\w ]*)(?:\((?<scope>[\w ]*)\))?(?<isBreaking>!)?: (?<message>.*)/
+      /(?<type>[\w ]*)(?:\((?<scope>[\w ]*)\))?(?<isBreaking>!)?: (?<message>.*)/,
     )
 
     if (!commitDetails) {

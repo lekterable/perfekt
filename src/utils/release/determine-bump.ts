@@ -1,7 +1,7 @@
-import { Config } from '~types'
 import Git from '~core/git'
-import getCommitsTypes from './get-commits-types'
+import type { Config } from '~types'
 import getChangesType from './get-changes-type'
+import getCommitsTypes from './get-commits-types'
 
 const determineBump = async (config: Config) => {
   const unreleasedCommits = new Git().getUnreleasedCommits()
@@ -16,7 +16,7 @@ const determineBump = async (config: Config) => {
 
   if (!bump) {
     throw new Error(
-      "Couldn't determine a version bump from unreleased commits."
+      "Couldn't determine a version bump from unreleased commits.",
     )
   }
 

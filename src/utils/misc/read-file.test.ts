@@ -1,6 +1,6 @@
 import fs from 'fs'
-import readFile from './read-file'
 import { rejectReadFile, resolveReadFile } from '~testing/fs'
+import readFile from './read-file'
 
 jest.mock('fs')
 
@@ -17,7 +17,7 @@ describe('readFile', () => {
     expect(fsMock.readFile).toHaveBeenCalledWith(
       mockFileName,
       'utf8',
-      expect.any(Function)
+      expect.any(Function),
     )
   })
 
@@ -32,7 +32,7 @@ describe('readFile', () => {
     expect(fsMock.readFile).toHaveBeenCalledWith(
       mockFileName,
       'utf8',
-      expect.any(Function)
+      expect.any(Function),
     )
     expect(changelog).toBe(mockFile)
   })

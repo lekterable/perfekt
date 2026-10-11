@@ -1,4 +1,4 @@
-import { Config } from '~types'
+import type { Config } from '~types'
 
 const defaultConfig: Config = {
   unreleasedHeader: '# Latest',
@@ -9,8 +9,8 @@ const defaultConfig: Config = {
   ignoredScopes: ['changelog'],
   groups: [
     { name: '## Features', change: 'minor', types: ['feat', 'feature'] },
-    { name: '## Fixes', change: 'patch', types: ['fix'] }
-  ]
+    { name: '## Fixes', change: 'patch', types: ['fix'] },
+  ],
 }
 
 export default defaultConfig

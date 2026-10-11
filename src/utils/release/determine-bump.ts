@@ -1,24 +1,26 @@
-import type { Config } from "~types";
-import Git from "~core/git";
-import getCommitsTypes from "./get-commits-types";
-import getChangesType from "./get-changes-type";
+import Git from '~core/git'
+import type { Config } from '~types'
+import getChangesType from './get-changes-type'
+import getCommitsTypes from './get-commits-types'
 
 const determineBump = async (config: Config) => {
-  const unreleasedCommits = new Git().getUnreleasedCommits();
+  const unreleasedCommits = new Git().getUnreleasedCommits()
 
   if (!unreleasedCommits.length) {
-    throw new Error("No unreleased commits, nothing to release.");
+    throw new Error('No unreleased commits, nothing to release.')
   }
 
-  const types = getCommitsTypes(unreleasedCommits);
+  const types = getCommitsTypes(unreleasedCommits)
 
-  const bump = getChangesType(types, config);
+  const bump = getChangesType(types, config)
 
   if (!bump) {
-    throw new Error("Couldn't determine a version bump from unreleased commits.");
+    throw new Error(
+      "Couldn't determine a version bump from unreleased commits.",
+    )
   }
 
-  return bump;
-};
+  return bump
+}
 
-export default determineBump;
+export default determineBump

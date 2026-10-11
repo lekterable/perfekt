@@ -1,106 +1,106 @@
-import type Commit from "~core/commit";
+import type Commit from '~core/commit'
 
-export type ReleaseChange = "major" | "minor" | "patch";
-export type PackageManagerName = "npm" | "pnpm" | "yarn";
+export type ReleaseChange = 'major' | 'minor' | 'patch'
+export type PackageManagerName = 'npm' | 'pnpm' | 'yarn'
 
 export type ConfigGroup = {
-  name: string;
-  change: ReleaseChange;
-  types: string[];
-};
+  name: string
+  change: ReleaseChange
+  types: string[]
+}
 
 export type Group = {
-  release?: Commit;
-  breaking?: Commit[];
-  misc?: Commit[];
-  [group: string]: Commit | Commit[] | undefined;
-};
+  release?: Commit
+  breaking?: Commit[]
+  misc?: Commit[]
+  [group: string]: Commit | Commit[] | undefined
+}
 
-export type GroupedCommits = Group[];
+export type GroupedCommits = Group[]
 
-export type ChangelogOptions = { write: boolean; root: boolean; from?: string };
+export type ChangelogOptions = { write: boolean; root: boolean; from?: string }
 
-export type ReleaseOptions = { from?: string; dryRun?: boolean };
+export type ReleaseOptions = { from?: string; dryRun?: boolean }
 
-export type SetupCommitsOptions = { ci?: boolean; force?: boolean };
+export type SetupCommitsOptions = { ci?: boolean; force?: boolean }
 
-export type SetupFileStatus = "written" | "skipped";
+export type SetupFileStatus = 'written' | 'skipped'
 
 export type SetupFileResult = {
-  path: string;
-  status: SetupFileStatus;
-};
+  path: string
+  status: SetupFileStatus
+}
 
 export type SetupCommitsResult = {
-  files: SetupFileResult[];
-  packageManager: PackageManagerName;
-  installCommand: string;
-  prepareHint: string;
-  defaultBranch: string | null;
-  lekterableTip: string;
-};
+  files: SetupFileResult[]
+  packageManager: PackageManagerName
+  installCommand: string
+  prepareHint: string
+  defaultBranch: string | null
+  lekterableTip: string
+}
 
 export type Config = {
-  unreleasedHeader: string;
-  releaseHeader: string;
-  breakingHeader: string;
-  miscHeader: string;
-  lineFormat: string;
-  ignoredScopes: string[];
-  groups: ConfigGroup[];
-};
+  unreleasedHeader: string
+  releaseHeader: string
+  breakingHeader: string
+  miscHeader: string
+  lineFormat: string
+  ignoredScopes: string[]
+  groups: ConfigGroup[]
+}
 
 export type OutputCommit = {
-  hash: string;
-  type: string | null;
-  scope: string | null;
-  message: string;
-  isBreaking: boolean;
-  isRelease: boolean;
-};
+  hash: string
+  type: string | null
+  scope: string | null
+  message: string
+  isBreaking: boolean
+  isRelease: boolean
+}
 
 export type OutputSection = {
-  key: string;
-  title: string;
-  change: ReleaseChange | null;
-  commits: OutputCommit[];
-};
+  key: string
+  title: string
+  change: ReleaseChange | null
+  commits: OutputCommit[]
+}
 
 export type OutputGroup = {
-  release: OutputCommit | null;
-  sections: OutputSection[];
-};
+  release: OutputCommit | null
+  sections: OutputSection[]
+}
 
 export type ChangelogResult = {
-  version: string | null;
-  latestTag: string | null;
-  from: string | null;
-  root: boolean;
-  write: boolean;
-  commitCount: number;
-  commits: OutputCommit[];
-  groups: OutputGroup[];
-  markdown: string;
-};
+  version: string | null
+  latestTag: string | null
+  from: string | null
+  root: boolean
+  write: boolean
+  commitCount: number
+  commits: OutputCommit[]
+  groups: OutputGroup[]
+  markdown: string
+}
 
 export type ReleaseResult = {
-  dryRun: boolean;
-  requestedVersion: string;
-  resolvedVersion: string;
-  resolvedBump: ReleaseChange | null;
-  packageManager: PackageManagerName;
-  currentVersion: string;
-  latestTag: string | null;
-  from: string | null;
-  files: string[];
+  dryRun: boolean
+  requestedVersion: string
+  resolvedVersion: string
+  resolvedBump: ReleaseChange | null
+  packageManager: PackageManagerName
+  currentVersion: string
+  latestTag: string | null
+  from: string | null
+  files: string[]
   git: {
-    commitMessage: string;
-    tag: string;
-  };
-  commitCount: number;
-  commits: OutputCommit[];
-  groups: OutputGroup[];
+    commitMessage: string
+    tag: string
+  }
+  commitCount: number
+  commits: OutputCommit[]
+  groups: OutputGroup[]
   changelog: {
-    markdown: string;
-  };
-};
+    markdown: string
+  }
+}

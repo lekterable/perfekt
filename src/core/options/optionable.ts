@@ -1,19 +1,19 @@
-import Options from ".";
+import Options from '.'
 
 class Optionable<T extends object> {
-  #options: Options<T>;
+  #options: Options<T>
 
   constructor(options: T) {
-    this.#options = new Options<T>(options);
+    this.#options = new Options<T>(options)
   }
 
   get options(): T {
-    return this.#options.options;
+    return this.#options.options
   }
 
   set options(options: Partial<T>) {
-    this.#options.restore().merge(options);
+    this.#options.restore().merge(options)
   }
 }
 
-export default Optionable;
+export default Optionable

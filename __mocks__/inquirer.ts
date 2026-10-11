@@ -1,5 +1,5 @@
 const inquirer = {
-  prompt: jest.fn()
-};
+  prompt: jest.fn(),
+}
 
-export default inquirer;
+export default inquirer

@@ -1,30 +1,30 @@
-import fs from "fs";
-import fileExists from "./file-exists";
+import fs from 'fs'
+import fileExists from './file-exists'
 
-jest.mock("fs");
+jest.mock('fs')
 
-const fsMock = jest.mocked(fs);
+const fsMock = jest.mocked(fs)
 
-describe("fileExists", () => {
-  const mockFileName = "package.json";
+describe('fileExists', () => {
+  const mockFileName = 'package.json'
 
-  it("should return `false` if file does not exist", () => {
-    fsMock.existsSync.mockReturnValueOnce(false);
+  it('should return `false` if file does not exist', () => {
+    fsMock.existsSync.mockReturnValueOnce(false)
 
-    const result = fileExists(mockFileName);
+    const result = fileExists(mockFileName)
 
-    expect(fsMock.existsSync).toHaveBeenCalledTimes(1);
-    expect(fsMock.existsSync).toHaveBeenCalledWith(mockFileName);
-    expect(result).toBe(false);
-  });
+    expect(fsMock.existsSync).toHaveBeenCalledTimes(1)
+    expect(fsMock.existsSync).toHaveBeenCalledWith(mockFileName)
+    expect(result).toBe(false)
+  })
 
-  it("should return `true` if file exists", () => {
-    fsMock.existsSync.mockReturnValueOnce(true);
+  it('should return `true` if file exists', () => {
+    fsMock.existsSync.mockReturnValueOnce(true)
 
-    const result = fileExists(mockFileName);
+    const result = fileExists(mockFileName)
 
-    expect(fsMock.existsSync).toHaveBeenCalledTimes(1);
-    expect(fsMock.existsSync).toHaveBeenCalledWith(mockFileName);
-    expect(result).toBe(true);
-  });
-});
+    expect(fsMock.existsSync).toHaveBeenCalledTimes(1)
+    expect(fsMock.existsSync).toHaveBeenCalledWith(mockFileName)
+    expect(result).toBe(true)
+  })
+})

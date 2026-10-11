@@ -1,9 +1,9 @@
-import updateVersion from "~utils/npm/update-version";
+import updateVersion from '~utils/npm/update-version'
 
 class NPM {
   updateVersion(version: string) {
-    updateVersion(version);
+    updateVersion(version)
   }
 }
 
-export default NPM;
+export default NPM

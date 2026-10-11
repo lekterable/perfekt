@@ -66,7 +66,7 @@ If for some reason you can't follow the convention for your commits' names, you 
 
 ## Shared lint, format and CI
 
-perfekt also ships the house [Biome](https://biomejs.dev) config, which replaces Prettier and ESLint: double quotes, semicolons, no trailing commas, 95 columns, Biome's recommended lint rules plus the ones `@eslint/js` and `typescript-eslint` recommended that Biome doesn't enable by default. Install `@biomejs/biome` and `perfekt`, then:
+perfekt also ships the house [Biome](https://biomejs.dev) config, which replaces Prettier and ESLint. It matches the website and influensea setup: single quotes, no semicolons, trailing commas, 80 columns, sorted imports and Tailwind classes, and an explicit rule list (types over interfaces, `import type`, no `console.log`). React and Next rules switch on by themselves when a repo depends on them. Install `@biomejs/biome` and `perfekt`, then:
 
 ```json
 { "extends": ["perfekt/biome"] }

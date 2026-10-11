@@ -1,30 +1,30 @@
-import exec from "~utils/misc/exec";
-import * as updateVersion from "~utils/npm/update-version";
-import NPM from "./npm";
+import exec from '~utils/misc/exec'
+import * as updateVersion from '~utils/npm/update-version'
+import NPM from './npm'
 
-jest.mock("~utils/misc/exec");
+jest.mock('~utils/misc/exec')
 
-const execMock = jest.mocked(exec);
+const execMock = jest.mocked(exec)
 
-describe("NPM", () => {
-  const npm = new NPM();
+describe('NPM', () => {
+  const npm = new NPM()
 
-  describe("updateVersion", () => {
-    let updateVersionSpy: jest.SpiedFunction<typeof updateVersion.default>;
+  describe('updateVersion', () => {
+    let updateVersionSpy: jest.SpiedFunction<typeof updateVersion.default>
 
     beforeEach(() => {
-      updateVersionSpy = jest.spyOn(updateVersion, "default");
-    });
+      updateVersionSpy = jest.spyOn(updateVersion, 'default')
+    })
 
-    it("should update version", () => {
-      const mockVersion = "2.0.0";
+    it('should update version', () => {
+      const mockVersion = '2.0.0'
 
-      execMock.mockReturnValue("");
+      execMock.mockReturnValue('')
 
-      npm.updateVersion(mockVersion);
+      npm.updateVersion(mockVersion)
 
-      expect(updateVersionSpy).toHaveBeenCalled();
-      expect(updateVersionSpy).toHaveBeenCalledWith(mockVersion);
-    });
-  });
-});
+      expect(updateVersionSpy).toHaveBeenCalled()
+      expect(updateVersionSpy).toHaveBeenCalledWith(mockVersion)
+    })
+  })
+})

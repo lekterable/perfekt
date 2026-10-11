@@ -1,163 +1,177 @@
 #!/usr/bin/env node
 
-import { Command, CommanderError } from "commander";
-import { cosmiconfigSync } from "cosmiconfig";
-import fs from "node:fs";
-import path from "node:path";
-import { Config, Perfekt } from "./core";
-import { SQUASH_MERGE_NOTE } from "./core/commitlint";
+import fs from 'node:fs'
+import path from 'node:path'
+import { Command, CommanderError } from 'commander'
+import { cosmiconfigSync } from 'cosmiconfig'
 import type {
   ChangelogOptions,
   ChangelogResult,
   ReleaseOptions,
   ReleaseResult,
   SetupCommitsOptions,
-  SetupCommitsResult
-} from "~types";
+  SetupCommitsResult,
+} from '~types'
+import { Config, Perfekt } from './core'
+import { SQUASH_MERGE_NOTE } from './core/commitlint'
 
-type ChangelogCommandOptions = ChangelogOptions & { json?: boolean };
-type ReleaseCommandOptions = ReleaseOptions & { json?: boolean };
+type ChangelogCommandOptions = ChangelogOptions & { json?: boolean }
+type ReleaseCommandOptions = ReleaseOptions & { json?: boolean }
 
-type PerfektCLI = Pick<Perfekt, "init" | "setupCommits"> & {
+type PerfektCLI = Pick<Perfekt, 'init' | 'setupCommits'> & {
   changelog: (
     version: string | undefined,
     options: Partial<ChangelogOptions>,
-    output?: "default" | "silent"
-  ) => Promise<ChangelogResult>;
-  release: (version: string, options: ReleaseOptions) => Promise<ReleaseResult>;
-};
+    output?: 'default' | 'silent',
+  ) => Promise<ChangelogResult>
+  release: (version: string, options: ReleaseOptions) => Promise<ReleaseResult>
+}
 
 type JsonResponse =
   | {
-      success: true;
-      command: "changelog";
-      write: boolean;
-      version: string | null;
-      latestTag: string | null;
-      from: string | null;
-      root: boolean;
-      commitCount: number;
-      commits: ChangelogResult["commits"];
-      groups: ChangelogResult["groups"];
-      markdown: string;
+      success: true
+      command: 'changelog'
+      write: boolean
+      version: string | null
+      latestTag: string | null
+      from: string | null
+      root: boolean
+      commitCount: number
+      commits: ChangelogResult['commits']
+      groups: ChangelogResult['groups']
+      markdown: string
     }
   | {
-      success: true;
-      command: "setup";
-      files: SetupCommitsResult["files"];
-      packageManager: SetupCommitsResult["packageManager"];
-      installCommand: string;
-      prepareHint: string;
-      defaultBranch: SetupCommitsResult["defaultBranch"];
-      lekterableTip: string;
+      success: true
+      command: 'setup'
+      files: SetupCommitsResult['files']
+      packageManager: SetupCommitsResult['packageManager']
+      installCommand: string
+      prepareHint: string
+      defaultBranch: SetupCommitsResult['defaultBranch']
+      lekterableTip: string
     }
   | {
-      success: true;
-      command: "release";
-      dryRun: boolean;
-      requestedVersion: string;
-      resolvedVersion: string;
-      resolvedBump: ReleaseResult["resolvedBump"];
-      packageManager: ReleaseResult["packageManager"];
-      currentVersion: string;
-      latestTag: string | null;
-      from: string | null;
-      files: string[];
-      git: ReleaseResult["git"];
-      commitCount: number;
-      commits: ReleaseResult["commits"];
-      groups: ReleaseResult["groups"];
-      changelog: ReleaseResult["changelog"];
+      success: true
+      command: 'release'
+      dryRun: boolean
+      requestedVersion: string
+      resolvedVersion: string
+      resolvedBump: ReleaseResult['resolvedBump']
+      packageManager: ReleaseResult['packageManager']
+      currentVersion: string
+      latestTag: string | null
+      from: string | null
+      files: string[]
+      git: ReleaseResult['git']
+      commitCount: number
+      commits: ReleaseResult['commits']
+      groups: ReleaseResult['groups']
+      changelog: ReleaseResult['changelog']
     }
   | {
-      success: false;
-      command: "changelog" | "release" | "init" | "setup" | "unknown";
+      success: false
+      command: 'changelog' | 'release' | 'init' | 'setup' | 'unknown'
       error: {
-        code: string;
-        message: string;
-      };
-    };
+        code: string
+        message: string
+      }
+    }
 
 export const readPackageVersion = (
-  packageJsonPath = path.resolve(__dirname, "../package.json")
-) => (JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as { version: string }).version;
+  packageJsonPath = path.resolve(__dirname, '../package.json'),
+) =>
+  (JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')) as { version: string })
+    .version
 
-export const loadConfig = () => cosmiconfigSync("perfekt").search()?.config;
+export const loadConfig = () => cosmiconfigSync('perfekt').search()?.config
 
 export const createPerfekt = (overrides = loadConfig()) => {
-  const { config } = new Config(overrides);
+  const { config } = new Config(overrides)
 
-  return new Perfekt(config);
-};
+  return new Perfekt(config)
+}
 
 const writeJson = (response: JsonResponse) =>
-  process.stdout.write(JSON.stringify(response, null, 2) + "\n");
+  process.stdout.write(JSON.stringify(response, null, 2) + '\n')
 
-type DetailRow = [label: string, value: string];
+type DetailRow = [label: string, value: string]
 
 const formatDetailBlock = (
   title: string,
   rows: DetailRow[],
-  writer: typeof process.stdout.write = process.stdout.write.bind(process.stdout)
+  writer: typeof process.stdout.write = process.stdout.write.bind(
+    process.stdout,
+  ),
 ) => {
-  const labels = rows.map(([label]) => `${label}:`);
-  const width = Math.max(...labels.map((label) => label.length));
+  const labels = rows.map(([label]) => `${label}:`)
+  const width = Math.max(...labels.map((label) => label.length))
   const lines = [
     title,
-    "",
-    ...rows.map(([label, value]) => `  ${`${label}:`.padEnd(width)}  ${value}`)
-  ];
+    '',
+    ...rows.map(([label, value]) => `  ${`${label}:`.padEnd(width)}  ${value}`),
+  ]
 
-  writer(lines.join("\n") + "\n");
-};
+  writer(lines.join('\n') + '\n')
+}
 
 const printSetupCommitsSummary = (result: SetupCommitsResult) => {
   const written = result.files
-    .filter((file) => file.status === "written")
-    .map((file) => file.path);
+    .filter((file) => file.status === 'written')
+    .map((file) => file.path)
   const skipped = result.files
-    .filter((file) => file.status === "skipped")
-    .map((file) => file.path);
+    .filter((file) => file.status === 'skipped')
+    .map((file) => file.path)
 
-  formatDetailBlock("🌱 Commitlint setup", [
-    ["Written", written.join(", ") || "none"],
-    ["Skipped", skipped.join(", ") || "none"],
-    ["Install", result.installCommand],
-    ["Prepare", result.prepareHint],
-    ["Default branch", result.defaultBranch ?? "not detected"],
-    ["Tip", result.lekterableTip]
-  ]);
+  formatDetailBlock('🌱 Commitlint setup', [
+    ['Written', written.join(', ') || 'none'],
+    ['Skipped', skipped.join(', ') || 'none'],
+    ['Install', result.installCommand],
+    ['Prepare', result.prepareHint],
+    ['Default branch', result.defaultBranch ?? 'not detected'],
+    ['Tip', result.lekterableTip],
+  ])
 
-  process.stdout.write(`\n  ${SQUASH_MERGE_NOTE}\n`);
-};
+  process.stdout.write(`\n  ${SQUASH_MERGE_NOTE}\n`)
+}
 
 const printReleaseSummary = (result: ReleaseResult) => {
-  const title = result.dryRun ? "🧭 Release plan" : "📦 Release summary";
+  const title = result.dryRun ? '🧭 Release plan' : '📦 Release summary'
 
   formatDetailBlock(title, [
-    ["Version", `${result.currentVersion} -> ${result.resolvedVersion}`],
-    ["Package manager", result.packageManager],
-    ["From", result.from ?? "root"],
-    ["Files", result.files.join(", ")],
-    ["Commit", result.git.commitMessage],
-    ["Tag", result.git.tag],
-    ["Commits included", String(result.commitCount)]
-  ]);
-};
+    ['Version', `${result.currentVersion} -> ${result.resolvedVersion}`],
+    ['Package manager', result.packageManager],
+    ['From', result.from ?? 'root'],
+    ['Files', result.files.join(', ')],
+    ['Commit', result.git.commitMessage],
+    ['Tag', result.git.tag],
+    ['Commits included', String(result.commitCount)],
+  ])
+}
 
-const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+const capitalize = (value: string) =>
+  value.charAt(0).toUpperCase() + value.slice(1)
 
-const printCliError = (command: ReturnType<typeof getCommandName>, error: unknown) => {
-  const message = error instanceof Error ? error.message : String(error);
+const printCliError = (
+  command: ReturnType<typeof getCommandName>,
+  error: unknown,
+) => {
+  const message = error instanceof Error ? error.message : String(error)
   const title =
-    command === "unknown" ? "⛔️ Command failed" : `⛔️ ${capitalize(command)} failed`;
+    command === 'unknown'
+      ? '⛔️ Command failed'
+      : `⛔️ ${capitalize(command)} failed`
 
-  formatDetailBlock(title, [["Reason", message]], process.stderr.write.bind(process.stderr));
-};
+  formatDetailBlock(
+    title,
+    [['Reason', message]],
+    process.stderr.write.bind(process.stderr),
+  )
+}
 
 const createChangelogResponse = (result: ChangelogResult): JsonResponse => ({
   success: true,
-  command: "changelog",
+  command: 'changelog',
   write: result.write,
   version: result.version,
   latestTag: result.latestTag,
@@ -166,23 +180,23 @@ const createChangelogResponse = (result: ChangelogResult): JsonResponse => ({
   commitCount: result.commitCount,
   commits: result.commits,
   groups: result.groups,
-  markdown: result.markdown
-});
+  markdown: result.markdown,
+})
 
 const createSetupResponse = (result: SetupCommitsResult): JsonResponse => ({
   success: true,
-  command: "setup",
+  command: 'setup',
   files: result.files,
   packageManager: result.packageManager,
   installCommand: result.installCommand,
   prepareHint: result.prepareHint,
   defaultBranch: result.defaultBranch,
-  lekterableTip: result.lekterableTip
-});
+  lekterableTip: result.lekterableTip,
+})
 
 const createReleaseResponse = (result: ReleaseResult): JsonResponse => ({
   success: true,
-  command: "release",
+  command: 'release',
   dryRun: result.dryRun,
   requestedVersion: result.requestedVersion,
   resolvedVersion: result.resolvedVersion,
@@ -196,165 +210,171 @@ const createReleaseResponse = (result: ReleaseResult): JsonResponse => ({
   commitCount: result.commitCount,
   commits: result.commits,
   groups: result.groups,
-  changelog: result.changelog
-});
+  changelog: result.changelog,
+})
 
 export const getCommandName = (
-  argv = process.argv
-): "changelog" | "release" | "init" | "setup" | "unknown" => {
-  const command = argv[2];
+  argv = process.argv,
+): 'changelog' | 'release' | 'init' | 'setup' | 'unknown' => {
+  const command = argv[2]
 
   if (
-    command === "changelog" ||
-    command === "release" ||
-    command === "init" ||
-    command === "setup"
+    command === 'changelog' ||
+    command === 'release' ||
+    command === 'init' ||
+    command === 'setup'
   ) {
-    return command;
+    return command
   }
 
-  return "unknown";
-};
+  return 'unknown'
+}
 
 export const getErrorCode = (error: unknown) => {
-  if (error instanceof CommanderError) return "INVALID_COMMAND";
+  if (error instanceof CommanderError) return 'INVALID_COMMAND'
 
-  const message = error instanceof Error ? error.message : String(error);
+  const message = error instanceof Error ? error.message : String(error)
 
-  if (message.startsWith("Invalid perfekt config")) return "INVALID_CONFIG";
-  if (message.includes("doesn't look right")) return "INVALID_VERSION";
-  if (message.includes("couldn't be bumped")) return "INVALID_VERSION";
-  if (message.includes("No unreleased commits")) return "NO_UNRELEASED_COMMITS";
+  if (message.startsWith('Invalid perfekt config')) return 'INVALID_CONFIG'
+  if (message.includes("doesn't look right")) return 'INVALID_VERSION'
+  if (message.includes("couldn't be bumped")) return 'INVALID_VERSION'
+  if (message.includes('No unreleased commits')) return 'NO_UNRELEASED_COMMITS'
   if (message.includes("Couldn't determine a version bump")) {
-    return "INVALID_COMMIT_TYPES";
+    return 'INVALID_COMMIT_TYPES'
   }
-  if (message.includes("Working tree must be clean")) {
-    return "DIRTY_WORKTREE";
+  if (message.includes('Working tree must be clean')) {
+    return 'DIRTY_WORKTREE'
   }
 
   if (message.includes("Couldn't get unreleased commits")) {
-    return "MISSING_RELEASE_TAG";
+    return 'MISSING_RELEASE_TAG'
   }
 
-  return "UNKNOWN_ERROR";
-};
+  return 'UNKNOWN_ERROR'
+}
 
-export const createProgram = (perfekt: PerfektCLI, version: string, jsonOutput = false) => {
-  const program = new Command();
+export const createProgram = (
+  perfekt: PerfektCLI,
+  version: string,
+  jsonOutput = false,
+) => {
+  const program = new Command()
 
-  program.exitOverride();
+  program.exitOverride()
   program.configureOutput(
     jsonOutput
       ? {
           writeErr: () => undefined,
-          writeOut: () => undefined
+          writeOut: () => undefined,
         }
       : {
-          writeErr: () => undefined
-        }
-  );
+          writeErr: () => undefined,
+        },
+  )
 
-  program.name("perfekt").version(version, "-v, --version");
+  program.name('perfekt').version(version, '-v, --version')
 
   program
-    .command("init")
-    .description("initialize config")
-    .action(() => perfekt.init());
+    .command('init')
+    .description('initialize config')
+    .action(() => perfekt.init())
 
-  const setup = program.command("setup").description("scaffold project conventions");
+  const setup = program
+    .command('setup')
+    .description('scaffold project conventions')
 
   setup
-    .command("commits")
-    .description("add commitlint and a husky commit-msg hook")
-    .option("--ci", "write a GitHub Action that lints pull request titles")
-    .option("--force", "overwrite existing generated files")
-    .option("--json", "print the command result as JSON")
+    .command('commits')
+    .description('add commitlint and a husky commit-msg hook')
+    .option('--ci', 'write a GitHub Action that lints pull request titles')
+    .option('--force', 'overwrite existing generated files')
+    .option('--json', 'print the command result as JSON')
     .action(async (options: SetupCommitsOptions & { json?: boolean }) => {
-      const { json = false, ...setupOptions } = options;
+      const { json = false, ...setupOptions } = options
       const result = await perfekt.setupCommits({
         ci: Boolean(setupOptions.ci),
-        force: Boolean(setupOptions.force)
-      });
+        force: Boolean(setupOptions.force),
+      })
 
       if (json) {
-        writeJson(createSetupResponse(result));
-        return;
+        writeJson(createSetupResponse(result))
+        return
       }
 
-      printSetupCommitsSummary(result);
-    });
+      printSetupCommitsSummary(result)
+    })
 
   program
-    .command("changelog [version]")
-    .description("generate package changelog")
-    .option("--write", "write output to the file")
-    .option("--json", "print the command result as JSON")
-    .option("--root", "generate changelog for the entire history")
+    .command('changelog [version]')
+    .description('generate package changelog')
+    .option('--write', 'write output to the file')
+    .option('--json', 'print the command result as JSON')
+    .option('--root', 'generate changelog for the entire history')
     .option(
-      "--from <commit>",
-      "SHA of the last commit which will NOT be included in this changelog"
+      '--from <commit>',
+      'SHA of the last commit which will NOT be included in this changelog',
     )
     .action(async (nextVersion, options: ChangelogCommandOptions) => {
-      const { json = false, ...changelogOptions } = options;
+      const { json = false, ...changelogOptions } = options
       const result = await perfekt.changelog(
         nextVersion,
         changelogOptions,
-        json ? "silent" : "default"
-      );
+        json ? 'silent' : 'default',
+      )
 
       if (json) {
-        writeJson(createChangelogResponse(result));
+        writeJson(createChangelogResponse(result))
       }
-    });
+    })
 
   program
-    .command("release <version>")
-    .description("execute a new release")
-    .option("--dry-run", "preview the release without changing files or git")
-    .option("--json", "print the command result as JSON")
+    .command('release <version>')
+    .description('execute a new release')
+    .option('--dry-run', 'preview the release without changing files or git')
+    .option('--json', 'print the command result as JSON')
     .option(
-      "--from <commit>",
-      "SHA of the last commit which will NOT be included in this release"
+      '--from <commit>',
+      'SHA of the last commit which will NOT be included in this release',
     )
     .action(async (nextVersion, options: ReleaseCommandOptions) => {
-      const { json = false, ...releaseOptions } = options;
-      const result = await perfekt.release(nextVersion, releaseOptions);
+      const { json = false, ...releaseOptions } = options
+      const result = await perfekt.release(nextVersion, releaseOptions)
 
       if (json) {
-        writeJson(createReleaseResponse(result));
-        return;
+        writeJson(createReleaseResponse(result))
+        return
       }
 
-      printReleaseSummary(result);
-    });
+      printReleaseSummary(result)
+    })
 
-  return program;
-};
+  return program
+}
 
 const isCommanderDisplayExit = (error: unknown) =>
-  error instanceof CommanderError && error.exitCode === 0;
+  error instanceof CommanderError && error.exitCode === 0
 
 export const run = async (argv = process.argv) => {
-  const version = readPackageVersion();
-  const perfekt = createPerfekt();
-  const jsonOutput = argv.includes("--json");
-  const warn = console.warn;
+  const version = readPackageVersion()
+  const perfekt = createPerfekt()
+  const jsonOutput = argv.includes('--json')
+  const warn = console.warn
 
   try {
     if (jsonOutput) {
-      console.warn = () => undefined;
+      console.warn = () => undefined
     }
 
-    await createProgram(perfekt, version, jsonOutput).parseAsync(argv);
+    await createProgram(perfekt, version, jsonOutput).parseAsync(argv)
   } catch (error) {
     if (isCommanderDisplayExit(error)) {
-      return;
+      return
     }
 
     if (!jsonOutput) {
-      printCliError(getCommandName(argv), error);
-      process.exitCode = error instanceof CommanderError ? error.exitCode : 1;
-      return;
+      printCliError(getCommandName(argv), error)
+      process.exitCode = error instanceof CommanderError ? error.exitCode : 1
+      return
     }
 
     writeJson({
@@ -362,16 +382,16 @@ export const run = async (argv = process.argv) => {
       command: getCommandName(argv),
       error: {
         code: getErrorCode(error),
-        message: error instanceof Error ? error.message : String(error)
-      }
-    });
-    process.exitCode = error instanceof CommanderError ? error.exitCode : 1;
+        message: error instanceof Error ? error.message : String(error),
+      },
+    })
+    process.exitCode = error instanceof CommanderError ? error.exitCode : 1
   } finally {
-    console.warn = warn;
+    console.warn = warn
   }
-};
+}
 
 /* istanbul ignore next */
 if (require.main === module) {
-  void run();
+  void run()
 }

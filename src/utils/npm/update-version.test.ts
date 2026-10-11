@@ -1,28 +1,28 @@
-import exec from "../misc/exec";
-import updateVersion from "./update-version";
-import { getVersionCommand } from "./get-package-manager";
+import exec from '../misc/exec'
+import { getVersionCommand } from './get-package-manager'
+import updateVersion from './update-version'
 
-jest.mock("../misc/exec");
-jest.mock("./get-package-manager", () => ({
-  getVersionCommand: jest.fn()
-}));
+jest.mock('../misc/exec')
+jest.mock('./get-package-manager', () => ({
+  getVersionCommand: jest.fn(),
+}))
 
-const execMock = jest.mocked(exec);
-const getVersionCommandMock = jest.mocked(getVersionCommand);
+const execMock = jest.mocked(exec)
+const getVersionCommandMock = jest.mocked(getVersionCommand)
 
-describe("updateVersion", () => {
-  it("should update version", () => {
-    const version = "3.3.3";
-    const command = `pnpm version ${version} --no-git-tag-version --no-git-checks`;
+describe('updateVersion', () => {
+  it('should update version', () => {
+    const version = '3.3.3'
+    const command = `pnpm version ${version} --no-git-tag-version --no-git-checks`
 
-    getVersionCommandMock.mockReturnValueOnce(command);
-    execMock.mockReturnValueOnce("");
+    getVersionCommandMock.mockReturnValueOnce(command)
+    execMock.mockReturnValueOnce('')
 
-    updateVersion(version);
+    updateVersion(version)
 
-    expect(getVersionCommandMock).toHaveBeenCalledTimes(1);
-    expect(getVersionCommandMock).toHaveBeenCalledWith(version);
-    expect(exec).toHaveBeenCalledTimes(1);
-    expect(exec).toHaveBeenCalledWith(command);
-  });
-});
+    expect(getVersionCommandMock).toHaveBeenCalledTimes(1)
+    expect(getVersionCommandMock).toHaveBeenCalledWith(version)
+    expect(exec).toHaveBeenCalledTimes(1)
+    expect(exec).toHaveBeenCalledWith(command)
+  })
+})

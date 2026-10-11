@@ -1,3 +1,3 @@
 module.exports = {
-  extends: ['./commitlint.cjs']
-}
+  extends: ["./commitlint.cjs"]
+};

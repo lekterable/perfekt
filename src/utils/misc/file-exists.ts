@@ -1,5 +1,5 @@
-import fs from 'fs'
+import fs from "fs";
 
-const fileExists = (fileName: string) => fs.existsSync(fileName)
+const fileExists = (fileName: string) => fs.existsSync(fileName);
 
-export default fileExists
+export default fileExists;

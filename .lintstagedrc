@@ -1,5 +1,3 @@
 {
-  "*.{ts,js,cjs,mjs}": ["eslint --fix", "prettier --write"],
-  "**/*.{json,md,html}": "prettier --write",
-  ".github/workflows/*.{yml,yaml}": "prettier --write"
+  "*": "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
 }

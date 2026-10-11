@@ -1,3 +1,3 @@
-const printOutput = (output: string) => process.stdout.write(output)
+const printOutput = (output: string) => process.stdout.write(output);
 
-export default printOutput
+export default printOutput;

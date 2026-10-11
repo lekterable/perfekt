@@ -1,7 +1,7 @@
 /* istanbul ignore file */
-export { default as exec } from './exec'
-export { execFile } from './exec'
-export { default as readFile } from './read-file'
-export { default as writeFile } from './write-file'
-export { default as printOutput } from './print-output'
-export { default as fileExists } from './file-exists'
+export { default as exec } from "./exec";
+export { execFile } from "./exec";
+export { default as readFile } from "./read-file";
+export { default as writeFile } from "./write-file";
+export { default as printOutput } from "./print-output";
+export { default as fileExists } from "./file-exists";

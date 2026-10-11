@@ -1,17 +1,14 @@
-import { ConfigGroup } from '~types'
+import type { ConfigGroup } from "~types";
 
-const mergeGroups = (
-  defaultGroups: ConfigGroup[],
-  overrideGroups?: ConfigGroup[]
-) => {
-  if (!overrideGroups?.length) return defaultGroups
+const mergeGroups = (defaultGroups: ConfigGroup[], overrideGroups?: ConfigGroup[]) => {
+  if (!overrideGroups?.length) return defaultGroups;
 
-  const replacedTypes = new Set(overrideGroups.flatMap(group => group.types))
+  const replacedTypes = new Set(overrideGroups.flatMap((group) => group.types));
   const preservedDefaults = defaultGroups.filter(
-    group => !group.types.some(type => replacedTypes.has(type))
-  )
+    (group) => !group.types.some((type) => replacedTypes.has(type))
+  );
 
-  return [...preservedDefaults, ...overrideGroups]
-}
+  return [...preservedDefaults, ...overrideGroups];
+};
 
-export default mergeGroups
+export default mergeGroups;

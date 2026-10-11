@@ -1,6 +1,6 @@
-import exec from '../misc/exec'
-import { getVersionCommand } from './get-package-manager'
+import exec from "../misc/exec";
+import { getVersionCommand } from "./get-package-manager";
 
-const updateVersion = (version: string) => exec(getVersionCommand(version))
+const updateVersion = (version: string) => exec(getVersionCommand(version));
 
-export default updateVersion
+export default updateVersion;

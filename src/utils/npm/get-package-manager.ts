@@ -1,70 +1,65 @@
-import fs from 'fs'
-import fileExists from '~utils/misc/file-exists'
-import { PackageManagerName } from '~types'
+import fs from "fs";
+import fileExists from "~utils/misc/file-exists";
+import type { PackageManagerName } from "~types";
 
 const packageManagers = {
   npm: {
-    lockfile: 'package-lock.json',
-    versionCommand: (version: string) =>
-      `npm version ${version} --no-git-tag-version`
+    lockfile: "package-lock.json",
+    versionCommand: (version: string) => `npm version ${version} --no-git-tag-version`
   },
   pnpm: {
-    lockfile: 'pnpm-lock.yaml',
+    lockfile: "pnpm-lock.yaml",
     versionCommand: (version: string) =>
       `pnpm version ${version} --no-git-tag-version --no-git-checks`
   },
   yarn: {
-    lockfile: 'yarn.lock',
+    lockfile: "yarn.lock",
     versionCommand: (version: string) =>
       `yarn version --new-version ${version} --no-git-tag-version`
   }
-} as const
+} as const;
 
-const packageManagerOrder: PackageManagerName[] = ['npm', 'pnpm', 'yarn']
+const packageManagerOrder: PackageManagerName[] = ["npm", "pnpm", "yarn"];
 
 const isPackageManager = (value: string): value is PackageManagerName =>
-  packageManagerOrder.includes(value as PackageManagerName)
+  packageManagerOrder.includes(value as PackageManagerName);
 
 const getPackageManagerFromPackageJson = () => {
-  if (!fileExists('package.json')) return
+  if (!fileExists("package.json")) return;
 
   try {
-    const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'))
+    const packageJson = JSON.parse(fs.readFileSync("package.json", "utf8"));
 
-    if (typeof packageJson.packageManager !== 'string') return
+    if (typeof packageJson.packageManager !== "string") return;
 
-    const [packageManager] = packageJson.packageManager.split('@')
+    const [packageManager] = packageJson.packageManager.split("@");
 
-    if (isPackageManager(packageManager)) return packageManager
+    if (isPackageManager(packageManager)) return packageManager;
   } catch {
-    return
+    return;
   }
-}
+};
 
 export const getPackageManager = (): PackageManagerName => {
-  const packageManager = getPackageManagerFromPackageJson()
+  const packageManager = getPackageManagerFromPackageJson();
 
-  if (packageManager) return packageManager
+  if (packageManager) return packageManager;
 
-  const detected = packageManagerOrder.find(manager =>
+  const detected = packageManagerOrder.find((manager) =>
     fileExists(packageManagers[manager].lockfile)
-  )
+  );
 
-  return detected ?? 'npm'
-}
+  return detected ?? "npm";
+};
 
 export const getReleaseFiles = () => {
-  const packageManager = getPackageManager()
-  const files = [
-    'CHANGELOG.md',
-    'package.json',
-    packageManagers[packageManager].lockfile
-  ]
+  const packageManager = getPackageManager();
+  const files = ["CHANGELOG.md", "package.json", packageManagers[packageManager].lockfile];
 
-  return files.filter(fileExists)
-}
+  return files.filter(fileExists);
+};
 
 export const getVersionCommand = (version: string) =>
-  packageManagers[getPackageManager()].versionCommand(version)
+  packageManagers[getPackageManager()].versionCommand(version);
 
-export default getPackageManager
+export default getPackageManager;

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": { "ignoreUnknown": true, "includes": ["**", "!**/*.snap"] },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 95,
+    "lineEnding": "lf"
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "none",
+      "arrowParentheses": "always"
+    }
+  },
+  "json": { "formatter": { "trailingCommas": "none" } },
+  "assist": { "enabled": false },
+  "linter": {
+    "rules": {
+      "recommended": true,
+      "complexity": {
+        "noUselessCatch": "error",
+        "noUselessThisAlias": "error"
+      },
+      "correctness": {
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error",
+        "noPrecisionLoss": "error",
+        "noUnusedPrivateClassMembers": "error"
+      },
+      "style": {
+        "noNonNullAssertion": "off",
+        "noNamespace": "error",
+        "useArrayLiterals": "error",
+        "useAsConstAssertion": "error",
+        "useErrorCause": "error"
+      },
+      "suspicious": {
+        "noEmptyBlockStatements": "error",
+        "noTsIgnore": "error",
+        "noUnassignedVariables": "error",
+        "noUselessRegexBackrefs": "error"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.ts", "**/*.tsx", "**/*.mts"],
+      "linter": { "rules": { "style": { "noCommonJs": "error" } } }
+    }
+  ]
+}

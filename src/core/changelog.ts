@@ -5,45 +5,45 @@ import {
   fileExists,
   printOutput,
   createReleasedFilter
-} from '~utils'
-import { defaults, Optionable } from './options'
-import { Config } from '~types'
-import { ChangelogOptions, GroupedCommits } from '~types'
+} from "~utils";
+import { defaults, Optionable } from "./options";
+import type { Config } from "~types";
+import type { ChangelogOptions, GroupedCommits } from "~types";
 
 class Changelog extends Optionable<ChangelogOptions> {
-  #config: Config
+  #config: Config;
 
   constructor(config: Config) {
-    super(defaults.changelogOptions)
-    this.#config = config
+    super(defaults.changelogOptions);
+    this.#config = config;
   }
 
   get hasChangelog() {
-    return fileExists('CHANGELOG.md')
+    return fileExists("CHANGELOG.md");
   }
 
   async getChangelog(): Promise<string> {
-    return (await readFile('CHANGELOG.md')) as string
+    return (await readFile("CHANGELOG.md")) as string;
   }
 
   async getHistory(version: string): Promise<string | undefined> {
-    const isFromOverwritten = Boolean(this.options.root || this.options.from)
+    const isFromOverwritten = Boolean(this.options.root || this.options.from);
 
-    if (!this.hasChangelog || isFromOverwritten) return
+    if (!this.hasChangelog || isFromOverwritten) return;
 
-    const changelog = await this.getChangelog()
+    const changelog = await this.getChangelog();
 
     if (!changelog) {
-      throw new Error("CHANGELOG doesn't contain any history.")
+      throw new Error("CHANGELOG doesn't contain any history.");
     }
 
-    const filterReleased = createReleasedFilter(version, this.#config)
+    const filterReleased = createReleasedFilter(version, this.#config);
 
-    return changelog.split('\n').filter(filterReleased).join('\n')
+    return changelog.split("\n").filter(filterReleased).join("\n");
   }
 
   generate(commits: GroupedCommits, version: string | undefined) {
-    return generateChangelog(commits, version, this.#config)
+    return generateChangelog(commits, version, this.#config);
   }
 
   async render(
@@ -51,23 +51,23 @@ class Changelog extends Optionable<ChangelogOptions> {
     version: string | undefined,
     previousVersion: string | undefined
   ) {
-    let changelog = this.generate(commits, version)
+    let changelog = this.generate(commits, version);
 
     if (previousVersion) {
-      const history = await this.getHistory(previousVersion)
+      const history = await this.getHistory(previousVersion);
 
-      if (history) changelog = changelog + '\n' + history
+      if (history) changelog = changelog + "\n" + history;
     }
 
-    return changelog
+    return changelog;
   }
 
   save(changelog: string) {
-    return writeFile('CHANGELOG.md', changelog)
+    return writeFile("CHANGELOG.md", changelog);
   }
 
   print(changelog: string) {
-    printOutput(changelog)
+    printOutput(changelog);
   }
 
   async finish(
@@ -75,12 +75,12 @@ class Changelog extends Optionable<ChangelogOptions> {
     version: string | undefined,
     previousVersion: string | undefined
   ) {
-    const changelog = await this.render(commits, version, previousVersion)
+    const changelog = await this.render(commits, version, previousVersion);
 
-    if (this.options.write) return this.save(changelog)
+    if (this.options.write) return this.save(changelog);
 
-    return this.print(changelog)
+    return this.print(changelog);
   }
 }
 
-export default Changelog
+export default Changelog;

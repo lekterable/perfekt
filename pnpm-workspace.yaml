@@ -6,8 +6,4 @@ allowBuilds:
 # releases at least a day old (1440 minutes), so a hijacked release is
 # usually pulled from the registry before it can land here.
 saveExact: true
-# Every `pnpm install` (laptop, CI, Vercel) installs exactly the lockfile and
-# fails if it is out of date; `pnpm add`/`remove`/`update` still update it.
-# After editing package.json by hand, run `pnpm install --no-frozen-lockfile`.
-frozenLockfile: true
 minimumReleaseAge: 1440

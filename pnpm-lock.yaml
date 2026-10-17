@@ -51,6 +51,9 @@ importers:
       lint-staged:
         specifier: 16.4.0
         version: 16.4.0
+      perfekt:
+        specifier: link:.
+        version: 'link:'
       ts-jest:
         specifier: 29.4.6
         version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.3.0)(@jest/types@30.3.0)(babel-jest@30.3.0(@babel/core@7.29.0))(jest-util@30.3.0)(jest@30.3.0(@types/node@25.5.0)(ts-node@10.9.1(@types/node@25.5.0)(typescript@5.9.3)))(typescript@5.9.3)

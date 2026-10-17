@@ -1,0 +1,11 @@
+// Bans function declarations: write `const name = () => {}` instead.
+// Generators are allowed, since arrows cannot yield.
+language js
+
+or {
+  JsFunctionDeclaration(),
+  JsFunctionExportDefaultDeclaration()
+} as $declaration where {
+  $declaration <: not r"^(?:async\s+)?function\s*\*[\s\S]*",
+  register_diagnostic(span=$declaration, message="Use an arrow function (`const name = () => {}`) instead of a function declaration. Generators are allowed.")
+}

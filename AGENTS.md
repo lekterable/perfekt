@@ -1,7 +1,7 @@
 # Agent guide
 
 perfekt is a release, changelog and versioning CLI for Conventional Commits repos (`perfekt release`, `perfekt changelog`, `perfekt setup commits`).
-It also ships the house tooling other repos extend: the shared commitlint rules (`perfekt/commitlint`), the Biome config (`perfekt/biome`) with its GritQL plugins in `grit/`, and reusable GitHub workflows in `.github/workflows/`.
+It also ships the house tooling other repos extend: the shared commitlint rules (`perfekt/commitlint`), the Biome config (`perfekt/biome`) with its GritQL plugins in `biome/`, and reusable GitHub workflows in `.github/workflows/`.
 Before pushing, run `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`. perfekt writes `CHANGELOG.md` itself on release, so never edit it by hand.
 
 <!-- conventions:start -->

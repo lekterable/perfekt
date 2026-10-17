@@ -1,6 +1,6 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
-  "plugins": ["./node_modules/perfekt/grit/arrow.grit"],
+  "plugins": ["./node_modules/perfekt/biome/arrow.grit"],
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "ignoreUnknown": true,
@@ -196,7 +196,7 @@
   "overrides": [
     {
       "includes": ["**/*.test.*", "**/tests/**"],
-      "plugins": ["./node_modules/perfekt/grit/should.grit"],
+      "plugins": ["./node_modules/perfekt/biome/should.grit"],
       "linter": { "rules": { "style": { "noNonNullAssertion": "off" } } }
     }
   ]

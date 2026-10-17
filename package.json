@@ -27,15 +27,15 @@
   "exports": {
     "./biome": "./biome.json",
     "./commitlint": "./commitlint.cjs",
-    "./grit/arrow.grit": "./grit/arrow.grit",
-    "./grit/should.grit": "./grit/should.grit",
+    "./biome/arrow.grit": "./biome/arrow.grit",
+    "./biome/should.grit": "./biome/should.grit",
     "./package.json": "./package.json"
   },
   "files": [
     "dist",
     "biome.json",
     "commitlint.cjs",
-    "grit"
+    "biome"
   ],
   "scripts": {
     "build": "tsdown",

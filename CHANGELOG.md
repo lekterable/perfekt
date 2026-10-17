@@ -1,3 +1,14 @@
+# 3.2.0
+
+## Features
+
+- enforce arrows and should test titles (#19) [f2e05208](https://github.com/lekterable/perfekt/commit/f2e05208788f61e88e318065df6a0aaf0b301061)
+- share a biome config and ci workflow (#18) [90d8607d](https://github.com/lekterable/perfekt/commit/90d8607d3240ad53d00518dd620f6891cc60af41)
+
+## Fixes
+
+- use npm's canonical bin and repository fields (#17) [459b2e8e](https://github.com/lekterable/perfekt/commit/459b2e8e3ef6646c8ceb00726fa773cfad8b8866)
+
 # 3.1.1
 
 ## Misc

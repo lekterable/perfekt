@@ -1,5 +1,6 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "plugins": ["./node_modules/perfekt/biome/arrow.grit"],
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "ignoreUnknown": true,
@@ -62,6 +63,7 @@
         "noUselessThisAlias": "error",
         "noUselessTypeConstraint": "error",
         "noUselessUndefinedInitialization": "error",
+        "useArrowFunction": "error",
         "useLiteralKeys": "error",
         "useOptionalChain": "error",
         "useRegexLiterals": "error"
@@ -194,6 +196,7 @@
   "overrides": [
     {
       "includes": ["**/*.test.*", "**/tests/**"],
+      "plugins": ["./node_modules/perfekt/biome/should.grit"],
       "linter": { "rules": { "style": { "noNonNullAssertion": "off" } } }
     }
   ]

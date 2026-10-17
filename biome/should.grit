@@ -1,0 +1,22 @@
+// Test titles describe behaviour: `it('should reject an expired token')`.
+// Covers it/test and their modifiers (.only, .skip, .todo, .each). describe blocks are exempt.
+language js
+
+`$test($title, $...)` where {
+  $test <: or {
+    `it`,
+    `test`,
+    `it.$_`,
+    `test.$_`,
+    `it.each($_)`,
+    `test.each($_)`,
+    `it.$_.each($_)`,
+    `test.$_.each($_)`
+  },
+  $title <: or {
+    JsStringLiteralExpression(),
+    JsTemplateExpression()
+  },
+  $title <: not r"^['\"`]should\b[\s\S]*",
+  register_diagnostic(span=$title, message="Start the test title with 'should' or 'should not', e.g. it('should reject an expired token').")
+}

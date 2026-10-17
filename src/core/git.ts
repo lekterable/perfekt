@@ -15,9 +15,7 @@ class Git {
   }
 
   add(files: string[]) {
-    const string = files.join(' ')
-
-    exec(`git add ${string}`)
+    exec(`git add ${files.join(' ')}`)
   }
 
   commit(message: string) {
@@ -35,17 +33,14 @@ class Git {
   }
 
   get latestTag() {
-    let latestTag: Buffer | string | undefined
-
     try {
-      latestTag = exec('git describe --tags --abbrev=0')
+      return exec('git describe --tags --abbrev=0')
+        ?.toString()
+        .trimEnd()
+        .replace('\n', '')
     } catch {
       return undefined
     }
-
-    latestTag = latestTag?.toString().trimEnd()
-
-    return latestTag?.replace('\n', '')
   }
 
   get latestReleaseCommit() {

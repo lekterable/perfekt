@@ -9,17 +9,25 @@ export const createCommits = (commits: string[]) => commits.map(createCommit)
 export const createConfig = (overrides?: Partial<PerfektConfig>) =>
   new Config(overrides).config
 
-export const summarizeGroupedCommits = (groups: GroupedCommits) =>
-  groups.map((group) => {
-    const summary: Record<string, string | string[]> = {}
+type CommitSummary = [key: string, messages: string | string[]]
 
-    for (const [key, value] of Object.entries(group)) {
-      if (!value) continue
+const summarizeEntry = ([key, value]: [
+  string,
+  Commit | Commit[] | undefined,
+]): CommitSummary[] => {
+  if (!value) return []
 
-      summary[key] = Array.isArray(value)
+  return [
+    [
+      key,
+      Array.isArray(value)
         ? value.map((commit) => commit.message)
-        : value.message
-    }
+        : value.message,
+    ],
+  ]
+}
 
-    return summary
-  })
+export const summarizeGroupedCommits = (groups: GroupedCommits) =>
+  groups.map((group) =>
+    Object.fromEntries(Object.entries(group).flatMap(summarizeEntry)),
+  )

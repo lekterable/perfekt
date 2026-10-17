@@ -7,14 +7,14 @@ const changePriority: Record<ReleaseChange, number> = {
 }
 
 export const sortChangeTypes = (
-  a: ReleaseChange | undefined,
-  b: ReleaseChange | undefined,
+  left: ReleaseChange | undefined,
+  right: ReleaseChange | undefined,
 ) => {
-  if (!a && !b) return 0
-  if (!a) return 1
-  if (!b) return -1
+  if (!left && !right) return 0
+  if (!left) return 1
+  if (!right) return -1
 
-  return changePriority[a] - changePriority[b]
+  return changePriority[left] - changePriority[right]
 }
 
 const mapTypeToChangeFactory = (config: Config) => (type: string) => {

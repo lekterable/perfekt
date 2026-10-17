@@ -50,15 +50,12 @@ class Changelog extends Optionable<ChangelogOptions> {
     version: string | undefined,
     previousVersion: string | undefined,
   ) {
-    let changelog = this.generate(commits, version)
+    const changelog = this.generate(commits, version)
+    const history = previousVersion
+      ? await this.getHistory(previousVersion)
+      : undefined
 
-    if (previousVersion) {
-      const history = await this.getHistory(previousVersion)
-
-      if (history) changelog = changelog + '\n' + history
-    }
-
-    return changelog
+    return history ? changelog + '\n' + history : changelog
   }
 
   save(changelog: string) {

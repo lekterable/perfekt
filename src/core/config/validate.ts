@@ -10,6 +10,14 @@ const configKeys = [
   'groups',
 ] as const
 
+const stringKeys = [
+  'unreleasedHeader',
+  'releaseHeader',
+  'breakingHeader',
+  'miscHeader',
+  'lineFormat',
+] as const
+
 const groupKeys = ['name', 'change', 'types'] as const
 const releaseChanges: ReleaseChange[] = ['major', 'minor', 'patch']
 
@@ -77,6 +85,14 @@ const validateGroup = (value: unknown, index: number): ConfigGroup => {
   }
 }
 
+const validateGroups = (value: unknown): ConfigGroup[] => {
+  if (!Array.isArray(value)) {
+    throw new Error('Invalid perfekt config: `groups` must be an array.')
+  }
+
+  return value.map(validateGroup)
+}
+
 const validateConfig = (value?: unknown): Partial<TConfig> | undefined => {
   if (typeof value === 'undefined') return
 
@@ -92,47 +108,24 @@ const validateConfig = (value?: unknown): Partial<TConfig> | undefined => {
     )
   }
 
-  const config: Partial<TConfig> = {}
+  const strings = Object.fromEntries(
+    stringKeys
+      .filter((key) => key in value)
+      .map((key) => [key, assertString(value[key], key)]),
+  )
 
-  if ('unreleasedHeader' in value) {
-    config.unreleasedHeader = assertString(
-      value.unreleasedHeader,
-      'unreleasedHeader',
-    )
+  return {
+    ...strings,
+    ...('ignoredScopes' in value
+      ? {
+          ignoredScopes: assertStringArray(
+            value.ignoredScopes,
+            'ignoredScopes',
+          ),
+        }
+      : {}),
+    ...('groups' in value ? { groups: validateGroups(value.groups) } : {}),
   }
-
-  if ('releaseHeader' in value) {
-    config.releaseHeader = assertString(value.releaseHeader, 'releaseHeader')
-  }
-
-  if ('breakingHeader' in value) {
-    config.breakingHeader = assertString(value.breakingHeader, 'breakingHeader')
-  }
-
-  if ('miscHeader' in value) {
-    config.miscHeader = assertString(value.miscHeader, 'miscHeader')
-  }
-
-  if ('lineFormat' in value) {
-    config.lineFormat = assertString(value.lineFormat, 'lineFormat')
-  }
-
-  if ('ignoredScopes' in value) {
-    config.ignoredScopes = assertStringArray(
-      value.ignoredScopes,
-      'ignoredScopes',
-    )
-  }
-
-  if ('groups' in value) {
-    if (!Array.isArray(value.groups)) {
-      throw new Error('Invalid perfekt config: `groups` must be an array.')
-    }
-
-    config.groups = value.groups.map(validateGroup)
-  }
-
-  return config
 }
 
 export default validateConfig

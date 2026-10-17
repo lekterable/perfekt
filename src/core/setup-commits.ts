@@ -74,11 +74,11 @@ export const getPrepareHint = () => {
   }
 
   try {
-    const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8')) as {
+    const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8')) as {
       scripts?: { prepare?: string }
     }
 
-    if (pkg.scripts?.prepare?.includes('husky')) {
+    if (packageJson.scripts?.prepare?.includes('husky')) {
       return 'package.json already runs husky in scripts.prepare'
     }
   } catch {

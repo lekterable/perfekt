@@ -153,19 +153,17 @@ class Perfekt {
       write: true,
       from: options.from,
     })
-    const files = ['CHANGELOG.md', 'package.json']
-
-    if (fileExists('pnpm-lock.yaml') && packageManager === 'pnpm') {
-      files.push('pnpm-lock.yaml')
-    }
-
-    if (fileExists('package-lock.json') && packageManager === 'npm') {
-      files.push('package-lock.json')
-    }
-
-    if (fileExists('yarn.lock') && packageManager === 'yarn') {
-      files.push('yarn.lock')
-    }
+    const lockfiles = [
+      { lockfile: 'pnpm-lock.yaml', manager: 'pnpm' },
+      { lockfile: 'package-lock.json', manager: 'npm' },
+      { lockfile: 'yarn.lock', manager: 'yarn' },
+    ]
+      .filter(
+        ({ lockfile, manager }) =>
+          fileExists(lockfile) && packageManager === manager,
+      )
+      .map(({ lockfile }) => lockfile)
+    const files = ['CHANGELOG.md', 'package.json', ...lockfiles]
 
     if (!options.dryRun) {
       if (!this.#git.isClean) {

@@ -80,7 +80,7 @@ The config also enforces the house code conventions:
 | --- | --- | --- |
 | `complexity/useArrowFunction` | Function expressions become arrows: `const add = (left, right) => left + right`, not `function (left, right) {}`. Functions that use `this` are left alone. Auto-fixable. | Biome core rule |
 | No function declarations | `function name() {}` and `export default function () {}` are errors. Generators (`function*`) are allowed, since arrows can't yield. | GritQL plugin `biome/arrow.grit` |
-| No loops | `for`, `for…of`, `for…in`, `for await`, `while`, `do…while` and `.forEach(...)` are errors. Use `map`/`filter`/`reduce`/`flatMap`/`find`, `it.each` for test tables, and one named helper built on `reduce` or recursion for sequential async work. | GritQL plugin `biome/loop.grit` |
+| No loops | `for`, `for…of`, `for…in`, `for await`, `while` and `do…while` are errors; `.forEach(...)` is allowed for side effects. Use `map`/`filter`/`reduce`/`flatMap`/`find`, `it.each` for test tables, and one named helper built on `reduce` or recursion for sequential async work. | GritQL plugin `biome/loop.grit` |
 | Test titles start with "should" | In `**/*.test.*` and `**/tests/**`, every `it(...)` and `test(...)` title (including `.only`, `.skip`, `.todo` and `.each`) must start with "should" or "should not": `it('should reject an expired token')`. `describe` blocks are exempt. | GritQL plugin `biome/should.grit` |
 | `style/useConsistentTypeDefinitions` | `type` instead of `interface`. | Biome core rule |
 

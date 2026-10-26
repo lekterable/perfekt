@@ -1,8 +1,9 @@
 import { fileExists, writeFile } from '~utils'
-import { CONFIG_FILE } from './config/load'
+import { CONFIG_FILE, JSON_CONFIG_FILES } from './config/load'
 
 const initialize = async () => {
-  if (fileExists(CONFIG_FILE)) throw new Error(`${CONFIG_FILE} already exists`)
+  const existing = JSON_CONFIG_FILES.find(fileExists)
+  if (existing) throw new Error(`${existing} already exists`)
 
   await writeFile(CONFIG_FILE, '{}\n')
 

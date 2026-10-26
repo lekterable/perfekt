@@ -21,6 +21,7 @@ describe('lint', () => {
     [`feat: add x\n\n${'y'.repeat(101)}`, false],
     [`feat: add x\n\nsee https://example.com/${'y'.repeat(100)}`, true],
     ['Added stuff\n\n1.2.3', false],
+    ['feat: add x\r\n\r\nbody from windows\r\n', true],
   ])('should lint %j as valid: %s', (message, valid) => {
     expect(lintMessage(message).valid).toBe(valid)
   })

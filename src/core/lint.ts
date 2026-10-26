@@ -68,6 +68,7 @@ const isNonImperative = (word: string) =>
 /** Drops the comments and the `git commit -v` diff git leaves in a commit message file. */
 export const cleanMessage = (raw: string) =>
   raw
+    .replace(/\r\n?/g, '\n')
     .split(/^# -+ >8 -+$/m)[0]
     .split('\n')
     .filter((line) => !line.startsWith('#'))
@@ -75,7 +76,7 @@ export const cleanMessage = (raw: string) =>
     .replace(/\s+$/, '')
 
 export const lintMessage = (raw: string): LintResult => {
-  const message = raw.replace(/^\n+|\s+$/g, '')
+  const message = raw.replace(/\r\n?/g, '\n').replace(/^\n+|\s+$/g, '')
 
   if (IGNORED.some((pattern) => pattern.test(message))) {
     return { valid: true, ignored: true, errors: [], warnings: [] }

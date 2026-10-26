@@ -14,7 +14,7 @@ describe('initialize', () => {
     expect(await initialize()).toBe('perfekt.json')
     expect(writeFileSpy).toHaveBeenCalledWith('perfekt.json', '{}\n')
 
-    fsMock.existsSync.mockReturnValue(true)
-    await expect(initialize()).rejects.toThrow('already exists')
+    fsMock.existsSync.mockImplementation((file) => file === '.perfektrc')
+    await expect(initialize()).rejects.toThrow('.perfektrc already exists')
   })
 })

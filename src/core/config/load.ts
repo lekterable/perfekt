@@ -4,17 +4,24 @@ import path from 'node:path'
 export const CONFIG_FILE = 'perfekt.json'
 
 // perfekt.json first, then the JSON files perfekt 3 also read, so existing repos keep working.
-const JSON_CONFIG_FILES = [CONFIG_FILE, '.perfektrc', '.perfektrc.json']
+export const JSON_CONFIG_FILES = [
+  CONFIG_FILE,
+  '.perfektrc',
+  '.perfektrc.json',
+  '.config/perfektrc',
+  '.config/perfektrc.json',
+]
 
-// Other files perfekt 3 read through cosmiconfig. Finding one is an error, so a release never
-// quietly drops a repo's changelog settings.
+const SCRIPT_EXTENSIONS = ['js', 'ts', 'mjs', 'cjs', 'mts', 'cts']
+
+// The other files perfekt 3 read through cosmiconfig. Finding one is an error, so a release
+// never quietly drops a repo's changelog settings.
 const OLD_CONFIG_FILES = [
-  '.perfektrc.yaml',
-  '.perfektrc.yml',
-  '.perfektrc.js',
-  '.perfektrc.cjs',
-  'perfekt.config.js',
-  'perfekt.config.cjs',
+  ...['yaml', 'yml', ...SCRIPT_EXTENSIONS].flatMap((extension) => [
+    `.perfektrc.${extension}`,
+    `.config/perfektrc.${extension}`,
+  ]),
+  ...SCRIPT_EXTENSIONS.map((extension) => `perfekt.config.${extension}`),
 ]
 
 const readJson = (file: string): unknown =>

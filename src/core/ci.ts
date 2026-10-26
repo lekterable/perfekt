@@ -80,13 +80,23 @@ export const getInstallCommand = (
 
   if (manager === 'pnpm') return ['pnpm', ['install']]
   if (manager === 'bun') return ['bun', ['install', '--frozen-lockfile']]
-  if (manager === 'yarn') return ['yarn', ['install']]
+  if (manager === 'yarn') {
+    const classic =
+      packageJson.packageManager?.startsWith('yarn@1') ?? !has('.yarnrc.yml')
+    return ['yarn', ['install', classic ? '--frozen-lockfile' : '--immutable']]
+  }
 
   return has('package-lock.json') ? ['npm', ['ci']] : ['npm', ['install']]
 }
 
-/** The commits a pull request would add: everything since the base branch. */
-export const getBase = (dir: string, base?: string, run = exec) => {
+const BASE_CANDIDATES = ['origin/main', 'origin/master', 'main', 'master']
+
+/** The commits a pull request would add: everything since the base branch, if one is found. */
+export const getBase = (
+  dir: string,
+  base?: string,
+  run = exec,
+): string | undefined => {
   if (base) return base
 
   const head = run(
@@ -94,8 +104,12 @@ export const getBase = (dir: string, base?: string, run = exec) => {
     ['symbolic-ref', '--short', 'refs/remotes/origin/HEAD'],
     dir,
   )
+  if (head.status === 0) return head.output.trim()
 
-  return head.status === 0 ? head.output.trim() : 'origin/master'
+  return BASE_CANDIDATES.find(
+    (ref) =>
+      run('git', ['rev-parse', '--verify', '--quiet', ref], dir).status === 0,
+  )
 }
 
 const SEPARATOR = '\u0000'
@@ -156,14 +170,23 @@ export const runSteps = async (
     output: install.value.status === 0 ? undefined : tail(install.value.output),
   })
 
+  const base = options.title ? undefined : getBase(dir, options.base, run)
+
   if (failed()) {
     steps.push({ name: 'commits', status: 'not run', ms: 0 })
+  } else if (!options.title && !base) {
+    steps.push({
+      name: 'commits',
+      status: 'skipped',
+      ms: 0,
+      detail: 'no base branch, pass --base',
+    })
   } else {
     const commits = await time(async () => {
       try {
-        const messages = options.title
-          ? [options.title]
-          : readCommitMessages(dir, getBase(dir, options.base, run), run)
+        const messages = base
+          ? readCommitMessages(dir, base, run)
+          : [options.title ?? '']
 
         return {
           count: messages.length,

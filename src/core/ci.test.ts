@@ -2,10 +2,17 @@ import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { ci, type Exec, exec, getInstallCommand, runSteps } from './ci'
+import { ci, type Exec, exec, getBase, getInstallCommand, runSteps } from './ci'
+
+const dirs: string[] = []
+
+afterAll(() => {
+  for (const dir of dirs) fs.rmSync(dir, { recursive: true, force: true })
+})
 
 const makeDir = (files: Record<string, string>) => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'perfekt-ci-test-'))
+  dirs.push(dir)
   for (const [name, content] of Object.entries(files)) {
     fs.writeFileSync(path.join(dir, name), content)
   }
@@ -31,6 +38,14 @@ describe('ci', () => {
       [
         { 'package.json': '{}', 'bun.lock': '' },
         'bun install --frozen-lockfile',
+      ],
+      [
+        { 'package.json': '{}', 'yarn.lock': '' },
+        'yarn install --frozen-lockfile',
+      ],
+      [
+        { 'package.json': '{"packageManager":"yarn@4.5.0"}' },
+        'yarn install --immutable',
       ],
       [{ 'package.json': '{}', 'package-lock.json': '{}' }, 'npm ci'],
       [{ 'package.json': '{}' }, 'npm install'],
@@ -65,6 +80,33 @@ describe('ci', () => {
     ])
     expect(steps[4].output).toBe('pnpm run test output')
     expect(calls).toEqual(['pnpm install', 'pnpm run lint', 'pnpm run test'])
+  })
+
+  it('should fall back to a local base branch and skip without one', async () => {
+    const dir = makeDir({ 'package.json': '{}' })
+    execFileSync('git', ['init', '--quiet', '--initial-branch=main'], {
+      cwd: dir,
+    })
+
+    const steps = await runSteps(dir, {}, recorder().run)
+    expect(steps[1]).toMatchObject({ name: 'commits', status: 'skipped' })
+
+    execFileSync(
+      'git',
+      [
+        '-c',
+        'user.email=t@t',
+        '-c',
+        'user.name=t',
+        'commit',
+        '--quiet',
+        '--allow-empty',
+        '-m',
+        'feat: init',
+      ],
+      { cwd: dir },
+    )
+    expect(getBase(dir)).toBe('main')
   })
 
   it('should fail a title that breaks the shared commit rules', async () => {

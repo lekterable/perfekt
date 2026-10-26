@@ -8,7 +8,7 @@ For the list of available commands you can always run:
 
 Usage: `perfekt init`
 
-Writes an empty `perfekt.json`, the only config file perfekt reads. It never overwrites an existing one.
+Writes an empty `perfekt.json`, the config file perfekt reads first. It never overwrites an existing config.
 
 Options:
 
@@ -84,7 +84,7 @@ Usage: `perfekt ci [options]`
 
 Runs the shared CI steps on your machine, for when GitHub Actions can't (no minutes left on a private repo) or before you push:
 
-1. `install`, with the lockfile frozen: `npm ci`, or `pnpm install` / `yarn install` with `CI=true`, which makes them refuse to change the lockfile, or `bun install --frozen-lockfile`. The package manager comes from `packageManager`, then the lockfile.
+1. `install`, with the lockfile frozen: `npm ci`, `pnpm install` with `CI=true`, `yarn install --frozen-lockfile` (`--immutable` on Yarn 2+) or `bun install --frozen-lockfile`. The package manager comes from `packageManager`, then the lockfile.
 2. `commits`, which lints every commit since the base branch with [`perfekt lint`](#lint), or only the pull request title with `--title`. These are the rules of the perfekt version you have installed; the shared workflow reads perfekt's `master`.
 3. `lint`, `typecheck`, `test` and `build`, each only when `package.json` has that script.
 
@@ -100,7 +100,7 @@ Options:
 
 `--title <title>` - lint this pull request title instead of the branch's commits
 
-`--base <ref>` - lint the commits since this ref; defaults to `origin/HEAD`, else `origin/master`
+`--base <ref>` - lint the commits since this ref; defaults to `origin/HEAD`, else the first of `origin/main`, `origin/master`, `main` and `master` that exists; with none, the step is skipped
 
 `--json` - print `{ success, command, dir, steps }`, where each step has its `name`, `status` (`passed`, `failed`, `skipped` or `not run`), time in `ms`, and the failing step's `output`
 

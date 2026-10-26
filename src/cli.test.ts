@@ -202,7 +202,7 @@ describe('cli', () => {
         'configureOutput',
       )
 
-      createProgram(createPerfektDouble(), '3.0.0', true)
+      createProgram(createPerfektDouble, '3.0.0', true)
 
       expect(configureOutputSpy).toHaveBeenCalledTimes(1)
       configureOutputSpy.mockRestore()
@@ -214,7 +214,7 @@ describe('cli', () => {
         'configureOutput',
       )
 
-      createProgram(createPerfektDouble(), '3.0.0')
+      createProgram(createPerfektDouble, '3.0.0')
 
       expect(configureOutputSpy).toHaveBeenCalledWith({
         writeErr: expect.any(Function),
@@ -224,7 +224,7 @@ describe('cli', () => {
 
     it('should suppress commander help output when top-level json mode is enabled', async () => {
       await expect(
-        createProgram(createPerfektDouble(), '3.0.0', true).parseAsync([
+        createProgram(createPerfektDouble, '3.0.0', true).parseAsync([
           'node',
           'perfekt',
           '--help',
@@ -238,7 +238,7 @@ describe('cli', () => {
 
     it('should print the version for the short -v flag', async () => {
       await expect(
-        createProgram(createPerfektDouble(), '3.0.0').parseAsync([
+        createProgram(createPerfektDouble, '3.0.0').parseAsync([
           'node',
           'perfekt',
           '-v',
@@ -253,7 +253,7 @@ describe('cli', () => {
     it('should run the init command', async () => {
       const perfekt = createPerfektDouble()
 
-      await createProgram(perfekt, '3.0.0').parseAsync([
+      await createProgram(() => perfekt, '3.0.0').parseAsync([
         'node',
         'perfekt',
         'init',
@@ -264,7 +264,7 @@ describe('cli', () => {
 
     it('should describe setup commits without pinning master', async () => {
       await expect(
-        createProgram(createPerfektDouble(), '3.0.0').parseAsync([
+        createProgram(createPerfektDouble, '3.0.0').parseAsync([
           'node',
           'perfekt',
           'setup',
@@ -286,7 +286,7 @@ describe('cli', () => {
     it('should run the setup commits command', async () => {
       const perfekt = createPerfektDouble()
 
-      await createProgram(perfekt, '3.0.0').parseAsync([
+      await createProgram(() => perfekt, '3.0.0').parseAsync([
         'node',
         'perfekt',
         'setup',
@@ -311,7 +311,7 @@ describe('cli', () => {
     it('should print setup commits json output', async () => {
       const perfekt = createPerfektDouble()
 
-      await createProgram(perfekt, '3.0.0').parseAsync([
+      await createProgram(() => perfekt, '3.0.0').parseAsync([
         'node',
         'perfekt',
         'setup',
@@ -328,7 +328,7 @@ describe('cli', () => {
     it('should parse changelog options', async () => {
       const perfekt = createPerfektDouble()
 
-      await createProgram(perfekt, '3.0.0').parseAsync([
+      await createProgram(() => perfekt, '3.0.0').parseAsync([
         'node',
         'perfekt',
         'changelog',
@@ -354,7 +354,7 @@ describe('cli', () => {
     it('should print changelog json output', async () => {
       const perfekt = createPerfektDouble()
 
-      await createProgram(perfekt, '3.0.0').parseAsync([
+      await createProgram(() => perfekt, '3.0.0').parseAsync([
         'node',
         'perfekt',
         'changelog',
@@ -370,7 +370,7 @@ describe('cli', () => {
     it('should parse release options and prints the release summary', async () => {
       const perfekt = createPerfektDouble()
 
-      await createProgram(perfekt, '3.0.0').parseAsync([
+      await createProgram(() => perfekt, '3.0.0').parseAsync([
         'node',
         'perfekt',
         'release',
@@ -400,7 +400,7 @@ describe('cli', () => {
         from: null,
       })
 
-      await createProgram(perfekt, '3.0.0').parseAsync([
+      await createProgram(() => perfekt, '3.0.0').parseAsync([
         'node',
         'perfekt',
         'release',
@@ -417,7 +417,7 @@ describe('cli', () => {
     it('should parse release dry-run json options and prints release json', async () => {
       const perfekt = createPerfektDouble()
 
-      await createProgram(perfekt, '3.0.0').parseAsync([
+      await createProgram(() => perfekt, '3.0.0').parseAsync([
         'node',
         'perfekt',
         'release',
@@ -444,7 +444,7 @@ describe('cli', () => {
       ['feat: add x', undefined],
       ['Added stuff.', 1],
     ])('should lint %j and set exit code %s', async (message, exitCode) => {
-      await createProgram(createPerfektDouble(), '3.0.0').parseAsync([
+      await createProgram(createPerfektDouble, '3.0.0').parseAsync([
         'node',
         'perfekt',
         'lint',
@@ -491,6 +491,18 @@ describe('cli', () => {
         expect.stringContaining('INVALID_CONFIG'),
       )
       expect(process.exitCode).toBe(1)
+    })
+
+    it('should lint without loading the config', async () => {
+      mockLoadedPerfekt()
+      ConfigMock.mockImplementation(() => {
+        throw new Error('Invalid perfekt config: expected an object.')
+      })
+
+      await run(['node', 'perfekt', 'lint', 'feat: add x'])
+
+      expect(ConfigMock).not.toHaveBeenCalled()
+      expect(process.exitCode).not.toBe(1)
     })
 
     it('should not print a failure block for the short version flag', async () => {

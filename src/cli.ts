@@ -287,7 +287,8 @@ export const getErrorCode = (error: unknown) => {
 }
 
 export const createProgram = (
-  perfekt: PerfektCLI,
+  // Called only by the commands that need it, so lint, ci and help work with a broken config.
+  getPerfekt: () => PerfektCLI,
   version: string,
   jsonOutput = false,
 ) => {
@@ -311,7 +312,7 @@ export const createProgram = (
     .command('init')
     .description('write an empty perfekt.json config')
     .action(async () => {
-      const written = await perfekt.init()
+      const written = await getPerfekt().init()
       process.stdout.write(`🌱 Wrote ${written}\n`)
     })
 
@@ -328,7 +329,7 @@ export const createProgram = (
     .option('--json', 'print the command result as JSON')
     .action(async (options: SetupCommitsOptions & { json?: boolean }) => {
       const { json = false, ...setupOptions } = options
-      const result = await perfekt.setupCommits({
+      const result = await getPerfekt().setupCommits({
         force: Boolean(setupOptions.force),
       })
 
@@ -352,7 +353,7 @@ export const createProgram = (
     )
     .action(async (nextVersion, options: ChangelogCommandOptions) => {
       const { json = false, ...changelogOptions } = options
-      const result = await perfekt.changelog(
+      const result = await getPerfekt().changelog(
         nextVersion,
         changelogOptions,
         json ? 'silent' : 'default',
@@ -374,7 +375,7 @@ export const createProgram = (
     )
     .action(async (nextVersion, options: ReleaseCommandOptions) => {
       const { json = false, ...releaseOptions } = options
-      const result = await perfekt.release(nextVersion, releaseOptions)
+      const result = await getPerfekt().release(nextVersion, releaseOptions)
 
       if (json) {
         writeJson(createReleaseResponse(result))
@@ -501,8 +502,9 @@ export const run = async (argv = process.argv) => {
       console.warn = () => undefined
     }
 
-    // Inside the try, so an invalid config reports INVALID_CONFIG instead of a stack trace.
-    await createProgram(createPerfekt(), version, jsonOutput).parseAsync(argv)
+    await createProgram(() => createPerfekt(), version, jsonOutput).parseAsync(
+      argv,
+    )
   } catch (error) {
     if (isCommanderDisplayExit(error)) {
       return

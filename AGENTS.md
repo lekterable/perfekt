@@ -6,10 +6,10 @@ Docs: `README.md` (also the docs site homepage), then `docs/` for getting starte
 Only `changelog` and `release` load the config (`src/core/config/load.ts`), so `lint`, `ci`, `init` and `setup` keep working when it is broken.
 Before pushing, run `pnpm build && node dist/cli.js ci` (or `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`). perfekt writes `CHANGELOG.md` itself on release, so never edit it by hand.
 
-<!-- conventions:start -->
+<!-- synapse:code-conventions -->
 ## Code conventions
 
-These are shared across repos. Keep this block identical in every repo that has it, and edit it in all of them at once.
+Synapse syncs this block across repos from `~/.synapse/source/blocks/code-conventions.md` (tracked in `.dotfiles`). Edit it there, or edit it here and run `synapse blocks pull AGENTS.md`, then run `synapse blocks sync --repos ~/.config/projects.json`.
 
 - TypeScript first. Use types, not interfaces.
 - Write arrow functions only; no `function` declarations or expressions. Generators, and the rare case a framework needs `this`, are the exceptions.
@@ -26,4 +26,4 @@ These are shared across repos. Keep this block identical in every repo that has 
 - Write one test per behaviour. Use a small table of cases instead of near-duplicate tests.
 - Keep the suite fast: no real network, sleeps or long timeouts in unit tests.
 - A bug fix adds one regression test that fails without the fix.
-<!-- conventions:end -->
+<!-- /synapse:code-conventions -->

@@ -4,7 +4,8 @@ name: CI
 # `typecheck` (plain JS) or `build` simply skips it:
 #
 #   jobs:
-#     ci:
+#     checks:
+#       name: Checks
 #       uses: lekterable/perfekt/.github/workflows/ci.yml@master
 #
 # perfekt runs it on itself too, across every Node version it supports, and uploads coverage.

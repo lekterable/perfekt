@@ -34,7 +34,7 @@ const IGNORED = [
   /^(R|r)evert (.*)/,
   /^(R|r)eapply (.*)/,
   /^(amend|fixup|squash)!/,
-  /^(chore(\([^)]+\))?:\s*)?v?\d+\.\d+\.\d+(-[\w.-]+)?(\+[\w.-]+)?\s*$/m,
+  /^(chore(\([^)]+\))?:\s*)?v?\d+\.\d+\.\d+(-[\w.-]+)?(\+[\w.-]+)?\s*(\n|$)/,
   /^(Merged (.*?)(in|into) (.*)|Merged PR (.*): (.*))/,
   /^Merge remote-tracking branch(\s*)(.*)/,
   /^Automatic merge(.*)/,

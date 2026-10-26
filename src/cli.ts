@@ -386,7 +386,7 @@ export const createProgram = (
   program
     .command('ci')
     .description(
-      'run the shared CI steps locally on a clean checkout of HEAD: install, commits, lint, typecheck, test, build',
+      'run the shared CI steps on a clean checkout of HEAD: install, commits, lint, typecheck, test, build',
     )
     .option('--dirty', 'run in this folder, uncommitted changes included')
     .option(
@@ -398,6 +398,17 @@ export const createProgram = (
       'lint the commits since this ref (default: origin/HEAD, else origin/master)',
     )
     .option('--json', 'print the command result as JSON')
+    .addHelpText(
+      'after',
+      `
+Stops at the first failing step, prints the end of its output and exits 1.
+
+Examples:
+  perfekt ci                          # before opening a pull request
+  perfekt ci --dirty                  # include uncommitted changes
+  perfekt ci --title "feat: add x"    # lint the PR title, not the commits
+  perfekt ci --json                   # steps, timings and failure output`,
+    )
     .action(
       async (options: {
         dirty?: boolean
@@ -418,18 +429,34 @@ export const createProgram = (
   program
     .command('lint [message]')
     .description(
-      'lint a commit message or pull request title with the shared commit rules (reads stdin without a message)',
+      'lint a commit message or pull request title with the shared rules (reads stdin without a message)',
     )
     .option(
       '--edit <file>',
       'lint the message in this file, as a commit-msg hook passes it',
     )
     .option('--json', 'print the command result as JSON')
+    .addHelpText(
+      'after',
+      `
+Exits 1 when the message breaks a rule; warnings print but pass.
+
+Examples:
+  perfekt lint "feat(cli): add x"
+  git log -1 --format=%B | perfekt lint
+  perfekt lint --edit "$1"          # in a git commit-msg hook`,
+    )
     .action(
       async (
         message: string | undefined,
         options: { edit?: string; json?: boolean },
       ) => {
+        if (message === undefined && !options.edit && process.stdin.isTTY) {
+          throw new Error(
+            'Pass a message, --edit <file>, or pipe the message in',
+          )
+        }
+
         const input = cleanMessage(
           message ??
             (options.edit
@@ -443,7 +470,9 @@ export const createProgram = (
             success: result.valid,
             command: 'lint',
             input,
-            ...result,
+            ignored: result.ignored,
+            errors: result.errors,
+            warnings: result.warnings,
           })
         } else if (result.errors.length + result.warnings.length > 0) {
           const report = formatLint(input, result)

@@ -20,12 +20,14 @@ describe('lint', () => {
     [`feat: ${'add '.repeat(17)}x`, false],
     [`feat: add x\n\n${'y'.repeat(101)}`, false],
     [`feat: add x\n\nsee https://example.com/${'y'.repeat(100)}`, true],
+    ['Added stuff\n\n1.2.3', false],
   ])('should lint %j as valid: %s', (message, valid) => {
     expect(lintMessage(message).valid).toBe(valid)
   })
 
   it.each([
     'chore(release): 3.1.0',
+    'v2.0.0\n\nbody',
     'Merge branch master into topic',
     'Merge pull request #3 from lekterable/topic',
     'Revert "feat: add x"',

@@ -34,6 +34,14 @@ Options:
 
 `--json` - print the command result as JSON instead of human-readable output
 
+### Upgrading from perfekt 3
+
+perfekt 4 replaces commitlint with the built-in [`perfekt lint`](#lint), and the `perfekt/commitlint` export is gone. In a repo set up by perfekt 3:
+
+1. Delete `commitlint.config.cjs` and remove `@commitlint/cli` and `@commitlint/config-conventional` from `devDependencies`.
+2. In `.husky/commit-msg`, replace the commitlint line with `npx --no -- perfekt lint --edit "$1"`, or delete the hook if PR title checks are enough.
+3. Keep `.github/workflows/commitlint.yml` as it is; the shared workflow it calls already runs `perfekt lint`'s rules.
+
 ## `lint`
 
 Usage: `perfekt lint [message] [options]`
@@ -57,7 +65,17 @@ Options:
 
 `--edit <file>` - lint the message in this file, dropping git's `#` comments and the `git commit -v` diff
 
-`--json` - print the result as JSON
+`--json` - print `{ success, command, input, ignored, errors, warnings }` instead of the report
+
+Exit codes: `0` when the message passes (warnings included), `1` when it breaks a rule or no message was given. Run with nothing to read from, it fails instead of waiting for input.
+
+Examples:
+
+```sh
+perfekt lint "feat(cli): add x"
+git log -1 --format=%B | perfekt lint
+perfekt lint --edit "$1"   # in a git commit-msg hook
+```
 
 ## `ci`
 
@@ -83,7 +101,9 @@ Options:
 
 `--base <ref>` - lint the commits since this ref; defaults to `origin/HEAD`, else `origin/master`
 
-`--json` - print the steps as JSON
+`--json` - print `{ success, command, dir, steps }`, where each step has its `name`, `status` (`passed`, `failed`, `skipped` or `not run`), time in `ms`, and the failing step's `output`
+
+Exit codes: `0` when every step passes or is skipped, `1` on the first failure.
 
 ## `release`
 

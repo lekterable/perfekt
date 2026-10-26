@@ -41,7 +41,7 @@ perfekt 4 replaces commitlint with the built-in [`perfekt lint`](#lint), and the
 1. Delete `commitlint.config.cjs` and remove `@commitlint/cli` and `@commitlint/config-conventional` from `devDependencies`.
 2. In `.husky/commit-msg`, replace the commitlint line with `npx --no -- perfekt lint --edit "$1"`, or delete the hook if PR title checks are enough.
 3. Keep `.github/workflows/commitlint.yml` as it is; the shared workflow it calls already runs `perfekt lint`'s rules.
-4. Move your config to `perfekt.json`: rename a JSON `.perfektrc`, or convert a YAML/JS one or a `"perfekt"` key in `package.json`. perfekt stops with an error while an old config file is there and `perfekt.json` isn't, so a release never runs without your settings.
+4. A JSON `.perfektrc` keeps working. Convert a YAML or JS config, or a `"perfekt"` key in `package.json`, to `perfekt.json`: perfekt stops with an error while one of those is there, so a release never runs without your settings.
 
 ## `lint`
 

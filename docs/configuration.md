@@ -2,7 +2,7 @@
 
 > **perfekt's** huge advantage is it's configurability.
 
-perfekt reads `perfekt.json` from the folder it runs in. `perfekt init` writes an empty one, and every field is optional.
+perfekt reads `perfekt.json` from the folder it runs in. `perfekt init` writes an empty one, and every field is optional. A JSON `.perfektrc` or `.perfektrc.json` from perfekt 3 still works when there is no `perfekt.json`.
 
 Default config looks like this:
 

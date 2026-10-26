@@ -2,3 +2,4 @@
 - [Getting started](getting-started.md)
 - [Documentation](documentation.md)
 - [Configuration](configuration.md)
+- [Upgrading from perfekt 3](upgrading.md)

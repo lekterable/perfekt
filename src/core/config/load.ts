@@ -24,38 +24,52 @@ const OLD_CONFIG_FILES = [
   ...SCRIPT_EXTENSIONS.map((extension) => `perfekt.config.${extension}`),
 ]
 
-const readJson = (file: string): unknown =>
-  JSON.parse(fs.readFileSync(file, 'utf8'))
+const PACKAGE_JSON_KEY = 'the "perfekt" key in package.json'
+
+const readJson = (file: string): unknown => {
+  const content = fs.readFileSync(file, 'utf8')
+
+  // Like perfekt 3, an empty file means no config.
+  return content.trim() ? JSON.parse(content) : undefined
+}
+
+const hasPackageJsonKey = (dir: string) => {
+  const file = path.join(dir, 'package.json')
+
+  return (
+    fs.existsSync(file) &&
+    'perfekt' in (readJson(file) as Record<string, unknown>)
+  )
+}
 
 /** The JSON config in the folder perfekt runs in, or undefined when there is none. */
 export const loadConfig = (dir = process.cwd()): unknown => {
-  const name = JSON_CONFIG_FILES.find((file) =>
-    fs.existsSync(path.join(dir, file)),
-  )
+  const exists = (file: string) => fs.existsSync(path.join(dir, file))
+  const found = [
+    ...[...JSON_CONFIG_FILES, ...OLD_CONFIG_FILES].filter(exists),
+    ...(hasPackageJsonKey(dir) ? [PACKAGE_JSON_KEY] : []),
+  ]
 
-  if (name) {
-    try {
-      return readJson(path.join(dir, name))
-    } catch (error) {
-      throw new Error(
-        `Invalid perfekt config: ${name} is not valid JSON (${error instanceof Error ? error.message : error})`,
-      )
-    }
-  }
-
-  const old = OLD_CONFIG_FILES.find((file) =>
-    fs.existsSync(path.join(dir, file)),
-  )
-  const packageJson = path.join(dir, 'package.json')
-  const inPackageJson =
-    fs.existsSync(packageJson) &&
-    typeof (readJson(packageJson) as { perfekt?: unknown }).perfekt === 'object'
-
-  if (old || inPackageJson) {
+  if (found.length > 1) {
     throw new Error(
-      `Invalid perfekt config: perfekt reads only JSON now; move the config from ${old ?? 'the "perfekt" key in package.json'} into ${CONFIG_FILE}`,
+      `Invalid perfekt config: found ${found.join(', ')}; keep only ${CONFIG_FILE}`,
     )
   }
 
-  return undefined
+  const [name] = found
+  if (!name) return undefined
+
+  if (!JSON_CONFIG_FILES.includes(name)) {
+    throw new Error(
+      `Invalid perfekt config: perfekt reads only JSON now; move the config from ${name} into ${CONFIG_FILE}`,
+    )
+  }
+
+  try {
+    return readJson(path.join(dir, name)) ?? undefined
+  } catch (error) {
+    throw new Error(
+      `Invalid perfekt config: ${name} is not valid JSON (${error instanceof Error ? error.message : error})`,
+    )
+  }
 }

@@ -194,7 +194,7 @@ export const runSteps = async (
         }
       } catch (error) {
         return {
-          count: 0,
+          count: undefined,
           problems: [error instanceof Error ? error.message : String(error)],
         }
       }
@@ -205,7 +205,9 @@ export const runSteps = async (
       ms: commits.ms,
       detail: options.title
         ? 'pull request title'
-        : `${commits.value.count} commit${commits.value.count === 1 ? '' : 's'}`,
+        : commits.value.count === undefined
+          ? undefined
+          : `${commits.value.count} commit${commits.value.count === 1 ? '' : 's'}`,
       output: commits.value.problems.join('\n') || undefined,
     })
   }

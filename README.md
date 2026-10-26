@@ -27,11 +27,19 @@
 
 ## Intro
 
-**perfekt** is a release, changelog and versioning manager. It's easy to use and doesn't require any configuration to get it up and running.
+**perfekt** is a release, changelog and versioning manager for [Conventional Commits](https://www.conventionalcommits.org) repos. It's easy to use and doesn't require any configuration to get it up and running.
 
-It works with all package managers: `pnpm`, `npm` and `yarn`. `perfekt` detects the package manager from your `packageManager` field or lockfile and updates the matching lockfile during releases.
+- `perfekt release` bumps the version, writes `CHANGELOG.md`, commits and tags.
+- `perfekt changelog` prints or writes the changelog without releasing.
+- `perfekt lint` checks a commit message or pull request title against the shared rules.
+- `perfekt ci` runs the shared CI steps on your machine before you push.
+- `perfekt setup commits` adds a GitHub Action that lints pull request titles.
 
-It can also return structured JSON for `release` and `changelog`, which makes it a good fit for CI jobs, scripts, and agents.
+It also ships shared tooling other repos extend: a [Biome](https://biomejs.dev) config and reusable GitHub workflows for CI, pull request titles and releases.
+
+It works with `pnpm`, `npm` and `yarn`, detecting the package manager from your `packageManager` field or lockfile and updating the matching lockfile on release. It installs as a single file with no dependencies. Every command except `init` can print JSON with `--json`, which makes it a good fit for CI jobs, scripts and agents.
+
+Upgrading from perfekt 3? See [upgrading](https://lekterable.github.io/perfekt/#/upgrading).
 
 ## Convention
 

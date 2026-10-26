@@ -2,6 +2,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
+import { isatty } from 'node:tty'
 import { Command, CommanderError } from 'commander'
 import type {
   ChangelogOptions,
@@ -15,7 +16,9 @@ import { Config, Perfekt } from './core'
 import { type CiResult, type CiStep, ci } from './core/ci'
 import { SQUASH_MERGE_NOTE } from './core/commits'
 import { loadConfig } from './core/config/load'
+import initialize from './core/initialize'
 import { cleanMessage, formatLint, lintMessage } from './core/lint'
+import setupCommits from './core/setup-commits'
 
 type ChangelogCommandOptions = ChangelogOptions & { json?: boolean }
 type ReleaseCommandOptions = ReleaseOptions & { json?: boolean }
@@ -109,6 +112,14 @@ export const createPerfekt = (overrides = loadConfig()) => {
 
   return new Perfekt(config)
 }
+
+// Only changelog and release read the config, so the other commands work with a broken one.
+const createCommands = (): PerfektCLI => ({
+  init: initialize,
+  setupCommits,
+  changelog: (...args) => createPerfekt().changelog(...args),
+  release: (...args) => createPerfekt().release(...args),
+})
 
 const writeJson = (response: JsonResponse) =>
   process.stdout.write(JSON.stringify(response, null, 2) + '\n')
@@ -287,8 +298,7 @@ export const getErrorCode = (error: unknown) => {
 }
 
 export const createProgram = (
-  // Called only by the commands that need it, so lint, ci and help work with a broken config.
-  getPerfekt: () => PerfektCLI,
+  perfekt: PerfektCLI,
   version: string,
   jsonOutput = false,
 ) => {
@@ -302,7 +312,8 @@ export const createProgram = (
           writeOut: () => undefined,
         }
       : {
-          writeErr: () => undefined,
+          // printCliError reports errors; help for a missing subcommand still prints
+          outputError: () => undefined,
         },
   )
 
@@ -312,7 +323,7 @@ export const createProgram = (
     .command('init')
     .description('write an empty perfekt.json config')
     .action(async () => {
-      const written = await getPerfekt().init()
+      const written = await perfekt.init()
       process.stdout.write(`🌱 Wrote ${written}\n`)
     })
 
@@ -329,7 +340,7 @@ export const createProgram = (
     .option('--json', 'print the command result as JSON')
     .action(async (options: SetupCommitsOptions & { json?: boolean }) => {
       const { json = false, ...setupOptions } = options
-      const result = await getPerfekt().setupCommits({
+      const result = await perfekt.setupCommits({
         force: Boolean(setupOptions.force),
       })
 
@@ -353,7 +364,7 @@ export const createProgram = (
     )
     .action(async (nextVersion, options: ChangelogCommandOptions) => {
       const { json = false, ...changelogOptions } = options
-      const result = await getPerfekt().changelog(
+      const result = await perfekt.changelog(
         nextVersion,
         changelogOptions,
         json ? 'silent' : 'default',
@@ -375,7 +386,7 @@ export const createProgram = (
     )
     .action(async (nextVersion, options: ReleaseCommandOptions) => {
       const { json = false, ...releaseOptions } = options
-      const result = await getPerfekt().release(nextVersion, releaseOptions)
+      const result = await perfekt.release(nextVersion, releaseOptions)
 
       if (json) {
         writeJson(createReleaseResponse(result))
@@ -397,7 +408,7 @@ export const createProgram = (
     )
     .option(
       '--base <ref>',
-      'lint the commits since this ref (default: origin/HEAD, else origin/master)',
+      'lint the commits since this ref (default: origin/HEAD, else origin/main, origin/master, main or master)',
     )
     .option('--json', 'print the command result as JSON')
     .addHelpText(
@@ -453,18 +464,21 @@ Examples:
         message: string | undefined,
         options: { edit?: string; json?: boolean },
       ) => {
-        if (message === undefined && !options.edit && process.stdin.isTTY) {
+        if (message !== undefined && options.edit) {
+          throw new Error('Pass a message or --edit <file>, not both')
+        }
+        // isatty, not process.stdin.isTTY: touching process.stdin makes fd 0 non-blocking, so
+        // reading a slow pipe would fail with EAGAIN.
+        if (message === undefined && !options.edit && isatty(0)) {
           throw new Error(
             'Pass a message, --edit <file>, or pipe the message in',
           )
         }
 
-        const input = cleanMessage(
-          message ??
-            (options.edit
-              ? fs.readFileSync(options.edit, 'utf8')
-              : fs.readFileSync(0, 'utf8')),
-        )
+        // Only a commit message file carries git's comments and the `git commit -v` diff.
+        const input = options.edit
+          ? cleanMessage(fs.readFileSync(options.edit, 'utf8'))
+          : (message ?? fs.readFileSync(0, 'utf8')).trimEnd()
         const result = lintMessage(input)
 
         if (options.json) {
@@ -489,8 +503,9 @@ Examples:
   return program
 }
 
-const isCommanderDisplayExit = (error: unknown) =>
-  error instanceof CommanderError && error.exitCode === 0
+const isCommanderDisplayExit = (error: unknown): error is CommanderError =>
+  error instanceof CommanderError &&
+  (error.exitCode === 0 || error.code === 'commander.help')
 
 export const run = async (argv = process.argv) => {
   const version = readPackageVersion()
@@ -502,11 +517,10 @@ export const run = async (argv = process.argv) => {
       console.warn = () => undefined
     }
 
-    await createProgram(() => createPerfekt(), version, jsonOutput).parseAsync(
-      argv,
-    )
+    await createProgram(createCommands(), version, jsonOutput).parseAsync(argv)
   } catch (error) {
     if (isCommanderDisplayExit(error)) {
+      if (error.exitCode) process.exitCode = error.exitCode
       return
     }
 

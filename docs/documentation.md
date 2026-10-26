@@ -4,6 +4,8 @@ For the list of available commands you can always run:
 
 `perfekt help`
 
+Upgrading from perfekt 3? See [upgrading](upgrading.md).
+
 ## `init`
 
 Usage: `perfekt init`
@@ -34,15 +36,6 @@ Options:
 
 `--json` - print the command result as JSON instead of human-readable output
 
-### Upgrading from perfekt 3
-
-perfekt 4 replaces commitlint with the built-in [`perfekt lint`](#lint), and the `perfekt/commitlint` export is gone. In a repo set up by perfekt 3:
-
-1. Delete `commitlint.config.cjs` and remove `@commitlint/cli` and `@commitlint/config-conventional` from `devDependencies`.
-2. In `.husky/commit-msg`, replace the commitlint line with `npx --no -- perfekt lint --edit "$1"`, or delete the hook if PR title checks are enough.
-3. Keep `.github/workflows/commitlint.yml` as it is; the shared workflow it calls already runs `perfekt lint`'s rules.
-4. A JSON `.perfektrc` keeps working. Convert a YAML or JS config, or a `"perfekt"` key in `package.json`, to `perfekt.json`: perfekt stops with an error while one of those is there, so a release never runs without your settings.
-
 ## `lint`
 
 Usage: `perfekt lint [message] [options]`
@@ -64,11 +57,11 @@ Options:
 
 `-h, --help` - display help for command
 
-`--edit <file>` - lint the message in this file, dropping git's `#` comments and the `git commit -v` diff
+`--edit <file>` - lint the message in this file, dropping git's `#` comments and the `git commit -v` diff. Use it instead of a message, not with one
 
 `--json` - print `{ success, command, input, ignored, errors, warnings }` instead of the report
 
-Exit codes: `0` when the message passes (warnings included), `1` when it breaks a rule or no message was given. Run with nothing to read from, it fails instead of waiting for input.
+Exit codes: `0` when the message passes (warnings included), `1` when it breaks a rule or no message was given. Run in a terminal with nothing piped in, it fails instead of waiting for input.
 
 Examples:
 
@@ -102,7 +95,7 @@ Options:
 
 `--base <ref>` - lint the commits since this ref; defaults to `origin/HEAD`, else the first of `origin/main`, `origin/master`, `main` and `master` that exists; with none, the step is skipped
 
-`--json` - print `{ success, command, dir, steps }`, where each step has its `name`, `status` (`passed`, `failed`, `skipped` or `not run`), time in `ms`, and the failing step's `output`
+`--json` - print `{ success, command, dir, steps }`, where each step has its `name`, `status` (`passed`, `failed`, `skipped` or `not run`), time in `ms`, an optional `detail` (the install command, the number of commits linted, why a step was skipped) and the failing step's `output`
 
 Exit codes: `0` when every step passes or is skipped, `1` on the first failure.
 

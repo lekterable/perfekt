@@ -1,23 +1,24 @@
 import fs from 'fs'
+import type { MockInstance } from 'vitest'
 import exec from '~utils/misc/exec'
 import * as writeFile from '../utils/misc/write-file'
 import { COMMITS_WORKFLOW_PATH, getCommitsWorkflow } from './commits'
 import setupCommits, { getDefaultBranch } from './setup-commits'
 
-jest.mock('fs')
-jest.mock('~utils/misc/exec')
+vi.mock('fs')
+vi.mock('~utils/misc/exec')
 
-const fsMock = jest.mocked(fs)
-const execMock = jest.mocked(exec)
+const fsMock = vi.mocked(fs)
+const execMock = vi.mocked(exec)
 
 const answer = (command: string, output: string) => (input: string) =>
   input.includes(command) ? output : ''
 
 describe('setup-commits', () => {
-  let writeFileSpy: jest.SpiedFunction<typeof writeFile.default>
+  let writeFileSpy: MockInstance<typeof writeFile.default>
 
   beforeEach(() => {
-    writeFileSpy = jest.spyOn(writeFile, 'default').mockResolvedValue()
+    writeFileSpy = vi.spyOn(writeFile, 'default').mockResolvedValue()
     fsMock.existsSync.mockReturnValue(false)
     execMock.mockImplementation(answer('origin/HEAD', 'origin/main'))
   })

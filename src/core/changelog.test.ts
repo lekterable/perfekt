@@ -3,9 +3,9 @@ import { createCommit, createConfig } from '~testing/fixtures'
 import { resolveReadFile } from '~testing/fs'
 import Changelog from './changelog'
 
-jest.mock('fs')
+vi.mock('fs')
 
-const fsMock = jest.mocked(fs)
+const fsMock = vi.mocked(fs)
 
 const mockVersion = '2.2.3'
 

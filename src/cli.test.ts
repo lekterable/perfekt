@@ -1,38 +1,41 @@
 import fs from 'node:fs'
 import { isatty } from 'node:tty'
 import { CommanderError } from 'commander'
+import type { Mock, MockInstance } from 'vitest'
 import { createProgram, getErrorCode, run } from './cli'
 import { Config, Perfekt } from './core'
 import { ci } from './core/ci'
 import { loadConfig } from './core/config/load'
 
-jest.mock('node:fs', () => ({
-  readFileSync: jest.fn(),
+vi.mock('node:fs', () => ({
+  default: { readFileSync: vi.fn() },
 }))
 
-jest.mock('node:tty', () => ({
-  isatty: jest.fn(),
+vi.mock('node:tty', () => ({
+  isatty: vi.fn(),
 }))
 
-jest.mock('./core/config/load', () => ({
-  loadConfig: jest.fn(),
+vi.mock('./core/config/load', () => ({
+  loadConfig: vi.fn(),
 }))
 
-jest.mock('./core', () => ({
-  Config: jest.fn(),
-  Perfekt: jest.fn(),
+vi.mock('./core', () => ({
+  Config: vi.fn(),
+  Perfekt: vi.fn(),
 }))
 
-jest.mock('./core/ci', () => ({
-  ci: jest.fn(),
+vi.mock('./core/ci', () => ({
+  ci: vi.fn(),
 }))
 
-const readFileSyncMock = jest.mocked(fs.readFileSync)
-const isattyMock = jest.mocked(isatty)
-const loadConfigMock = jest.mocked(loadConfig)
-const ciMock = jest.mocked(ci)
-const ConfigMock = Config as unknown as jest.Mock
-const PerfektMock = Perfekt as unknown as jest.Mock
+const readFileSyncMock = vi.mocked(fs.readFileSync)
+const isattyMock = vi.mocked(isatty)
+const loadConfigMock = vi.mocked(loadConfig)
+const ciMock = vi.mocked(ci)
+// Stand-ins for the Config and Perfekt classes, which the CLI calls with `new`.
+type Constructor = new (...args: never[]) => object
+const ConfigMock = Config as unknown as Mock<Constructor>
+const PerfektMock = Perfekt as unknown as Mock<Constructor>
 
 const createChangelogResult = () => ({
   write: false,
@@ -76,10 +79,10 @@ const createSetupCommitsResult = () => ({
 })
 
 const createPerfektDouble = () => ({
-  init: jest.fn().mockResolvedValue('perfekt.json'),
-  setupCommits: jest.fn().mockResolvedValue(createSetupCommitsResult()),
-  changelog: jest.fn().mockResolvedValue(createChangelogResult()),
-  release: jest.fn().mockResolvedValue(createReleaseResult()),
+  init: vi.fn().mockResolvedValue('perfekt.json'),
+  setupCommits: vi.fn().mockResolvedValue(createSetupCommitsResult()),
+  changelog: vi.fn().mockResolvedValue(createChangelogResult()),
+  release: vi.fn().mockResolvedValue(createReleaseResult()),
 })
 
 const mockLoadedPerfekt = (instance = createPerfektDouble()) => {
@@ -87,8 +90,22 @@ const mockLoadedPerfekt = (instance = createPerfektDouble()) => {
     JSON.stringify({ version: '3.0.0' }) as never,
   )
   loadConfigMock.mockReturnValue({ answer: 42 })
-  ConfigMock.mockImplementation((value) => ({ config: { normalized: value } }))
-  PerfektMock.mockImplementation(() => instance)
+  // Vitest calls constructor mocks with `new`, so the implementations are classes.
+  ConfigMock.mockImplementation(
+    class {
+      config: unknown
+      constructor(value: unknown) {
+        this.config = { normalized: value }
+      }
+    },
+  )
+  PerfektMock.mockImplementation(
+    class {
+      constructor() {
+        Object.assign(this, instance)
+      }
+    },
+  )
 
   return instance
 }
@@ -100,20 +117,16 @@ const parse = (...args: string[]) =>
     ...args,
   ])
 
-const lastJson = (spy: jest.SpiedFunction<typeof process.stdout.write>) =>
+const lastJson = (spy: MockInstance<typeof process.stdout.write>) =>
   JSON.parse(spy.mock.calls[spy.mock.calls.length - 1]?.[0] as string)
 
 describe('cli', () => {
-  let stdoutSpy: jest.SpiedFunction<typeof process.stdout.write>
-  let stderrSpy: jest.SpiedFunction<typeof process.stderr.write>
+  let stdoutSpy: MockInstance<typeof process.stdout.write>
+  let stderrSpy: MockInstance<typeof process.stderr.write>
 
   beforeEach(() => {
-    stdoutSpy = jest
-      .spyOn(process.stdout, 'write')
-      .mockImplementation(() => true)
-    stderrSpy = jest
-      .spyOn(process.stderr, 'write')
-      .mockImplementation(() => true)
+    stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
+    stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true)
     process.exitCode = undefined
   })
 
@@ -429,9 +442,13 @@ describe('cli', () => {
 
     it('should report an invalid config as an error, not a crash', async () => {
       mockLoadedPerfekt()
-      ConfigMock.mockImplementation(() => {
-        throw new Error('Invalid perfekt config: expected an object.')
-      })
+      ConfigMock.mockImplementation(
+        class {
+          constructor() {
+            throw new Error('Invalid perfekt config: expected an object.')
+          }
+        },
+      )
 
       await expect(
         run(['node', 'perfekt', 'changelog', '--json']),
@@ -445,9 +462,13 @@ describe('cli', () => {
 
     it('should lint without loading the config', async () => {
       mockLoadedPerfekt()
-      ConfigMock.mockImplementation(() => {
-        throw new Error('Invalid perfekt config: expected an object.')
-      })
+      ConfigMock.mockImplementation(
+        class {
+          constructor() {
+            throw new Error('Invalid perfekt config: expected an object.')
+          }
+        },
+      )
 
       await run(['node', 'perfekt', 'lint', 'feat: add x'])
 
@@ -480,7 +501,7 @@ describe('cli', () => {
     })
 
     it('should hide warnings in JSON mode and restore console.warn', async () => {
-      const warnSpy = jest
+      const warnSpy = vi
         .spyOn(console, 'warn')
         .mockImplementation(() => undefined)
       const perfekt = mockLoadedPerfekt()

@@ -44,27 +44,26 @@
     "format": "biome check --write",
     "lint": "biome check",
     "prepare": "pnpm run build && husky",
-    "test": "jest",
-    "test:ci": "jest --collectCoverage --ci --runInBand",
-    "test:coverage": "jest --collectCoverage",
-    "test:watch": "jest --watch",
+    "test": "vitest run",
+    "test:ci": "vitest run --coverage",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "validate": "pnpm run lint && pnpm run typecheck"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
-    "@types/jest": "30.0.0",
     "@types/node": "25.5.0",
     "@types/semver": "7.7.1",
+    "@vitest/coverage-v8": "4.1.12",
     "commander": "14.0.3",
     "husky": "9.1.7",
-    "jest": "30.3.0",
     "lint-staged": "16.4.0",
     "perfekt": "link:.",
     "semver": "7.7.4",
-    "ts-jest": "29.4.6",
     "tsdown": "0.21.4",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "4.1.12"
   },
   "peerDependencies": {
     "@biomejs/biome": ">=2.5"

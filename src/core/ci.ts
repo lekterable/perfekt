@@ -7,6 +7,9 @@ import path from 'node:path'
 // lockfile frozen (CI=true does that for pnpm and yarn, npm ci always does), lint the commits,
 // then each of lint, typecheck, test and build the repo has.
 
+// The commitlint major the shared config is written for, as in .github/workflows/commitlint.yml.
+const COMMITLINT_MAJOR = 20
+
 export const CI_SCRIPTS = ['lint', 'typecheck', 'test', 'build'] as const
 
 export type CiStatus = 'passed' | 'failed' | 'skipped' | 'not run'
@@ -117,25 +120,31 @@ export const readCommitMessages = (dir: string, base: string, run = exec) => {
 }
 
 /**
- * Lints each message with perfekt's shared commitlint config, as the shared commitlint workflow
- * does for pull request titles. Returns one report per failing message.
+ * Lints each message with perfekt's shared commitlint config. Like the shared commitlint
+ * workflow, it fetches @commitlint/cli on demand (npm caches it), so perfekt doesn't ship it.
+ * Returns one report per failing message.
  */
-export const lintMessages = (messages: string[], sharedConfig: string) => {
-  const cli = path.join(
-    path.dirname(require.resolve('@commitlint/cli/package.json')),
-    'cli.js',
-  )
-
-  return messages.flatMap((message) => {
+export const lintMessages = (messages: string[], sharedConfig: string) =>
+  messages.flatMap((message) => {
     const result = spawnSync(
-      process.execPath,
-      [cli, '--config', sharedConfig],
+      'npm',
+      [
+        'exec',
+        '--yes',
+        `--package=@commitlint/cli@${COMMITLINT_MAJOR}`,
+        '--',
+        'commitlint',
+        '--config',
+        sharedConfig,
+      ],
       {
         cwd: path.dirname(sharedConfig),
         encoding: 'utf8',
         input: `${message}\n`,
       },
     )
+
+    if (result.error) throw result.error
 
     return result.status === 0
       ? []
@@ -144,7 +153,6 @@ export const lintMessages = (messages: string[], sharedConfig: string) => {
             `✖ ${message.split('\n')[0]}`,
         ]
   })
-}
 
 const time = async <T>(work: () => T | Promise<T>) => {
   const start = Date.now()

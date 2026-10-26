@@ -497,6 +497,22 @@ describe('cli', () => {
       process.argv = argv
     })
 
+    it('should report an invalid config as an error, not a crash', async () => {
+      mockLoadedPerfekt()
+      ConfigMock.mockImplementation(() => {
+        throw new Error('Invalid perfekt config: expected an object.')
+      })
+
+      await expect(
+        run(['node', 'perfekt', 'changelog', '--json']),
+      ).resolves.toBe(undefined)
+
+      expect(stdoutSpy).toHaveBeenCalledWith(
+        expect.stringContaining('INVALID_CONFIG'),
+      )
+      expect(process.exitCode).toBe(1)
+    })
+
     it('should not print a failure block for the short version flag', async () => {
       mockLoadedPerfekt()
 

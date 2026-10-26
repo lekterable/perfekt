@@ -3,8 +3,8 @@ import { fileExists, writeFile } from '~utils'
 // Each file cosmiconfig reads, with an empty config in its format.
 export const CONFIG_FILES: Record<string, string> = {
   '.perfektrc': '{}\n',
-  'perfekt.json': '{}\n',
-  'perfekt.yaml': '{}\n',
+  '.perfektrc.json': '{}\n',
+  '.perfektrc.yaml': '{}\n',
   'perfekt.config.js': 'module.exports = {}\n',
 }
 

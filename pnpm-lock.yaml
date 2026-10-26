@@ -165,16 +165,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      commander:
-        specifier: 14.0.3
-        version: 14.0.3
-      cosmiconfig:
-        specifier: 9.0.1
-        version: 9.0.1(typescript@5.9.3)
-      semver:
-        specifier: 7.7.4
-        version: 7.7.4
     devDependencies:
       '@biomejs/biome':
         specifier: 2.5.15
@@ -188,6 +178,12 @@ importers:
       '@types/semver':
         specifier: 7.7.1
         version: 7.7.1
+      commander:
+        specifier: 14.0.3
+        version: 14.0.3
+      cosmiconfig:
+        specifier: 9.0.1
+        version: 9.0.1(typescript@5.9.3)
       husky:
         specifier: 9.1.7
         version: 9.1.7
@@ -203,6 +199,9 @@ importers:
       perfekt:
         specifier: link:.
         version: 'link:'
+      semver:
+        specifier: 7.7.4
+        version: 7.7.4
       ts-jest:
         specifier: 29.4.6
         version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.3.0)(@jest/types@30.3.0)(babel-jest@30.3.0(@babel/core@7.29.0))(jest-util@30.3.0)(jest@30.3.0(@types/node@25.5.0)(ts-node@10.9.1(@types/node@25.5.0)(typescript@5.9.3)))(typescript@5.9.3)

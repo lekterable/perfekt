@@ -312,7 +312,7 @@ export const createProgram = (
   program
     .command('init [file]')
     .description(
-      'write an empty config: .perfektrc (default), perfekt.json, perfekt.yaml or perfekt.config.js',
+      'write an empty config: .perfektrc (default), .perfektrc.json, .perfektrc.yaml or perfekt.config.js',
     )
     .action(async (file?: string) => {
       const written = await perfekt.init(file)
@@ -497,7 +497,6 @@ const isCommanderDisplayExit = (error: unknown) =>
 
 export const run = async (argv = process.argv) => {
   const version = readPackageVersion()
-  const perfekt = createPerfekt()
   const jsonOutput = argv.includes('--json')
   const warn = console.warn
 
@@ -506,7 +505,8 @@ export const run = async (argv = process.argv) => {
       console.warn = () => undefined
     }
 
-    await createProgram(perfekt, version, jsonOutput).parseAsync(argv)
+    // Inside the try, so an invalid config reports INVALID_CONFIG instead of a stack trace.
+    await createProgram(createPerfekt(), version, jsonOutput).parseAsync(argv)
   } catch (error) {
     if (isCommanderDisplayExit(error)) {
       return

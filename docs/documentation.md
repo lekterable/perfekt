@@ -8,7 +8,7 @@ For the list of available commands you can always run:
 
 Usage: `perfekt init [file]`
 
-Writes an empty configuration file: `.perfektrc` by default, or `perfekt.json`, `perfekt.yaml` or `perfekt.config.js` when you name one. It never overwrites an existing file.
+Writes an empty configuration file: `.perfektrc` by default, or `.perfektrc.json`, `.perfektrc.yaml` or `perfekt.config.js` when you name one. It never overwrites an existing file.
 
 Options:
 

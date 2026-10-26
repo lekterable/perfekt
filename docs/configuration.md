@@ -1,7 +1,5 @@
 # Configuration
 
-> **perfekt's** huge advantage is it's configurability.
-
 perfekt reads `perfekt.json` from the folder it runs in. `perfekt init` writes an empty one, and every field is optional; an empty file means the defaults. A JSON `.perfektrc`, `.perfektrc.json` or `.config/perfektrc[.json]` from perfekt 3 still works in its place.
 
 Only `changelog` and `release` read the config. They stop with an `INVALID_CONFIG` error when the file isn't valid JSON, when it's a YAML or JS config or a `"perfekt"` key in `package.json`, or when more than one config is present, so a release never runs with settings you didn't mean.

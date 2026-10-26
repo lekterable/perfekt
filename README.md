@@ -27,7 +27,7 @@
 
 ## Intro
 
-**perfekt** releases, versions and writes changelogs for [Conventional Commits](https://www.conventionalcommits.org) repos. It needs no config to start, works with `pnpm`, `npm` and `yarn`, and installs as one file with no dependencies.
+**perfekt** is a release, changelog and versioning manager for [Conventional Commits](https://www.conventionalcommits.org) repos. It needs no config to start, works with `pnpm`, `npm` and `yarn`, and installs as one file with no dependencies.
 
 | Command | What it does |
 | --- | --- |

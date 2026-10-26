@@ -1,1 +1,1 @@
-node dist/cli.cjs lint --edit "$1"
+node dist/cli.js lint --edit "$1"

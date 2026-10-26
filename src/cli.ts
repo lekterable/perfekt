@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import fs from 'node:fs'
 import path from 'node:path'
 import { isatty } from 'node:tty'
@@ -542,9 +540,4 @@ export const run = async (argv = process.argv) => {
   } finally {
     console.warn = warn
   }
-}
-
-/* istanbul ignore next */
-if (require.main === module) {
-  void run()
 }

@@ -20,9 +20,10 @@
     "url": "git+https://github.com/lekterable/perfekt.git"
   },
   "license": "MIT",
+  "type": "module",
   "author": "Kornel Dubieniecki (https://kornel.me)",
   "bin": {
-    "perfekt": "dist/cli.cjs"
+    "perfekt": "dist/cli.js"
   },
   "exports": {
     "./biome": "./biome.json",

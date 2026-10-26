@@ -1,15 +1,16 @@
 import fs from 'fs'
+import type { MockInstance } from 'vitest'
 import { createConfig } from '~testing/fixtures'
 import { resolveReadFile, resolveWriteFile } from '~testing/fs'
 import exec, { execFile } from '~utils/misc/exec'
 import Perfekt from './perfekt'
 
-jest.mock('fs')
-jest.mock('~utils/misc/exec')
+vi.mock('fs')
+vi.mock('~utils/misc/exec')
 
-const fsMock = jest.mocked(fs)
-const execMock = jest.mocked(exec)
-const execFileMock = jest.mocked(execFile)
+const fsMock = vi.mocked(fs)
+const execMock = vi.mocked(exec)
+const execFileMock = vi.mocked(execFile)
 
 const mockLog = [
   'bffc2f9e8da1c7ac133689bc9cd14494f3be08e3 refactor: extract line generating logic to function and promisify exec',
@@ -85,10 +86,10 @@ describe('Perfekt', () => {
   })
 
   describe('changelog', () => {
-    let stdoutSpy: jest.SpiedFunction<typeof process.stdout.write>
+    let stdoutSpy: MockInstance<typeof process.stdout.write>
 
     beforeEach(() => {
-      stdoutSpy = jest
+      stdoutSpy = vi
         .spyOn(process.stdout, 'write')
         .mockImplementation(() => true)
     })

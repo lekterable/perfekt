@@ -187,7 +187,7 @@ describe('ci', () => {
   })
 
   it('should remove the temporary folder when the clean checkout fails', async () => {
-    const mkdtempSpy = jest.spyOn(fs, 'mkdtempSync')
+    const mkdtempSpy = vi.spyOn(fs, 'mkdtempSync')
     const run: Exec = (_command, args) =>
       args[0] === 'worktree'
         ? { status: 128, output: 'fatal: invalid reference: HEAD' }

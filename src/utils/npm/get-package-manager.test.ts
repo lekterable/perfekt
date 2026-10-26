@@ -1,9 +1,9 @@
 import fs from 'fs'
 import { getPackageManager } from './get-package-manager'
 
-jest.mock('fs')
+vi.mock('fs')
 
-const fsMock = jest.mocked(fs)
+const fsMock = vi.mocked(fs)
 
 describe('getPackageManager', () => {
   it.each([

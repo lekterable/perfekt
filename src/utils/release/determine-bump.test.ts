@@ -17,7 +17,7 @@ describe('determineBump', () => {
   const config = createConfig()
 
   const mockUnreleased = (log: string[]) =>
-    jest
+    vi
       .spyOn(Git.prototype, 'getUnreleasedCommits')
       .mockReturnValueOnce(createCommits(log))
 

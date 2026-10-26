@@ -1,9 +1,9 @@
 import exec from '../utils/misc/exec'
 import Git from './git'
 
-jest.mock('../utils/misc/exec')
+vi.mock('../utils/misc/exec')
 
-const execMock = jest.mocked(exec)
+const execMock = vi.mocked(exec)
 
 const releaseCommit = (version: string) =>
   `60a2d0a9b503d6c8bd0209ac4971dae463c67b34 chore(release): ${version}`

@@ -3,14 +3,14 @@ import { readFile } from '../misc'
 import determineBump from './determine-bump'
 import resolveVersion from './resolve-version'
 
-jest.mock('../misc', () => ({
-  readFile: jest.fn(),
+vi.mock('../misc', () => ({
+  readFile: vi.fn(),
 }))
 
-jest.mock('./determine-bump', () => jest.fn())
+vi.mock('./determine-bump', () => ({ default: vi.fn() }))
 
-const readFileMock = jest.mocked(readFile)
-const determineBumpMock = jest.mocked(determineBump)
+const readFileMock = vi.mocked(readFile)
+const determineBumpMock = vi.mocked(determineBump)
 
 describe('resolveVersion', () => {
   const config = createConfig()

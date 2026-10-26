@@ -34,6 +34,16 @@ export type SetupCommitsResult = {
   defaultBranch: string | null
 }
 
+export type SetupHooksOptions = { force?: boolean; major: string; dir?: string }
+
+export type SetupHooksResult = {
+  files: SetupFileResult[]
+  /** The hooks path set in this clone's git config, or null when untouched. */
+  hooksPath: string | null
+  /** The command other clones must run when no prepare script sets the hooks path. */
+  clonesNeed: string | null
+}
+
 export type Config = {
   unreleasedHeader: string
   releaseHeader: string

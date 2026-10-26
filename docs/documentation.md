@@ -126,6 +126,20 @@ Options:
 
 Exit codes: `0` when every step passes or is skipped, `1` on the first failure.
 
+## `setup`
+
+Usage: `perfekt setup [options]`
+
+Runs [`setup commits`](#setup-commits) and then [`setup hooks`](#setup-hooks).
+
+Options:
+
+`-h, --help` - display help for command
+
+`--force` - overwrite the workflow and the hook if they already exist
+
+`--json` - print `{ success, command, files, defaultBranch, hooksPath, clonesNeed }`, with the files of both steps
+
 ## `setup commits`
 
 Usage: `perfekt setup commits [options]`
@@ -143,6 +157,25 @@ Options:
 `--force` - overwrite the workflow if it already exists
 
 `--json` - print the command result as JSON instead of human-readable output
+
+## `setup hooks`
+
+Usage: `perfekt setup hooks [options]`
+
+Writes a `commit-msg` hook that runs `perfekt lint --edit` on every commit, so a message that breaks the rules is rejected before it is made. A repo with `perfekt` in its dependencies runs that copy; any other repo runs `npx --yes perfekt@<major>`.
+
+- In a repo with a `.husky/` folder, the hook goes in `.husky/commit-msg` and husky runs it.
+- Otherwise it goes in `.githooks/commit-msg`, and git's `core.hooksPath` is set to `.githooks` in this clone. When `package.json` has no `prepare` script, setup adds `git config core.hooksPath .githooks` as one, so every other clone picks the hook up on install. When it already has one, setup leaves it alone and prints the command to add to it.
+
+An existing hook is left alone unless you pass `--force`.
+
+Options:
+
+`-h, --help` - display help for command
+
+`--force` - overwrite the hook if it already exists
+
+`--json` - print `{ success, command, files, hooksPath, clonesNeed }`, where `hooksPath` is the hooks path set in this clone (or `null`) and `clonesNeed` is the command other clones still need (or `null`)
 
 ## `init`
 

@@ -81,6 +81,11 @@ const createSetupCommitsResult = () => ({
 const createPerfektDouble = () => ({
   init: vi.fn().mockResolvedValue('perfekt.json'),
   setupCommits: vi.fn().mockResolvedValue(createSetupCommitsResult()),
+  setupHooks: vi.fn().mockReturnValue({
+    files: [{ path: '.githooks/commit-msg', status: 'written' as const }],
+    hooksPath: '.githooks',
+    clonesNeed: null,
+  }),
   changelog: vi.fn().mockResolvedValue(createChangelogResult()),
   release: vi.fn().mockResolvedValue(createReleaseResult()),
 })
@@ -190,6 +195,52 @@ describe('cli', () => {
 
       expect(perfekt.init).toHaveBeenCalledTimes(1)
       expect(stdoutSpy).toHaveBeenCalledWith('🌱 Wrote perfekt.json\n')
+    })
+
+    it('should run both setups with a bare setup', async () => {
+      const perfekt = createPerfektDouble()
+
+      await createProgram(perfekt, '4.1.0').parseAsync([
+        'node',
+        'perfekt',
+        'setup',
+        '--json',
+      ])
+
+      expect(perfekt.setupCommits).toHaveBeenCalledWith({ force: false })
+      expect(perfekt.setupHooks).toHaveBeenCalledWith({
+        force: false,
+        major: '4',
+      })
+      expect(lastJson(stdoutSpy)).toMatchObject({
+        command: 'setup',
+        files: [
+          { path: '.github/workflows/commitlint.yml', status: 'written' },
+          { path: '.githooks/commit-msg', status: 'written' },
+        ],
+        defaultBranch: 'main',
+        hooksPath: '.githooks',
+      })
+    })
+
+    it('should run the setup hooks command', async () => {
+      const perfekt = createPerfektDouble()
+
+      await createProgram(perfekt, '4.1.0').parseAsync([
+        'node',
+        'perfekt',
+        'setup',
+        'hooks',
+      ])
+
+      expect(perfekt.setupCommits).not.toHaveBeenCalled()
+      expect(perfekt.setupHooks).toHaveBeenCalledWith({
+        force: false,
+        major: '4',
+      })
+      expect(stdoutSpy).toHaveBeenCalledWith(
+        expect.stringContaining('.githooks/commit-msg'),
+      )
     })
 
     it('should run the setup commits command', async () => {

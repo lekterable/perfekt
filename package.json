@@ -29,6 +29,7 @@
     "./biome": "./biome.json",
     "./biome/arrow.grit": "./biome/arrow.grit",
     "./biome/should.grit": "./biome/should.grit",
+    "./biome/loop.grit": "./biome/loop.grit",
     "./package.json": "./package.json"
   },
   "files": [

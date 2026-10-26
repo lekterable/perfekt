@@ -1,0 +1,14 @@
+// Bans loops: use map/filter/reduce/flatMap/find, it.each for test tables, and
+// reduce or recursion in one named helper for sequential async work.
+// forEach stays allowed for side effects (logging, writes).
+language js
+
+or {
+  JsForStatement(),
+  JsForOfStatement(),
+  JsForInStatement(),
+  JsWhileStatement(),
+  JsDoWhileStatement()
+} as $loop where {
+  register_diagnostic(span=$loop, message="Write this declaratively (map, filter, reduce, flatMap, find, it.each) instead of a loop (forEach is fine for side effects). Sequential async work goes in one named helper built on reduce or recursion.")
+}

@@ -6,16 +6,16 @@ import { loadConfig } from './load'
 const dirs: string[] = []
 
 afterAll(() => {
-  for (const dir of dirs) fs.rmSync(dir, { recursive: true, force: true })
+  dirs.forEach((dir) => fs.rmSync(dir, { recursive: true, force: true }))
 })
 
 const makeDir = (files: Record<string, string>) => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'perfekt-config-'))
   dirs.push(dir)
-  for (const [name, content] of Object.entries(files)) {
+  Object.entries(files).forEach(([name, content]) => {
     fs.mkdirSync(path.dirname(path.join(dir, name)), { recursive: true })
     fs.writeFileSync(path.join(dir, name), content)
-  }
+  })
   return dir
 }
 

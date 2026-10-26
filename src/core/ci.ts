@@ -212,30 +212,30 @@ export const runSteps = async (
     })
   }
 
-  for (const script of CI_SCRIPTS) {
-    if (failed()) {
-      steps.push({ name: script, status: 'not run', ms: 0 })
-      continue
+  // Scripts run one after another; once a step failed, the rest are not run.
+  const scriptStep = async (
+    script: string,
+    done: CiStep[],
+  ): Promise<CiStep> => {
+    if (done.some((step) => step.status === 'failed')) {
+      return { name: script, status: 'not run', ms: 0 }
     }
     if (!packageJson.scripts?.[script]) {
-      steps.push({
-        name: script,
-        status: 'skipped',
-        ms: 0,
-        detail: 'no script',
-      })
-      continue
+      return { name: script, status: 'skipped', ms: 0, detail: 'no script' }
     }
     const result = await time(() => run(manager, ['run', script], dir))
-    steps.push({
+    return {
       name: script,
       status: result.value.status === 0 ? 'passed' : 'failed',
       ms: result.ms,
       output: result.value.status === 0 ? undefined : tail(result.value.output),
-    })
+    }
   }
 
-  return steps
+  return CI_SCRIPTS.reduce<Promise<CiStep[]>>(async (previous, script) => {
+    const done = await previous
+    return [...done, await scriptStep(script, done)]
+  }, Promise.resolve(steps))
 }
 
 /**

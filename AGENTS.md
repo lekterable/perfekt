@@ -9,7 +9,7 @@ Before pushing, run `pnpm build && node dist/cli.js ci` (or `pnpm lint`, `pnpm t
 <!-- conventions:start -->
 ## Code conventions
 
-These are shared across Kornel's repos. Keep this block identical in every repo, and edit it in all of them at once.
+These are shared across repos. Keep this block identical in every repo that has it, and edit it in all of them at once.
 
 - TypeScript first. Use types, not interfaces.
 - Write arrow functions only; no `function` declarations or expressions. Generators, and the rare case a framework needs `this`, are the exceptions.

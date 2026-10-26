@@ -32,7 +32,6 @@ export type SetupFileResult = {
 export type SetupCommitsResult = {
   files: SetupFileResult[]
   defaultBranch: string | null
-  lekterableTip: string
 }
 
 export type Config = {

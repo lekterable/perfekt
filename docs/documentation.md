@@ -134,8 +134,6 @@ Writes `.github/workflows/commitlint.yml`, which lints pull request titles by ca
 
 When you squash-merge, the pull request title becomes the commit, so this covers what lands on the default branch. A trailing `(#N)` from GitHub squash is allowed.
 
-It also prints a lekterable tip. Our repos use `master` and first commit `feat: init :seedling:`. That is advisory. Setup does not fail on `main`.
-
 An existing workflow is left alone unless you pass `--force`.
 
 Options:

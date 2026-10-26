@@ -1,11 +1,7 @@
 import fs from 'fs'
 import exec from '~utils/misc/exec'
 import * as writeFile from '../utils/misc/write-file'
-import {
-  COMMITS_WORKFLOW_PATH,
-  getCommitsWorkflow,
-  LEKTERABLE_TIP,
-} from './commits'
+import { COMMITS_WORKFLOW_PATH, getCommitsWorkflow } from './commits'
 import setupCommits, { getDefaultBranch } from './setup-commits'
 
 jest.mock('fs')
@@ -57,7 +53,6 @@ describe('setup-commits', () => {
     expect(result).toEqual({
       files: [{ path: COMMITS_WORKFLOW_PATH, status: 'written' }],
       defaultBranch: 'main',
-      lekterableTip: LEKTERABLE_TIP,
     })
   })
 

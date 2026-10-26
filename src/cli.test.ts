@@ -66,13 +66,8 @@ const createReleaseResult = () => ({
 
 const createSetupCommitsResult = () => ({
   files: [
-    { path: 'commitlint.config.cjs', status: 'written' as const },
-    { path: '.husky/commit-msg', status: 'written' as const },
+    { path: '.github/workflows/commitlint.yml', status: 'written' as const },
   ],
-  packageManager: 'pnpm' as const,
-  installCommand:
-    'pnpm add -D @commitlint/cli @commitlint/config-conventional husky',
-  prepareHint: 'package.json already runs husky in scripts.prepare',
   defaultBranch: 'main',
   lekterableTip:
     'lekterable repos use master and first commit feat: init :seedling:. Advisory only. Setup does not fail on other default branches.',
@@ -301,7 +296,7 @@ describe('cli', () => {
       })
 
       expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('add commitlint and a husky commit-msg hook'),
+        expect.stringContaining('lints pull request titles'),
       )
       expect(stdoutSpy).not.toHaveBeenCalledWith(
         expect.stringContaining('default branch master'),
@@ -316,20 +311,16 @@ describe('cli', () => {
         'perfekt',
         'setup',
         'commits',
-        '--ci',
         '--force',
       ])
 
       expect(perfekt.setupCommits).toHaveBeenCalledTimes(1)
-      expect(perfekt.setupCommits).toHaveBeenCalledWith({
-        ci: true,
-        force: true,
-      })
+      expect(perfekt.setupCommits).toHaveBeenCalledWith({ force: true })
       expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('🌱 Commitlint setup'),
+        expect.stringContaining('🌱 Commit linting setup'),
       )
       expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('commitlint.config.cjs'),
+        expect.stringContaining('.github/workflows/commitlint.yml'),
       )
       expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining('main'))
       expect(stdoutSpy).toHaveBeenCalledWith(
@@ -348,10 +339,7 @@ describe('cli', () => {
         '--json',
       ])
 
-      expect(perfekt.setupCommits).toHaveBeenCalledWith({
-        ci: false,
-        force: false,
-      })
+      expect(perfekt.setupCommits).toHaveBeenCalledWith({ force: false })
       expect(stdoutSpy).toHaveBeenCalledWith(
         expect.stringContaining('"command": "setup"'),
       )
@@ -468,6 +456,22 @@ describe('cli', () => {
       expect(stdoutSpy).toHaveBeenCalledWith(
         expect.stringContaining('"command": "release"'),
       )
+    })
+  })
+
+  describe('lint', () => {
+    it.each([
+      ['feat: add x', undefined],
+      ['Added stuff.', 1],
+    ])('should lint %j and set exit code %s', async (message, exitCode) => {
+      await createProgram(createPerfektDouble(), '3.0.0').parseAsync([
+        'node',
+        'perfekt',
+        'lint',
+        message,
+      ])
+
+      expect(process.exitCode).toBe(exitCode)
     })
   })
 

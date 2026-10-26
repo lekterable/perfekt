@@ -14,7 +14,8 @@ import type {
 } from '~types'
 import { Config, Perfekt } from './core'
 import { type CiResult, type CiStep, ci } from './core/ci'
-import { SQUASH_MERGE_NOTE } from './core/commitlint'
+import { SQUASH_MERGE_NOTE } from './core/commits'
+import { cleanMessage, formatLint, lintMessage } from './core/lint'
 
 type ChangelogCommandOptions = ChangelogOptions & { json?: boolean }
 type ReleaseCommandOptions = ReleaseOptions & { json?: boolean }
@@ -46,9 +47,6 @@ type JsonResponse =
       success: true
       command: 'setup'
       files: SetupCommitsResult['files']
-      packageManager: SetupCommitsResult['packageManager']
-      installCommand: string
-      prepareHint: string
       defaultBranch: SetupCommitsResult['defaultBranch']
       lekterableTip: string
     }
@@ -77,8 +75,23 @@ type JsonResponse =
       steps: CiStep[]
     }
   | {
+      success: boolean
+      command: 'lint'
+      input: string
+      ignored: boolean
+      errors: string[]
+      warnings: string[]
+    }
+  | {
       success: false
-      command: 'changelog' | 'release' | 'init' | 'setup' | 'ci' | 'unknown'
+      command:
+        | 'changelog'
+        | 'release'
+        | 'init'
+        | 'setup'
+        | 'ci'
+        | 'lint'
+        | 'unknown'
       error: {
         code: string
         message: string
@@ -130,11 +143,9 @@ const printSetupCommitsSummary = (result: SetupCommitsResult) => {
     .filter((file) => file.status === 'skipped')
     .map((file) => file.path)
 
-  formatDetailBlock('🌱 Commitlint setup', [
+  formatDetailBlock('🌱 Commit linting setup', [
     ['Written', written.join(', ') || 'none'],
     ['Skipped', skipped.join(', ') || 'none'],
-    ['Install', result.installCommand],
-    ['Prepare', result.prepareHint],
     ['Default branch', result.defaultBranch ?? 'not detected'],
     ['Tip', result.lekterableTip],
   ])
@@ -212,9 +223,6 @@ const createSetupResponse = (result: SetupCommitsResult): JsonResponse => ({
   success: true,
   command: 'setup',
   files: result.files,
-  packageManager: result.packageManager,
-  installCommand: result.installCommand,
-  prepareHint: result.prepareHint,
   defaultBranch: result.defaultBranch,
   lekterableTip: result.lekterableTip,
 })
@@ -240,7 +248,7 @@ const createReleaseResponse = (result: ReleaseResult): JsonResponse => ({
 
 export const getCommandName = (
   argv = process.argv,
-): 'changelog' | 'release' | 'init' | 'setup' | 'ci' | 'unknown' => {
+): 'changelog' | 'release' | 'init' | 'setup' | 'ci' | 'lint' | 'unknown' => {
   const command = argv[2]
 
   if (
@@ -248,7 +256,8 @@ export const getCommandName = (
     command === 'release' ||
     command === 'init' ||
     command === 'setup' ||
-    command === 'ci'
+    command === 'ci' ||
+    command === 'lint'
   ) {
     return command
   }
@@ -311,14 +320,14 @@ export const createProgram = (
 
   setup
     .command('commits')
-    .description('add commitlint and a husky commit-msg hook')
-    .option('--ci', 'write a GitHub Action that lints pull request titles')
-    .option('--force', 'overwrite existing generated files')
+    .description(
+      'add a GitHub Action that lints pull request titles with perfekt lint',
+    )
+    .option('--force', 'overwrite an existing workflow')
     .option('--json', 'print the command result as JSON')
     .action(async (options: SetupCommitsOptions & { json?: boolean }) => {
       const { json = false, ...setupOptions } = options
       const result = await perfekt.setupCommits({
-        ci: Boolean(setupOptions.ci),
         force: Boolean(setupOptions.force),
       })
 
@@ -377,7 +386,7 @@ export const createProgram = (
   program
     .command('ci')
     .description(
-      'run the shared CI steps locally on a clean checkout of HEAD: install, commitlint, lint, typecheck, test, build',
+      'run the shared CI steps locally on a clean checkout of HEAD: install, commits, lint, typecheck, test, build',
     )
     .option('--dirty', 'run in this folder, uncommitted changes included')
     .option(
@@ -397,15 +406,52 @@ export const createProgram = (
         json?: boolean
       }) => {
         const { json = false, ...ciOptions } = options
-        const result = await ci({
-          ...ciOptions,
-          sharedConfig: path.resolve(__dirname, '../commitlint.cjs'),
-        })
+        const result = await ci(ciOptions)
 
         if (json) writeJson({ command: 'ci', ...result })
         else printCiSummary(result)
 
         if (!result.success) process.exitCode = 1
+      },
+    )
+
+  program
+    .command('lint [message]')
+    .description(
+      'lint a commit message or pull request title with the shared commit rules (reads stdin without a message)',
+    )
+    .option(
+      '--edit <file>',
+      'lint the message in this file, as a commit-msg hook passes it',
+    )
+    .option('--json', 'print the command result as JSON')
+    .action(
+      async (
+        message: string | undefined,
+        options: { edit?: string; json?: boolean },
+      ) => {
+        const input = cleanMessage(
+          message ??
+            (options.edit
+              ? fs.readFileSync(options.edit, 'utf8')
+              : fs.readFileSync(0, 'utf8')),
+        )
+        const result = lintMessage(input)
+
+        if (options.json) {
+          writeJson({
+            success: result.valid,
+            command: 'lint',
+            input,
+            ...result,
+          })
+        } else if (result.errors.length + result.warnings.length > 0) {
+          const report = formatLint(input, result)
+          if (result.valid) process.stdout.write(`${report}\n`)
+          else process.stderr.write(`${report}\n`)
+        }
+
+        if (!result.valid) process.exitCode = 1
       },
     )
 

@@ -26,7 +26,6 @@
   },
   "exports": {
     "./biome": "./biome.json",
-    "./commitlint": "./commitlint.cjs",
     "./biome/arrow.grit": "./biome/arrow.grit",
     "./biome/should.grit": "./biome/should.grit",
     "./package.json": "./package.json"
@@ -34,7 +33,6 @@
   "files": [
     "dist",
     "biome.json",
-    "commitlint.cjs",
     "biome"
   ],
   "scripts": {
@@ -52,7 +50,6 @@
     "validate": "pnpm run lint && pnpm run typecheck"
   },
   "dependencies": {
-    "@commitlint/config-conventional": "20.5.0",
     "commander": "14.0.3",
     "cosmiconfig": "9.0.1",
     "inquirer": "13.3.2",
@@ -60,7 +57,6 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
-    "@commitlint/cli": "20.5.0",
     "@types/jest": "30.0.0",
     "@types/node": "25.5.0",
     "@types/semver": "7.7.1",

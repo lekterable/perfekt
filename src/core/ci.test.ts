@@ -4,8 +4,6 @@ import os from 'node:os'
 import path from 'node:path'
 import { ci, type Exec, exec, getInstallCommand, runSteps } from './ci'
 
-const sharedConfig = path.resolve(__dirname, '../../commitlint.cjs')
-
 const makeDir = (files: Record<string, string>) => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'perfekt-ci-test-'))
   for (const [name, content] of Object.entries(files)) {
@@ -55,11 +53,7 @@ describe('ci', () => {
     })
     const { calls, run } = recorder(['pnpm run test'])
 
-    const steps = await runSteps(
-      dir,
-      { title: 'feat: add ci', sharedConfig },
-      run,
-    )
+    const steps = await runSteps(dir, { title: 'feat: add ci' }, run)
 
     expect(steps.map((step) => [step.name, step.status])).toEqual([
       ['install', 'passed'],
@@ -75,11 +69,7 @@ describe('ci', () => {
 
   it('should fail a title that breaks the shared commit rules', async () => {
     const dir = makeDir({ 'package.json': '{}' })
-    const steps = await runSteps(
-      dir,
-      { title: 'Added CI.', sharedConfig },
-      recorder().run,
-    )
+    const steps = await runSteps(dir, { title: 'Added CI.' }, recorder().run)
 
     expect(steps[1]).toMatchObject({ name: 'commits', status: 'failed' })
     expect(steps[2].status).toBe('not run')
@@ -117,16 +107,8 @@ describe('ci', () => {
       JSON.stringify({ scripts: { test: 'jest' } }),
     )
 
-    const clean = await ci(
-      { base: 'HEAD~1', sharedConfig },
-      dir,
-      recorder().run,
-    )
-    const dirty = await ci(
-      { base: 'HEAD~1', dirty: true, sharedConfig },
-      dir,
-      recorder().run,
-    )
+    const clean = await ci({ base: 'HEAD~1' }, dir, recorder().run)
+    const dirty = await ci({ base: 'HEAD~1', dirty: true }, dir, recorder().run)
 
     expect(clean.steps.find((step) => step.name === 'test')?.status).toBe(
       'skipped',

@@ -37,7 +37,7 @@ It can also return structured JSON for `release` and `changelog`, which makes it
 
 For **perfekt** to run with its full power, your project must follow the [conventional commits](https://www.conventionalcommits.org) specification, this allows it to know the type of changes introduced in a given commit.
 
-If you want help enforcing that locally, run `perfekt setup commits`. That writes a [commitlint](https://commitlint.js.org/) config extending the shared `perfekt/commitlint` rules and a husky `commit-msg` hook, then prints the exact dependencies to install.
+`perfekt lint` checks a message against the shared rules, with nothing else to install: `perfekt lint "feat: add x"`, from stdin, or `--edit <file>` from a git `commit-msg` hook. The rules are commitlint's `config-conventional` plus the house overrides, built into perfekt.
 
 The shared rules keep the usual types (`feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `ci`, `build`, `style`, `perf`, `revert`), reject subjects that end with `.` and headers over 72 characters, and warn on subjects over 50 characters or ones that don't start with an imperative verb. They accept `feat: init :seedling:` and a trailing GitHub squash suffix like `(#123)`.
 
@@ -52,13 +52,13 @@ jobs:
     uses: lekterable/perfekt/.github/workflows/commitlint.yml@master
 ```
 
-`perfekt setup commits --ci` writes that caller for you.
+`perfekt setup commits` writes that caller for you. The workflow runs perfekt's rules straight from its `master` with Node 24, so it installs nothing.
 
 To release from CI instead of your machine, call the shared `lekterable/perfekt/.github/workflows/release.yml@master` workflow from a manually triggered one. It runs `perfekt release`, pushes the commit and tag, and publishes a GitHub release. See [releasing from GitHub Actions](https://lekterable.github.io/perfekt/#/documentation?id=releasing-from-github-actions).
 
-lekterable repos use `master` and start with `feat: init :seedling:`. That is a house tip, not a package rule. `perfekt setup commits` detects the consumer default branch for `--ci` and does not fail on `main`.
+lekterable repos use `master` and start with `feat: init :seedling:`. That is a house tip, not a package rule. `perfekt setup commits` detects the consumer default branch and does not fail on `main`.
 
-GitHub squash titles still need repo settings or merge habit to strip `(#N)` — commitlint only catches local commits, and CI if you add `perfekt setup commits --ci`.
+When you squash-merge, the pull request title becomes the commit, so linting titles covers what lands on the default branch. `perfekt ci` lints the branch's commits too.
 
 If your project doesn't do it yet, you can start any time as there is no need for rewriting any git history, simply create an initial release which will contain all of the _unconventional_ commits and after that start naming your commits accordingly.
 
@@ -100,7 +100,7 @@ jobs:
 
 It needs a `packageManager` field in `package.json` for the pnpm version.
 
-To run the same steps on your machine, plus commitlint on the branch's commits, use `perfekt ci`. It works on a clean checkout of `HEAD` and exits 1 on the first failing step. See [`ci`](https://lekterable.github.io/perfekt/#/documentation?id=ci).
+To run the same steps on your machine, plus `perfekt lint` on the branch's commits, use `perfekt ci`. It works on a clean checkout of `HEAD` and exits 1 on the first failing step. See [`ci`](https://lekterable.github.io/perfekt/#/documentation?id=ci).
 
 ## Getting started
 

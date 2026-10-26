@@ -1,1 +1,0 @@
-pnpm exec commitlint --format @commitlint/format/lib/index.js --edit "$1"

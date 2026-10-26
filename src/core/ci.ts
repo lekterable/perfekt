@@ -2,13 +2,11 @@ import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import { formatLint, lintMessage } from './lint'
 
 // The same steps as the shared .github/workflows/ci.yml, run on this machine: install with the
 // lockfile frozen (CI=true does that for pnpm and yarn, npm ci always does), lint the commits,
 // then each of lint, typecheck, test and build the repo has.
-
-// The commitlint major the shared config is written for, as in .github/workflows/commitlint.yml.
-const COMMITLINT_MAJOR = 20
 
 export const CI_SCRIPTS = ['lint', 'typecheck', 'test', 'build'] as const
 
@@ -119,39 +117,12 @@ export const readCommitMessages = (dir: string, base: string, run = exec) => {
     .filter(Boolean)
 }
 
-/**
- * Lints each message with perfekt's shared commitlint config. Like the shared commitlint
- * workflow, it fetches @commitlint/cli on demand (npm caches it), so perfekt doesn't ship it.
- * Returns one report per failing message.
- */
-export const lintMessages = (messages: string[], sharedConfig: string) =>
+/** One report per message that breaks the shared rules. */
+export const lintMessages = (messages: string[]) =>
   messages.flatMap((message) => {
-    const result = spawnSync(
-      'npm',
-      [
-        'exec',
-        '--yes',
-        `--package=@commitlint/cli@${COMMITLINT_MAJOR}`,
-        '--',
-        'commitlint',
-        '--config',
-        sharedConfig,
-      ],
-      {
-        cwd: path.dirname(sharedConfig),
-        encoding: 'utf8',
-        input: `${message}\n`,
-      },
-    )
+    const result = lintMessage(message)
 
-    if (result.error) throw result.error
-
-    return result.status === 0
-      ? []
-      : [
-          `${result.stdout}${result.stderr}`.trim() ||
-            `✖ ${message.split('\n')[0]}`,
-        ]
+    return result.valid ? [] : [formatLint(message, result)]
   })
 
 const time = async <T>(work: () => T | Promise<T>) => {
@@ -167,7 +138,7 @@ const tail = (output: string, lines = 60) =>
 /** Runs the steps in order and stops at the first failure, like a CI job. */
 export const runSteps = async (
   dir: string,
-  options: CiOptions & { sharedConfig: string },
+  options: CiOptions,
   run = exec,
 ): Promise<CiStep[]> => {
   const packageJson = readPackageJson(dir)
@@ -196,7 +167,7 @@ export const runSteps = async (
 
         return {
           count: messages.length,
-          problems: lintMessages(messages, options.sharedConfig),
+          problems: lintMessages(messages),
         }
       } catch (error) {
         return {
@@ -247,7 +218,7 @@ export const runSteps = async (
  * files can't make it pass, or in place with `dirty`.
  */
 export const ci = async (
-  options: CiOptions & { sharedConfig: string },
+  options: CiOptions,
   cwd = process.cwd(),
   run = exec,
 ): Promise<CiResult> => {

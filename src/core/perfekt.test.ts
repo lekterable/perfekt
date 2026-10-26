@@ -107,14 +107,11 @@ describe('Perfekt', () => {
     fsMock.chmodSync.mockImplementation(() => undefined)
     fsMock.writeFile.mockImplementation(resolveWriteFile())
 
-    const result = await perfekt.setupCommits({ ci: true })
+    const result = await perfekt.setupCommits()
 
     expect(result.files.map((file) => file.path)).toEqual([
-      'commitlint.config.cjs',
-      '.husky/commit-msg',
       '.github/workflows/commitlint.yml',
     ])
-    expect(result.packageManager).toBe('pnpm')
   })
 
   describe('changelog', () => {

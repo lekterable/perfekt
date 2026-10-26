@@ -18,39 +18,46 @@ Options:
 
 Usage: `perfekt setup commits [options]`
 
-Scaffolds Conventional Commits linting in the current repo:
+Writes `.github/workflows/commitlint.yml`, which lints pull request titles by calling the shared `lekterable/perfekt/.github/workflows/commitlint.yml@master` workflow. That workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 24, so it installs nothing and title rules change everywhere at once. The `pull_request` filter uses the detected default branch when git exposes one.
 
-- Writes a one-line `commitlint.config.cjs` that extends the shared `perfekt/commitlint` rules, so every repo follows the same rules and a rule change ships with a `perfekt` bump
-- Writes `.husky/commit-msg` so local commits are linted
-- Prints the exact `@commitlint/cli` + `husky` + `perfekt` install command for the detected package manager
-- Reminds you to run `husky` from `package.json` `scripts.prepare`
-- Detects the current default branch for the optional `--ci` workflow
-- Prints a lekterable tip. Our repos use `master` and first commit `feat: init :seedling:`. That is advisory. Setup does not fail on `main`.
+When you squash-merge, the pull request title becomes the commit, so this covers what lands on the default branch. A trailing `(#N)` from GitHub squash is allowed.
 
-The shared rules (`perfekt/commitlint`, on top of `@commitlint/config-conventional`):
+It also prints a lekterable tip. Our repos use `master` and first commit `feat: init :seedling:`. That is advisory. Setup does not fail on `main`.
 
-- Allow only `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `ci`, `build`, `style`, `perf`, `revert`
-- Accept `feat: init :seedling:` and scoped subjects like `feat(web): add x`
-- Accept a trailing GitHub squash suffix like `(#123)`
-- Reject subjects that end with `.` and headers longer than 72 characters
-- Warn when the subject is longer than 50 characters
-- Warn when the subject does not start with an imperative verb (`add`, not `added`, `adding` or `adds`)
-
-Add a scope only when it narrows the change to one area (`fix(seo): ...`); leave it out for repo-wide changes.
-
-Existing files are left alone unless you pass `--force`.
-
-`perfekt setup commits` only guards local commits and CI you add yourself. GitHub squash-merge titles still need repo settings or merge habit to strip `(#N)`.
+An existing workflow is left alone unless you pass `--force`.
 
 Options:
 
 `-h, --help` - display help for command
 
-`--ci` - also write `.github/workflows/commitlint.yml`, which lints pull request titles by calling the shared `lekterable/perfekt/.github/workflows/commitlint.yml@master` workflow. That workflow always reads the rules from perfekt's `master`, so title rules change everywhere at once. The `pull_request` filter uses the detected default branch when git exposes one.
-
-`--force` - overwrite generated files if they already exist
+`--force` - overwrite the workflow if it already exists
 
 `--json` - print the command result as JSON instead of human-readable output
+
+## `lint`
+
+Usage: `perfekt lint [message] [options]`
+
+Lints a commit message or pull request title with the shared rules, read from the argument, from `--edit <file>`, or from stdin. It prints commitlint's report format and exits 1 on an error; warnings don't fail. The rules are `@commitlint/config-conventional` plus the house overrides, built into perfekt, so there is no commitlint to install:
+
+- Allow only `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `ci`, `build`, `style`, `perf`, `revert`, in lower case
+- Accept `feat: init :seedling:`, scoped subjects like `feat(web): add x` and `feat!:` breaking changes
+- Accept a trailing GitHub squash suffix like `(#123)`
+- Reject an empty type or subject, a subject that starts with a capital letter or ends with `.`, a header longer than 72 characters or wrapped in whitespace, and body lines longer than 100 characters unless they hold a URL
+- Warn when the subject is longer than 50 characters, does not start with an imperative verb (`add`, not `added`, `adding` or `adds`), or the body or a `BREAKING CHANGE:` footer has no blank line before it
+- Skip merge, revert, `fixup!`/`squash!`/`amend!` and release (`chore(release): 1.2.3`) messages, as commitlint does
+
+Add a scope only when it narrows the change to one area (`fix(seo): ...`); leave it out for repo-wide changes.
+
+To lint local commits too, add a `commit-msg` hook that runs `npx --no -- perfekt lint --edit "$1"`.
+
+Options:
+
+`-h, --help` - display help for command
+
+`--edit <file>` - lint the message in this file, dropping git's `#` comments and the `git commit -v` diff
+
+`--json` - print the result as JSON
 
 ## `ci`
 
@@ -59,7 +66,7 @@ Usage: `perfekt ci [options]`
 Runs the shared CI steps on your machine, for when GitHub Actions can't (no minutes left on a private repo) or before you push:
 
 1. `install`, with the lockfile frozen: `npm ci`, or `pnpm install` / `yarn install` with `CI=true`, which makes them refuse to change the lockfile, or `bun install --frozen-lockfile`. The package manager comes from `packageManager`, then the lockfile.
-2. `commits`, which lints every commit since the base branch with the shared `perfekt/commitlint` rules, or only the pull request title with `--title`. These are the rules of the perfekt version you have installed; the shared commitlint workflow reads perfekt's `master`. Like that workflow, it fetches `@commitlint/cli` on demand with `npm exec`, so the first run needs the network and later runs use npm's cache.
+2. `commits`, which lints every commit since the base branch with [`perfekt lint`](#lint), or only the pull request title with `--title`. These are the rules of the perfekt version you have installed; the shared workflow reads perfekt's `master`.
 3. `lint`, `typecheck`, `test` and `build`, each only when `package.json` has that script.
 
 Every step runs with `CI=true`, like on GitHub Actions. It stops at the first failing step, prints the end of its output, and exits 1.

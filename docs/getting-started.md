@@ -32,11 +32,11 @@ where `<version>` is the version of your new release.
 
 lekterable repos often use `master` and first commit `feat: init :seedling:`. Other default branches work.
 
-To enforce Conventional Commits before they land, run:
+To enforce Conventional Commits on pull request titles, run:
 
 `perfekt setup commits`
 
-Then install the printed `commitlint` and `husky` dependencies. Use `perfekt setup commits --ci` if you also want a GitHub Action that lints pull request titles. The workflow uses the detected default branch when git exposes one.
+It writes a GitHub Action that lints each pull request title with `perfekt lint`'s rules, installing nothing. The workflow uses the detected default branch when git exposes one. `perfekt lint "feat: add x"` checks a message by hand.
 
 Refer to the [release documentation](./documentation.md#release) and [setup commits documentation](./documentation.md#setup-commits) for more information.
 

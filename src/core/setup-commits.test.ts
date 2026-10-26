@@ -9,61 +9,39 @@ import {
 import setupCommits, { getDefaultBranch } from './setup-commits'
 
 jest.mock('fs')
-jest.mock('~utils/misc/exec', () => ({
-  __esModule: true,
-  default: jest.fn(),
-}))
+jest.mock('~utils/misc/exec')
 
 const fsMock = jest.mocked(fs)
 const execMock = jest.mocked(exec)
+
+const answer = (command: string, output: string) => (input: string) =>
+  input.includes(command) ? output : ''
 
 describe('setup-commits', () => {
   let writeFileSpy: jest.SpiedFunction<typeof writeFile.default>
 
   beforeEach(() => {
     writeFileSpy = jest.spyOn(writeFile, 'default').mockResolvedValue()
-    fsMock.existsSync.mockImplementation(
-      (fileName) => fileName === 'package.json',
-    )
-    fsMock.readFileSync.mockReturnValue(
-      JSON.stringify({
-        packageManager: 'pnpm@10.32.0',
-        scripts: { prepare: 'pnpm run build && husky' },
-      }) as never,
-    )
-    fsMock.mkdirSync.mockImplementation(() => undefined)
-    fsMock.chmodSync.mockImplementation(() => undefined)
-    execMock.mockImplementation((command) => {
-      if (String(command).includes('origin/HEAD')) return 'origin/main'
-      return ''
-    })
+    fsMock.existsSync.mockReturnValue(false)
+    execMock.mockImplementation(answer('origin/HEAD', 'origin/main'))
   })
 
-  it('should detect origin HEAD, then config, then main or master', () => {
-    expect(getDefaultBranch()).toBe('main')
+  it.each([
+    ['origin HEAD', answer('origin/HEAD', 'origin/main'), 'main'],
+    ['init.defaultBranch', answer('init.defaultBranch', 'develop'), 'develop'],
+    ['a current master branch', answer('show-current', 'master'), 'master'],
+    ['a current topic branch', answer('show-current', 'topic'), null],
+    [
+      'no git',
+      () => {
+        throw new Error('no git')
+      },
+      null,
+    ],
+  ])('should detect the default branch from %s', (_label, run, expected) => {
+    execMock.mockImplementation(run)
 
-    execMock.mockImplementation((command) => {
-      if (String(command).includes('init.defaultBranch')) return 'develop'
-      return ''
-    })
-    expect(getDefaultBranch()).toBe('develop')
-
-    execMock.mockImplementation((command) => {
-      if (String(command).includes('show-current')) return 'master'
-      return ''
-    })
-    expect(getDefaultBranch()).toBe('master')
-
-    execMock.mockImplementation((command) => {
-      if (String(command).includes('show-current')) return 'topic'
-      return ''
-    })
-    expect(getDefaultBranch()).toBe(null)
-
-    execMock.mockImplementation(() => {
-      throw new Error('no git')
-    })
-    expect(getDefaultBranch()).toBe(null)
+    expect(getDefaultBranch()).toBe(expected)
   })
 
   it('should write the workflow for the detected branch', async () => {

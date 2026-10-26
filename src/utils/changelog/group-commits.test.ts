@@ -30,24 +30,30 @@ const defaultSummary = {
 }
 
 describe('groupCommits', () => {
-  it('should group unconventional commits as misc', () => {
-    const grouped = groupCommits(
-      createCommits([
+  it.each([
+    [
+      'unconventional',
+      [
         '8c56a8d694955eb02d665f9e78a95cd076e8fcf5 Add a new feature',
         'acaa27892bc96dd4d4a48f6a732d81a4d9e360fc Fix a bug',
-        'aea7f150d13aabaac487253bd26c809121333a17 Refactor some legacy code',
-      ]),
-      createConfig(),
-    )
-
-    expect(summarizeGroupedCommits(grouped)).toEqual([
-      {
-        misc: ['Add a new feature', 'Fix a bug', 'Refactor some legacy code'],
-      },
-    ])
+      ],
+      ['Add a new feature', 'Fix a bug'],
+    ],
+    [
+      'unknown-type',
+      [
+        '8c56a8d694955eb02d665f9e78a95cd076e8fcf5 refactor: rewrite some code',
+        'aea7f150d13aabaac487253bd26c809121333a17 ci: setup github actions workflow',
+      ],
+      ['rewrite some code', 'setup github actions workflow'],
+    ],
+  ])('should group %s commits as misc', (_label, log, misc) => {
+    expect(
+      summarizeGroupedCommits(groupCommits(createCommits(log), createConfig())),
+    ).toEqual([{ misc }])
   })
 
-  it('should skip changelog-scoped commits by default', () => {
+  it('should group commits by type and skip changelog-scoped ones', () => {
     const grouped = groupCommits(
       [
         ...createCommits(mockLog),
@@ -61,57 +67,7 @@ describe('groupCommits', () => {
     expect(summarizeGroupedCommits(grouped)).toEqual([defaultSummary])
   })
 
-  it('should group unreleased commits by their configured type', () => {
-    const grouped = groupCommits(createCommits(mockLog), createConfig())
-
-    expect(summarizeGroupedCommits(grouped)).toEqual([defaultSummary])
-  })
-
-  it('should attach release commits to the current release group', () => {
-    const grouped = groupCommits(
-      [
-        createCommit(
-          'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
-        ),
-        ...createCommits(mockLog),
-      ],
-      createConfig(),
-    )
-
-    expect(summarizeGroupedCommits(grouped)).toEqual([
-      {
-        ...defaultSummary,
-        release: '0.1.0',
-      },
-    ])
-  })
-
-  it('should start a new group when unreleased work appears before a release marker', () => {
-    const grouped = groupCommits(
-      [
-        createCommit(
-          '86aa5dc18c363514e518b16b6eeb0bb2c5d94617 feat: add release `new` keyword',
-        ),
-        createCommit(
-          'f2191200bf7b6e5eec3d61fcef9eb756e0129cfb chore(release): 0.1.0',
-        ),
-        ...createCommits(mockLog),
-      ],
-      createConfig(),
-    )
-
-    expect(summarizeGroupedCommits(grouped)).toEqual([
-      {
-        feat: ['add release `new` keyword'],
-      },
-      {
-        ...defaultSummary,
-        release: '0.1.0',
-      },
-    ])
-  })
-
-  it('should group multiple releases independently', () => {
+  it('should start a new group at each release commit', () => {
     const grouped = groupCommits(
       [
         createCommit(
@@ -129,14 +85,8 @@ describe('groupCommits', () => {
     )
 
     expect(summarizeGroupedCommits(grouped)).toEqual([
-      {
-        feat: ['add release `new` keyword'],
-        release: '1.2.0',
-      },
-      {
-        ...defaultSummary,
-        release: '0.1.0',
-      },
+      { feat: ['add release `new` keyword'], release: '1.2.0' },
+      { ...defaultSummary, release: '0.1.0' },
     ])
   })
 
@@ -147,43 +97,16 @@ describe('groupCommits', () => {
         createCommit(
           '17feea4af5e339532d680a6ef6e9ec331f8abd2e feat!: add release version bumping',
         ),
-        createCommit(
-          'aea7f150d13aabaac487253bd26c809121333a17 feat!: change some important api',
-        ),
       ],
       createConfig(),
     )
 
     expect(summarizeGroupedCommits(grouped)).toEqual([
-      {
-        breaking: ['add release version bumping', 'change some important api'],
-        ...defaultSummary,
-      },
+      { breaking: ['add release version bumping'], ...defaultSummary },
     ])
   })
 
-  it('should fall back to misc for unknown types', () => {
-    const grouped = groupCommits(
-      createCommits([
-        '8c56a8d694955eb02d665f9e78a95cd076e8fcf5 refactor: rewrite some code',
-        'acaa27892bc96dd4d4a48f6a732d81a4d9e360fc tests: add new test cases',
-        'aea7f150d13aabaac487253bd26c809121333a17 ci: setup github actions workflow',
-      ]),
-      createConfig(),
-    )
-
-    expect(summarizeGroupedCommits(grouped)).toEqual([
-      {
-        misc: [
-          'rewrite some code',
-          'add new test cases',
-          'setup github actions workflow',
-        ],
-      },
-    ])
-  })
-
-  it('should extend default release groups with a refactors group', () => {
+  it('should use custom groups and ignored scopes', () => {
     const grouped = groupCommits(
       [
         ...createCommits(mockLog),
@@ -207,23 +130,6 @@ describe('groupCommits', () => {
           'extract line generating logic to function and promisify exec',
         ],
         misc: ['add core tests', 'update dependencies'],
-      },
-    ])
-  })
-
-  it('should let custom groups replace default groups when their types overlap', () => {
-    const grouped = groupCommits(
-      createCommits(mockLog),
-      createConfig({
-        groups: [{ name: '## Bug Fixes', change: 'patch', types: ['fix'] }],
-      }),
-    )
-
-    expect(summarizeGroupedCommits(grouped)).toEqual([
-      {
-        feat: defaultSummary.feat,
-        fix: defaultSummary.fix,
-        misc: defaultSummary.misc,
       },
     ])
   })

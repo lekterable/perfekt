@@ -28,11 +28,8 @@ class Commit {
       return
     }
 
-    const { groups } = commitDetails
-
-    if (!groups) {
-      throw new Error('Error while parsing commit details.')
-    }
+    // A match always has the named groups.
+    const groups = commitDetails.groups as Record<string, string>
 
     this.#hash = hash
     this.#message = groups.message

@@ -4,7 +4,7 @@ import path from 'node:path'
 export const CONFIG_FILE = 'perfekt.json'
 
 // perfekt.json first, then the JSON files perfekt 3 also read, so existing repos keep working.
-export const JSON_CONFIG_FILES = [
+const JSON_CONFIG_FILES = [
   CONFIG_FILE,
   '.perfektrc',
   '.perfektrc.json',
@@ -36,19 +36,30 @@ const readJson = (file: string): unknown => {
 const hasPackageJsonKey = (dir: string) => {
   const file = path.join(dir, 'package.json')
 
+  if (!fs.existsSync(file)) return false
+
+  const packageJson = readJson(file)
+
   return (
-    fs.existsSync(file) &&
-    'perfekt' in (readJson(file) as Record<string, unknown>)
+    typeof packageJson === 'object' &&
+    packageJson !== null &&
+    'perfekt' in packageJson
   )
+}
+
+/** Every perfekt config in the folder, old formats and the package.json key included. */
+export const findConfigFiles = (dir = process.cwd()) => {
+  const exists = (file: string) => fs.existsSync(path.join(dir, file))
+
+  return [
+    ...[...JSON_CONFIG_FILES, ...OLD_CONFIG_FILES].filter(exists),
+    ...(hasPackageJsonKey(dir) ? [PACKAGE_JSON_KEY] : []),
+  ]
 }
 
 /** The JSON config in the folder perfekt runs in, or undefined when there is none. */
 export const loadConfig = (dir = process.cwd()): unknown => {
-  const exists = (file: string) => fs.existsSync(path.join(dir, file))
-  const found = [
-    ...[...JSON_CONFIG_FILES, ...OLD_CONFIG_FILES].filter(exists),
-    ...(hasPackageJsonKey(dir) ? [PACKAGE_JSON_KEY] : []),
-  ]
+  const found = findConfigFiles(dir)
 
   if (found.length > 1) {
     throw new Error(

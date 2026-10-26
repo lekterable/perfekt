@@ -1,9 +1,15 @@
-import { INIT_COMMIT } from './commits'
-import { cleanMessage, lintMessage } from './lint'
+import { execFileSync } from 'node:child_process'
+import path from 'node:path'
+import { cleanMessage, formatLint, lintMessage } from './lint'
+
+const [major, minor] = process.versions.node.split('.').map(Number)
+const canStripTypes =
+  'typescript' in process.features || major > 22 || (major === 22 && minor >= 6)
+const itWhenStrippable = canStripTypes ? it : it.skip
 
 describe('lint', () => {
   it.each([
-    [INIT_COMMIT, true],
+    ['feat: init :seedling:', true],
     ['feat(web): add x', true],
     ['feat!: drop node 18', true],
     ['feat: add x (#12)', true],
@@ -81,5 +87,40 @@ describe('lint', () => {
     ].join('\n')
 
     expect(cleanMessage(file)).toBe('feat: add x')
+  })
+
+  it('should report errors, warnings and counts like commitlint', () => {
+    const message = 'feat: Added x.\nbody'
+
+    expect(formatLint(message, lintMessage(message))).toBe(
+      [
+        '⧗ input: feat: Added x.',
+        '✖ subject must not be sentence-case, start-case, pascal-case, upper-case',
+        '✖ subject may not end with full stop',
+        '⚠ body must have leading blank line',
+        '⚠ subject should start with an imperative verb ("add", not "added")',
+        '✖ found 2 problems, 2 warnings',
+      ].join('\n'),
+    )
+  })
+
+  // The shared PR title workflow imports this file with plain node from a sparse checkout.
+  itWhenStrippable('should run under plain node without other files', () => {
+    const script =
+      'const { lintMessage } = await import(process.argv[1]); process.stdout.write(String(lintMessage("feat: add x").valid))'
+    const output = execFileSync(
+      process.execPath,
+      [
+        '--experimental-strip-types',
+        '--no-warnings',
+        '--input-type=module',
+        '-e',
+        script,
+        path.join(__dirname, 'lint.ts'),
+      ],
+      { encoding: 'utf8' },
+    )
+
+    expect(output).toBe('true')
   })
 })

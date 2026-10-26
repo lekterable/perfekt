@@ -1,5 +1,3 @@
-export const INIT_COMMIT = 'feat: init :seedling:'
-
 export const COMMITS_WORKFLOW_PATH = '.github/workflows/commitlint.yml'
 
 export const SQUASH_MERGE_NOTE =

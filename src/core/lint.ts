@@ -2,7 +2,7 @@
 // commitlint. Self-contained (no imports) so the shared PR title workflow can run this file with
 // plain node straight from a sparse checkout.
 
-export const COMMIT_TYPES = [
+const COMMIT_TYPES = [
   'feat',
   'fix',
   'chore',
@@ -16,11 +16,11 @@ export const COMMIT_TYPES = [
   'revert',
 ] as const
 
-export const HEADER_MAX_LENGTH = 72
-export const SUBJECT_MAX_LENGTH = 50
-export const LINE_MAX_LENGTH = 100
+const HEADER_MAX_LENGTH = 72
+const SUBJECT_MAX_LENGTH = 50
+const LINE_MAX_LENGTH = 100
 
-export type LintResult = {
+type LintResult = {
   valid: boolean
   ignored: boolean
   errors: string[]

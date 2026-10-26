@@ -21,7 +21,9 @@ import setupCommits from './core/setup-commits'
 type ChangelogCommandOptions = ChangelogOptions & { json?: boolean }
 type ReleaseCommandOptions = ReleaseOptions & { json?: boolean }
 
-type PerfektCLI = Pick<Perfekt, 'init' | 'setupCommits'> & {
+type PerfektCLI = {
+  init: () => Promise<string>
+  setupCommits: (options: SetupCommitsOptions) => Promise<SetupCommitsResult>
   changelog: (
     version: string | undefined,
     options: Partial<ChangelogOptions>,

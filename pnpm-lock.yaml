@@ -187,9 +187,6 @@ importers:
       jest:
         specifier: 30.3.0
         version: 30.3.0(@types/node@25.5.0)(ts-node@10.9.1(@types/node@25.5.0)(typescript@5.9.3))
-      jest-mock-process:
-        specifier: 2.0.0
-        version: 2.0.0(jest@30.3.0(@types/node@25.5.0)(ts-node@10.9.1(@types/node@25.5.0)(typescript@5.9.3)))
       lint-staged:
         specifier: 16.4.0
         version: 16.4.0
@@ -1386,11 +1383,6 @@ packages:
   jest-message-util@30.3.0:
     resolution: {integrity: sha512-Z/j4Bo+4ySJ+JPJN3b2Qbl9hDq3VrXmnjjGEWD/x0BCXeOXPTV1iZYYzl2X8c1MaCOL+ewMyNBcm88sboE6YWw==}
     engines: {node: ^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0}
-
-  jest-mock-process@2.0.0:
-    resolution: {integrity: sha512-bybzszPfvrYhplymvUNFc130ryvjSCW1JSCrLA0LiV0Sv9TrI+cz90n3UYUPoT2nhNL6c6IV9LxUSFJF9L9tHQ==}
-    peerDependencies:
-      jest: '>=23.4'
 
   jest-mock@30.3.0:
     resolution: {integrity: sha512-OTzICK8CpE+t4ndhKrwlIdbM6Pn8j00lvmSmq5ejiO+KxukbLjgOflKWMn3KE34EZdQm5RqTuKj+5RIEniYhog==}
@@ -3283,10 +3275,6 @@ snapshots:
       pretty-format: 30.3.0
       slash: 3.0.0
       stack-utils: 2.0.6
-
-  jest-mock-process@2.0.0(jest@30.3.0(@types/node@25.5.0)(ts-node@10.9.1(@types/node@25.5.0)(typescript@5.9.3))):
-    dependencies:
-      jest: 30.3.0(@types/node@25.5.0)(ts-node@10.9.1(@types/node@25.5.0)(typescript@5.9.3))
 
   jest-mock@30.3.0:
     dependencies:

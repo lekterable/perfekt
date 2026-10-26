@@ -8,7 +8,7 @@ import { formatLint, lintMessage } from './lint'
 // lockfile frozen (CI=true does that for pnpm and yarn, npm ci always does), lint the commits,
 // then each of lint, typecheck, test and build the repo has.
 
-export const CI_SCRIPTS = ['lint', 'typecheck', 'test', 'build'] as const
+const CI_SCRIPTS = ['lint', 'typecheck', 'test', 'build'] as const
 
 export type CiStatus = 'passed' | 'failed' | 'skipped' | 'not run'
 
@@ -20,7 +20,7 @@ export type CiStep = {
   output?: string
 }
 
-export type CiOptions = {
+type CiOptions = {
   dirty?: boolean
   title?: string
   base?: string
@@ -114,7 +114,7 @@ export const getBase = (
 
 const SEPARATOR = '\u0000'
 
-export const readCommitMessages = (dir: string, base: string, run = exec) => {
+const readCommitMessages = (dir: string, base: string, run = exec) => {
   const result = run(
     'git',
     ['log', '--no-merges', '--format=%B%x00', `${base}..HEAD`],
@@ -132,7 +132,7 @@ export const readCommitMessages = (dir: string, base: string, run = exec) => {
 }
 
 /** One report per message that breaks the shared rules. */
-export const lintMessages = (messages: string[]) =>
+const lintMessages = (messages: string[]) =>
   messages.flatMap((message) => {
     const result = lintMessage(message)
 
@@ -269,6 +269,7 @@ export const ci = async (
     repo,
   )
   if (added.status !== 0) {
+    fs.rmSync(worktree, { recursive: true, force: true })
     throw new Error(`Couldn't create a clean checkout: ${added.output.trim()}`)
   }
 

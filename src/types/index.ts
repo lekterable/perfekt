@@ -24,11 +24,9 @@ export type ReleaseOptions = { from?: string; dryRun?: boolean }
 
 export type SetupCommitsOptions = { force?: boolean }
 
-export type SetupFileStatus = 'written' | 'skipped'
-
 export type SetupFileResult = {
   path: string
-  status: SetupFileStatus
+  status: 'written' | 'skipped'
 }
 
 export type SetupCommitsResult = {

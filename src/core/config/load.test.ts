@@ -27,6 +27,7 @@ describe('loadConfig', () => {
     [{ 'perfekt.json': '\n' }, undefined],
     [{ 'perfekt.json': 'null' }, undefined],
     [{ 'package.json': '{"name":"x"}' }, undefined],
+    [{ 'package.json': '' }, undefined],
   ])('should read %j', (files, config) => {
     expect(loadConfig(makeDir(files))).toEqual(config)
   })

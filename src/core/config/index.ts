@@ -22,4 +22,3 @@ class Config {
 }
 
 export default Config
-export { defaultConfig }

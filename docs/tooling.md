@@ -4,13 +4,13 @@ Besides the CLI, perfekt ships tooling other repos extend, so lint, format and C
 
 ## Biome
 
-`perfekt/biome` is the house [Biome](https://biomejs.dev) config. It replaces Prettier and ESLint with one tool: single quotes, no semicolons, trailing commas, 80 columns, sorted imports and Tailwind classes, and an explicit rule list (types over interfaces, `import type`, no `console.log`). React and Next rules switch on by themselves when a repo depends on them. Install `@biomejs/biome` and `perfekt`, then:
+`perfekt/biome` is the house [Biome](https://biomejs.dev) config. It replaces Prettier and ESLint with one tool: single quotes, no semicolons, trailing commas, 80 columns, sorted imports and Tailwind classes, and an explicit rule list (types over interfaces, `import type`, no `console.log`). React and Next rules switch on by themselves when a repo depends on them. `perfekt setup lint` sets it up: it writes a `biome.json` that extends `perfekt/biome`, adds `@biomejs/biome` and `perfekt` as dev dependencies, and adds `biome check` as the `lint` script and `biome check --write` as `format` when those are missing. To do it by hand, install both packages and write:
 
 ```json
 { "extends": ["perfekt/biome"] }
 ```
 
-Use `biome check` as your `lint` script and `biome check --write` as `format`. Biome doesn't format Markdown or YAML.
+Biome doesn't format Markdown or YAML.
 
 The config also enforces the house code conventions:
 

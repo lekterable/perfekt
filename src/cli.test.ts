@@ -86,6 +86,10 @@ const createPerfektDouble = () => ({
     hooksPath: '.githooks',
     clonesNeed: null,
   }),
+  setupLint: vi.fn().mockReturnValue({
+    files: [{ path: 'biome.json', status: 'written' as const }],
+    installCommand: 'pnpm install',
+  }),
   changelog: vi.fn().mockResolvedValue(createChangelogResult()),
   release: vi.fn().mockResolvedValue(createReleaseResult()),
 })
@@ -197,7 +201,7 @@ describe('cli', () => {
       expect(stdoutSpy).toHaveBeenCalledWith('🌱 Wrote perfekt.json\n')
     })
 
-    it('should run both setups with a bare setup', async () => {
+    it('should run every setup with a bare setup', async () => {
       const perfekt = createPerfektDouble()
 
       await createProgram(perfekt, '4.1.0').parseAsync([
@@ -212,14 +216,17 @@ describe('cli', () => {
         force: false,
         major: '4',
       })
+      expect(perfekt.setupLint).toHaveBeenCalledWith({ force: false })
       expect(lastJson(stdoutSpy)).toMatchObject({
         command: 'setup',
         files: [
           { path: '.github/workflows/commitlint.yml', status: 'written' },
           { path: '.githooks/commit-msg', status: 'written' },
+          { path: 'biome.json', status: 'written' },
         ],
         defaultBranch: 'main',
         hooksPath: '.githooks',
+        installCommand: 'pnpm install',
       })
     })
 

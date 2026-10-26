@@ -9,6 +9,8 @@ import type {
   ReleaseResult,
   SetupCommitsOptions,
   SetupCommitsResult,
+  SetupHooksOptions,
+  SetupHooksResult,
 } from '~types'
 import { Config, Perfekt } from './core'
 import { type CiResult, type CiStep, ci } from './core/ci'
@@ -17,6 +19,7 @@ import { loadConfig } from './core/config/load'
 import initialize from './core/initialize'
 import { cleanMessage, formatLint, lintMessage } from './core/lint'
 import setupCommits from './core/setup-commits'
+import setupHooks from './core/setup-hooks'
 
 type ChangelogCommandOptions = ChangelogOptions & { json?: boolean }
 type ReleaseCommandOptions = ReleaseOptions & { json?: boolean }
@@ -24,6 +27,7 @@ type ReleaseCommandOptions = ReleaseOptions & { json?: boolean }
 type PerfektCLI = {
   init: () => Promise<string>
   setupCommits: (options: SetupCommitsOptions) => Promise<SetupCommitsResult>
+  setupHooks: (options: SetupHooksOptions) => SetupHooksResult
   changelog: (
     version: string | undefined,
     options: Partial<ChangelogOptions>,
@@ -50,7 +54,9 @@ type JsonResponse =
       success: true
       command: 'setup'
       files: SetupCommitsResult['files']
-      defaultBranch: SetupCommitsResult['defaultBranch']
+      defaultBranch?: SetupCommitsResult['defaultBranch']
+      hooksPath?: SetupHooksResult['hooksPath']
+      clonesNeed?: SetupHooksResult['clonesNeed']
     }
   | {
       success: true
@@ -116,6 +122,7 @@ export const createPerfekt = (overrides = loadConfig()) => {
 const createCommands = (): PerfektCLI => ({
   init: initialize,
   setupCommits,
+  setupHooks,
   changelog: (...args) => createPerfekt().changelog(...args),
   release: (...args) => createPerfekt().release(...args),
 })
@@ -158,6 +165,24 @@ const printSetupCommitsSummary = (result: SetupCommitsResult) => {
   ])
 
   process.stdout.write(`\n  ${SQUASH_MERGE_NOTE}\n`)
+}
+
+const printSetupHooksSummary = (result: SetupHooksResult) => {
+  formatDetailBlock('🪝 Commit hook setup', [
+    ...result.files.map(
+      (file): DetailRow => [
+        file.status === 'written' ? 'Written' : 'Skipped',
+        file.path,
+      ],
+    ),
+    ['Hooks path', result.hooksPath ?? 'unchanged'],
+  ])
+
+  if (result.clonesNeed) {
+    process.stdout.write(
+      `\n  Other clones need \`${result.clonesNeed}\`; add it to your prepare script.\n`,
+    )
+  }
 }
 
 const STEP_ICONS = { passed: '✓', failed: '✗', skipped: '–', 'not run': '·' }
@@ -226,12 +251,10 @@ const createChangelogResponse = (result: ChangelogResult): JsonResponse => ({
   markdown: result.markdown,
 })
 
-const createSetupResponse = (result: SetupCommitsResult): JsonResponse => ({
-  success: true,
-  command: 'setup',
-  files: result.files,
-  defaultBranch: result.defaultBranch,
-})
+const createSetupResponse = (
+  result: Partial<SetupCommitsResult & SetupHooksResult> &
+    Pick<SetupCommitsResult, 'files'>,
+): JsonResponse => ({ success: true, command: 'setup', ...result })
 
 const createReleaseResponse = (result: ReleaseResult): JsonResponse => ({
   success: true,
@@ -314,7 +337,11 @@ export const createProgram = (
         },
   )
 
-  program.name('perfekt').version(version, '-v, --version')
+  program
+    .name('perfekt')
+    .version(version, '-v, --version')
+    // setup's own --force and --json must not swallow its subcommands' flags
+    .enablePositionalOptions()
 
   program
     .command('init')
@@ -324,9 +351,33 @@ export const createProgram = (
       process.stdout.write(`🌱 Wrote ${written}\n`)
     })
 
+  const major = version.split('.')[0]
+
   const setup = program
     .command('setup')
-    .description('scaffold project conventions')
+    .description('add the PR title workflow and the commit hook')
+    .option('--force', 'overwrite existing files')
+    .option('--json', 'print the command result as JSON')
+    .action(async (options: { force?: boolean; json?: boolean }) => {
+      const force = Boolean(options.force)
+      const commits = await perfekt.setupCommits({ force })
+      const hooks = perfekt.setupHooks({ force, major })
+
+      if (options.json) {
+        writeJson(
+          createSetupResponse({
+            ...commits,
+            ...hooks,
+            files: [...commits.files, ...hooks.files],
+          }),
+        )
+        return
+      }
+
+      printSetupCommitsSummary(commits)
+      process.stdout.write('\n')
+      printSetupHooksSummary(hooks)
+    })
 
   setup
     .command('commits')
@@ -347,6 +398,27 @@ export const createProgram = (
       }
 
       printSetupCommitsSummary(result)
+    })
+
+  setup
+    .command('hooks')
+    .description(
+      'add a commit-msg hook that lints each commit with perfekt lint',
+    )
+    .option('--force', 'overwrite an existing hook')
+    .option('--json', 'print the command result as JSON')
+    .action((options: { force?: boolean; json?: boolean }) => {
+      const result = perfekt.setupHooks({
+        force: Boolean(options.force),
+        major,
+      })
+
+      if (options.json) {
+        writeJson(createSetupResponse(result))
+        return
+      }
+
+      printSetupHooksSummary(result)
     })
 
   program

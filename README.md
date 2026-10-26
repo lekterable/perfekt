@@ -35,7 +35,7 @@
 | `perfekt changelog` | Prints the changelog, or writes it with `--write` |
 | `perfekt lint [message]` | Checks a commit message or pull request title against the shared rules |
 | `perfekt ci` | Runs install, commit lint, lint, typecheck, test and build like CI does |
-| `perfekt setup commits` | Adds a GitHub Action that lints pull request titles |
+| `perfekt setup` | Adds a GitHub Action that lints pull request titles (`setup commits`) and a `commit-msg` hook that lints local commits (`setup hooks`) |
 | `perfekt init` | Writes an empty `perfekt.json` config |
 
 Every command except `init` prints JSON with `--json`, for scripts, CI jobs and agents.
@@ -55,7 +55,7 @@ perfekt release new                  # pick the next version from the commits an
 perfekt changelog                    # preview the unreleased changes
 perfekt lint "feat(cli): add x"      # check a message
 perfekt ci                           # check the branch like CI would, before you push
-perfekt setup commits                # lint pull request titles on GitHub
+perfekt setup                        # lint pull request titles on GitHub and commits locally
 ```
 
 `release new` picks the version from the commit types: `feat` is a minor release, `fix` a patch, and a `!` or `BREAKING CHANGE` a major. You can also pass `major`, `minor`, `patch` or an exact version. Start with [getting started](https://lekterable.github.io/perfekt/#/getting-started), and see the [documentation](https://lekterable.github.io/perfekt/#/documentation) for every option.
@@ -71,7 +71,7 @@ perfekt reads the commit type to group the changelog and pick the next version, 
 - Header up to 72 characters; subjects over 50 characters get a warning
 - `!` after the type, or a `BREAKING CHANGE:` footer, marks a breaking change
 
-`perfekt lint` enforces these rules (commitlint's `config-conventional` plus a few house overrides, built in). When you squash-merge, the pull request title becomes the commit, so `perfekt setup commits` lints titles on GitHub, and `perfekt lint --edit "$1"` in a `commit-msg` hook lints local commits.
+`perfekt lint` enforces these rules (commitlint's `config-conventional` plus a few house overrides, built in). When you squash-merge, the pull request title becomes the commit, so `perfekt setup commits` lints titles on GitHub, and `perfekt setup hooks` adds a `commit-msg` hook that lints local commits.
 
 Adopting the convention in an older repo needs no history rewrite: release once to collect the old commits, then name new commits by the convention. perfekt still works without it, but can't group changes by type or pick the version with `new`.
 

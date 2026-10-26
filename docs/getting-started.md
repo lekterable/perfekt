@@ -33,7 +33,8 @@ To only see the changelog, run `perfekt changelog`. See [`release`](documentatio
 perfekt groups the changelog and picks versions from commit types, so check messages with [`perfekt lint`](documentation.md#lint):
 
 - `perfekt setup commits` adds a GitHub Action that lints pull request titles, which become the commits when you squash-merge.
-- For local commits, add a `commit-msg` hook that runs `npx --no -- perfekt lint --edit "$1"`.
+- `perfekt setup hooks` adds a `commit-msg` hook that lints each local commit.
+- `perfekt setup` does both.
 
 ## Check before you push
 

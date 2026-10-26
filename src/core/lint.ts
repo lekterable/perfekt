@@ -34,12 +34,28 @@ const IGNORED = [
   /^(R|r)evert (.*)/,
   /^(R|r)eapply (.*)/,
   /^(amend|fixup|squash)!/,
-  /^(chore(\([^)]+\))?:\s*)?v?\d+\.\d+\.\d+(-[\w.-]+)?(\+[\w.-]+)?\s*(\n|$)/,
   /^(Merged (.*?)(in|into) (.*)|Merged PR (.*): (.*))/,
   /^Merge remote-tracking branch(\s*)(.*)/,
   /^Automatic merge(.*)/,
   /^Auto-merged (.*?) into (.*)/,
 ]
+
+// semver.org's version pattern, with commitlint's optional `v`.
+const IDENTIFIER = '(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)'
+const VERSION = new RegExp(
+  `^v?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-${IDENTIFIER}(?:\\.${IDENTIFIER})*)?(?:\\+[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*)?$`,
+)
+
+// A release commit like `chore(release): 1.2.3 [skip ci]`, matched the way commitlint does.
+const isVersion = (message: string) =>
+  VERSION.test(
+    message
+      .split('\n')[0]
+      .replace(/^chore(\([^)]+\))?:/, '')
+      .replace(/\[(skip|ci)(-|\s)(ci|skip)\]/i, '')
+      .replace(/\((skip|ci)(-|\s)(ci|skip)\)/i, '')
+      .trim(),
+  )
 
 const HEADER = /^(\w*)(?:\((.*)\))?!?: (.*)$/
 const NOTE = /^BREAKING[ -]CHANGE: /
@@ -73,12 +89,13 @@ export const cleanMessage = (raw: string) =>
     .split('\n')
     .filter((line) => !line.startsWith('#'))
     .join('\n')
-    .replace(/\s+$/, '')
+    .replace(/\n\s*$/, '')
 
 export const lintMessage = (raw: string): LintResult => {
-  const message = raw.replace(/\r\n?/g, '\n').replace(/^\n+|\s+$/g, '')
+  // Trailing blank lines go, but not the header's own trailing whitespace.
+  const message = raw.replace(/\r\n?/g, '\n').replace(/^\n+|\n\s*$/g, '')
 
-  if (IGNORED.some((pattern) => pattern.test(message))) {
+  if (isVersion(message) || IGNORED.some((pattern) => pattern.test(message))) {
     return { valid: true, ignored: true, errors: [], warnings: [] }
   }
 
@@ -100,7 +117,7 @@ export const lintMessage = (raw: string): LintResult => {
       !(COMMIT_TYPES as readonly string[]).includes(type) &&
       `type must be one of [${COMMIT_TYPES.join(', ')}]`,
     !subject && 'subject may not be empty',
-    /^[\p{Lu}\p{Lt}]/u.test(subject) &&
+    /^\p{Lu}/u.test(subject) &&
       'subject must not be sentence-case, start-case, pascal-case, upper-case',
     header.endsWith('.') &&
       !header.endsWith('...') &&

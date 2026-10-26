@@ -22,6 +22,9 @@ describe('lint', () => {
     [`feat: add x\n\nsee https://example.com/${'y'.repeat(100)}`, true],
     ['Added stuff\n\n1.2.3', false],
     ['feat: add x\r\n\r\nbody from windows\r\n', true],
+    ['feat: add x ', false],
+    ['01.2.3', false],
+    ['feat: ǅungla titlecase', true],
   ])('should lint %j as valid: %s', (message, valid) => {
     expect(lintMessage(message).valid).toBe(valid)
   })
@@ -29,6 +32,7 @@ describe('lint', () => {
   it.each([
     'chore(release): 3.1.0',
     'v2.0.0\n\nbody',
+    '1.2.3 [skip ci]',
     'Merge branch master into topic',
     'Merge pull request #3 from lekterable/topic',
     'Revert "feat: add x"',

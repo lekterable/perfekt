@@ -478,7 +478,7 @@ Examples:
         // Only a commit message file carries git's comments and the `git commit -v` diff.
         const input = options.edit
           ? cleanMessage(fs.readFileSync(options.edit, 'utf8'))
-          : (message ?? fs.readFileSync(0, 'utf8')).trimEnd()
+          : (message ?? fs.readFileSync(0, 'utf8')).replace(/\n+$/, '')
         const result = lintMessage(input)
 
         if (options.json) {

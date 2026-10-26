@@ -1,12 +1,10 @@
 import fs from 'fs'
-import inquirer from 'inquirer'
 import { createConfig } from '~testing/fixtures'
 import { resolveReadFile, resolveWriteFile } from '~testing/fs'
 import exec, { execFile } from '~utils/misc/exec'
 import Perfekt from './perfekt'
 
 jest.mock('fs')
-jest.mock('inquirer')
 jest.mock('~utils/misc/exec', () => ({
   __esModule: true,
   default: jest.fn(),
@@ -14,7 +12,6 @@ jest.mock('~utils/misc/exec', () => ({
 }))
 
 const fsMock = jest.mocked(fs)
-const inquirerMock = jest.mocked(inquirer)
 const execMock = jest.mocked(exec)
 const execFileMock = jest.mocked(execFile)
 
@@ -78,16 +75,15 @@ describe('Perfekt', () => {
     perfekt = new Perfekt(createConfig())
   })
 
-  it('should initialize the config file selected by the user', async () => {
-    inquirerMock.prompt.mockResolvedValueOnce({ configFormat: '.perfektrc' })
+  it('should initialize the default config file', async () => {
+    fsMock.existsSync.mockReturnValue(false)
     fsMock.writeFile.mockImplementationOnce(resolveWriteFile())
 
     await perfekt.init()
 
-    expect(inquirerMock.prompt).toHaveBeenCalledTimes(1)
     expect(fsMock.writeFile).toHaveBeenCalledWith(
       '.perfektrc',
-      '',
+      '{}\n',
       'utf8',
       expect.any(Function),
     )

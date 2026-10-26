@@ -1,31 +1,32 @@
-import inquirer from 'inquirer'
+import fs from 'fs'
 import * as writeFile from '../utils/misc/write-file'
-import initialize, { questions } from './initialize'
+import initialize from './initialize'
 
-jest.mock('inquirer')
 jest.mock('fs')
 
-const inquirerMock = jest.mocked(inquirer)
+const fsMock = jest.mocked(fs)
 
 describe('initialize', () => {
   let writeFileSpy: jest.SpiedFunction<typeof writeFile.default>
 
   beforeEach(() => {
-    writeFileSpy = jest.spyOn(writeFile, 'default')
+    writeFileSpy = jest.spyOn(writeFile, 'default').mockResolvedValue()
+    fsMock.existsSync.mockReturnValue(false)
   })
 
-  it('should write to file with --write option and released', async () => {
-    const mockConfigFormat = '.prettierrc'
+  it.each([
+    [undefined, '.perfektrc', '{}\n'],
+    ['perfekt.config.js', 'perfekt.config.js', 'module.exports = {}\n'],
+  ])('should write an empty config to %s', async (file, path, content) => {
+    expect(await initialize(file)).toBe(path)
+    expect(writeFileSpy).toHaveBeenCalledWith(path, content)
+  })
 
-    inquirerMock.prompt.mockResolvedValueOnce({
-      configFormat: mockConfigFormat,
-    })
+  it('should not overwrite a config or write an unknown one', async () => {
+    await expect(initialize('perfekt.toml')).rejects.toThrow('Unknown config')
 
-    await initialize()
-
-    expect(inquirer.prompt).toHaveBeenCalledTimes(1)
-    expect(inquirer.prompt).toHaveBeenCalledWith(questions)
-    expect(writeFileSpy).toHaveBeenCalledTimes(1)
-    expect(writeFileSpy).toHaveBeenCalledWith(mockConfigFormat, '')
+    fsMock.existsSync.mockReturnValue(true)
+    await expect(initialize()).rejects.toThrow('already exists')
+    expect(writeFileSpy).not.toHaveBeenCalled()
   })
 })

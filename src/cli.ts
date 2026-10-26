@@ -310,9 +310,14 @@ export const createProgram = (
   program.name('perfekt').version(version, '-v, --version')
 
   program
-    .command('init')
-    .description('initialize config')
-    .action(() => perfekt.init())
+    .command('init [file]')
+    .description(
+      'write an empty config: .perfektrc (default), perfekt.json, perfekt.yaml or perfekt.config.js',
+    )
+    .action(async (file?: string) => {
+      const written = await perfekt.init(file)
+      process.stdout.write(`🌱 Wrote ${written}\n`)
+    })
 
   const setup = program
     .command('setup')

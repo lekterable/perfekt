@@ -1,25 +1,26 @@
-import inquirer from 'inquirer'
-import { writeFile } from '~utils'
+import { fileExists, writeFile } from '~utils'
 
-export const questions = [
-  {
-    type: 'list',
-    name: 'configFormat',
-    message: 'Which format do you want to use for your your config?',
-    choices: [
-      '.perfektrc',
-      'perfekt.config.js',
-      'perfekt.yaml',
-      'perfekt.json',
-    ],
-    default: '.perfektrc',
-  },
-]
+// Each file cosmiconfig reads, with an empty config in its format.
+export const CONFIG_FILES: Record<string, string> = {
+  '.perfektrc': '{}\n',
+  'perfekt.json': '{}\n',
+  'perfekt.yaml': '{}\n',
+  'perfekt.config.js': 'module.exports = {}\n',
+}
 
-const initialize = async () => {
-  const { configFormat } = await inquirer.prompt(questions)
+const initialize = async (file = '.perfektrc') => {
+  const content = CONFIG_FILES[file]
 
-  writeFile(configFormat, '')
+  if (content === undefined) {
+    throw new Error(
+      `Unknown config file ${file}, use one of ${Object.keys(CONFIG_FILES).join(', ')}`,
+    )
+  }
+  if (fileExists(file)) throw new Error(`${file} already exists`)
+
+  await writeFile(file, content)
+
+  return file
 }
 
 export default initialize

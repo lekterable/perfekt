@@ -74,7 +74,7 @@ const createSetupCommitsResult = () => ({
 })
 
 const createPerfektDouble = () => ({
-  init: jest.fn(),
+  init: jest.fn().mockResolvedValue('.perfektrc'),
   setupCommits: jest.fn().mockResolvedValue(createSetupCommitsResult()),
   changelog: jest.fn().mockResolvedValue(createChangelogResult()),
   release: jest.fn().mockResolvedValue(createReleaseResult()),

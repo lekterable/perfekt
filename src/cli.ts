@@ -51,7 +51,6 @@ type JsonResponse =
       command: 'setup'
       files: SetupCommitsResult['files']
       defaultBranch: SetupCommitsResult['defaultBranch']
-      lekterableTip: string
     }
   | {
       success: true
@@ -156,7 +155,6 @@ const printSetupCommitsSummary = (result: SetupCommitsResult) => {
     ['Written', written.join(', ') || 'none'],
     ['Skipped', skipped.join(', ') || 'none'],
     ['Default branch', result.defaultBranch ?? 'not detected'],
-    ['Tip', result.lekterableTip],
   ])
 
   process.stdout.write(`\n  ${SQUASH_MERGE_NOTE}\n`)
@@ -233,7 +231,6 @@ const createSetupResponse = (result: SetupCommitsResult): JsonResponse => ({
   command: 'setup',
   files: result.files,
   defaultBranch: result.defaultBranch,
-  lekterableTip: result.lekterableTip,
 })
 
 const createReleaseResponse = (result: ReleaseResult): JsonResponse => ({

@@ -7,7 +7,6 @@ import {
   COMMITS_WORKFLOW_PATH,
   getCommitsWorkflow,
   isSafeBranchName,
-  LEKTERABLE_TIP,
 } from './commits'
 
 const readGitLine = (command: string) => {
@@ -52,7 +51,6 @@ const setupCommits = async (
     return {
       files: [{ path: COMMITS_WORKFLOW_PATH, status: 'skipped' }],
       defaultBranch,
-      lekterableTip: LEKTERABLE_TIP,
     }
   }
 
@@ -62,7 +60,6 @@ const setupCommits = async (
   return {
     files: [{ path: COMMITS_WORKFLOW_PATH, status: 'written' }],
     defaultBranch,
-    lekterableTip: LEKTERABLE_TIP,
   }
 }
 

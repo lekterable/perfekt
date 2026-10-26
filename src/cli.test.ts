@@ -73,8 +73,6 @@ const createSetupCommitsResult = () => ({
     { path: '.github/workflows/commitlint.yml', status: 'written' as const },
   ],
   defaultBranch: 'main',
-  lekterableTip:
-    'lekterable repos use master and first commit feat: init :seedling:. Advisory only. Setup does not fail on other default branches.',
 })
 
 const createPerfektDouble = () => ({
@@ -200,7 +198,7 @@ describe('cli', () => {
         expect.stringContaining('.github/workflows/commitlint.yml'),
       )
       expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Advisory only'),
+        expect.stringContaining('squash-merge'),
       )
     })
 

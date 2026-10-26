@@ -40,7 +40,7 @@ describe('lint', () => {
     'v2.0.0\n\nbody',
     '1.2.3 [skip ci]',
     'Merge branch master into topic',
-    'Merge pull request #3 from lekterable/topic',
+    'Merge pull request #3 from owner/topic',
     'Revert "feat: add x"',
     'fixup! feat: add x',
   ])('should ignore %j like commitlint does', (message) => {

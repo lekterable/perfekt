@@ -52,6 +52,32 @@ Options:
 
 `--json` - print the command result as JSON instead of human-readable output
 
+## `ci`
+
+Usage: `perfekt ci [options]`
+
+Runs the shared CI steps on your machine, for when GitHub Actions can't (no minutes left on a private repo) or before you push:
+
+1. `install`, with the lockfile frozen: `npm ci`, or `pnpm install` / `yarn install` with `CI=true`, which makes them refuse to change the lockfile, or `bun install --frozen-lockfile`. The package manager comes from `packageManager`, then the lockfile.
+2. `commits`, which lints every commit since the base branch with the shared `perfekt/commitlint` rules, or only the pull request title with `--title`. These are the rules of the perfekt version you have installed; the shared commitlint workflow reads perfekt's `master`.
+3. `lint`, `typecheck`, `test` and `build`, each only when `package.json` has that script.
+
+Every step runs with `CI=true`, like on GitHub Actions. It stops at the first failing step, prints the end of its output, and exits 1.
+
+By default it runs on a clean checkout of `HEAD` in a temporary git worktree, so uncommitted or untracked files can't make it pass. It runs on one Node version, the one on your PATH, not the shared workflow's matrix.
+
+Options:
+
+`-h, --help` - display help for command
+
+`--dirty` - run in the current folder instead, uncommitted changes included
+
+`--title <title>` - lint this pull request title instead of the branch's commits
+
+`--base <ref>` - lint the commits since this ref; defaults to `origin/HEAD`, else `origin/master`
+
+`--json` - print the steps as JSON
+
 ## `release`
 
 Usage: `perfekt release [options] <version>`

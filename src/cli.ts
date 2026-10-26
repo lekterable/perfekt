@@ -13,6 +13,7 @@ import type {
   SetupCommitsResult,
 } from '~types'
 import { Config, Perfekt } from './core'
+import { type CiResult, type CiStep, ci } from './core/ci'
 import { SQUASH_MERGE_NOTE } from './core/commitlint'
 
 type ChangelogCommandOptions = ChangelogOptions & { json?: boolean }
@@ -70,8 +71,14 @@ type JsonResponse =
       changelog: ReleaseResult['changelog']
     }
   | {
+      success: boolean
+      command: 'ci'
+      dir: string
+      steps: CiStep[]
+    }
+  | {
       success: false
-      command: 'changelog' | 'release' | 'init' | 'setup' | 'unknown'
+      command: 'changelog' | 'release' | 'init' | 'setup' | 'ci' | 'unknown'
       error: {
         code: string
         message: string
@@ -133,6 +140,24 @@ const printSetupCommitsSummary = (result: SetupCommitsResult) => {
   ])
 
   process.stdout.write(`\n  ${SQUASH_MERGE_NOTE}\n`)
+}
+
+const STEP_ICONS = { passed: '✓', failed: '✗', skipped: '–', 'not run': '·' }
+
+const printCiSummary = (result: CiResult) => {
+  const width = Math.max(...result.steps.map((step) => step.name.length))
+  const lines = result.steps.map((step) => {
+    const time = step.ms > 0 ? ` ${(step.ms / 1000).toFixed(1)}s` : ''
+    const detail = step.detail ? `  ${step.detail}` : ''
+
+    return `  ${STEP_ICONS[step.status]} ${step.name.padEnd(width)}${time}${detail}`
+  })
+  const failed = result.steps.find((step) => step.status === 'failed')
+
+  process.stdout.write(
+    `${result.success ? '✅ CI passed' : '❌ CI failed'}\n\n${lines.join('\n')}\n`,
+  )
+  if (failed?.output) process.stdout.write(`\n${failed.output}\n`)
 }
 
 const printReleaseSummary = (result: ReleaseResult) => {
@@ -215,14 +240,15 @@ const createReleaseResponse = (result: ReleaseResult): JsonResponse => ({
 
 export const getCommandName = (
   argv = process.argv,
-): 'changelog' | 'release' | 'init' | 'setup' | 'unknown' => {
+): 'changelog' | 'release' | 'init' | 'setup' | 'ci' | 'unknown' => {
   const command = argv[2]
 
   if (
     command === 'changelog' ||
     command === 'release' ||
     command === 'init' ||
-    command === 'setup'
+    command === 'setup' ||
+    command === 'ci'
   ) {
     return command
   }
@@ -347,6 +373,41 @@ export const createProgram = (
 
       printReleaseSummary(result)
     })
+
+  program
+    .command('ci')
+    .description(
+      'run the shared CI steps locally on a clean checkout of HEAD: install, commitlint, lint, typecheck, test, build',
+    )
+    .option('--dirty', 'run in this folder, uncommitted changes included')
+    .option(
+      '--title <title>',
+      'lint this pull request title instead of the branch commits',
+    )
+    .option(
+      '--base <ref>',
+      'lint the commits since this ref (default: origin/HEAD, else origin/master)',
+    )
+    .option('--json', 'print the command result as JSON')
+    .action(
+      async (options: {
+        dirty?: boolean
+        title?: string
+        base?: string
+        json?: boolean
+      }) => {
+        const { json = false, ...ciOptions } = options
+        const result = await ci({
+          ...ciOptions,
+          sharedConfig: path.resolve(__dirname, '../commitlint.cjs'),
+        })
+
+        if (json) writeJson({ command: 'ci', ...result })
+        else printCiSummary(result)
+
+        if (!result.success) process.exitCode = 1
+      },
+    )
 
   return program
 }

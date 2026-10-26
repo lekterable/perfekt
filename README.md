@@ -100,6 +100,8 @@ jobs:
 
 It needs a `packageManager` field in `package.json` for the pnpm version.
 
+To run the same steps on your machine, plus commitlint on the branch's commits, use `perfekt ci`. It works on a clean checkout of `HEAD` and exits 1 on the first failing step. See [`ci`](https://lekterable.github.io/perfekt/#/documentation?id=ci).
+
 ## Getting started
 
 For a quick introduction and set up instructions head to the [getting started](https://lekterable.github.io/perfekt/#/getting-started.md) section.

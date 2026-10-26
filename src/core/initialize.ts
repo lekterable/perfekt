@@ -1,26 +1,12 @@
 import { fileExists, writeFile } from '~utils'
+import { CONFIG_FILE } from './config/load'
 
-// The config files init can write, each with an empty config in its format.
-export const CONFIG_FILES: Record<string, string> = {
-  'perfekt.json': '{}\n',
-  'perfekt.yaml': '{}\n',
-  '.perfektrc': '{}\n',
-  'perfekt.config.js': 'module.exports = {}\n',
-}
+const initialize = async () => {
+  if (fileExists(CONFIG_FILE)) throw new Error(`${CONFIG_FILE} already exists`)
 
-const initialize = async (file = 'perfekt.json') => {
-  const content = CONFIG_FILES[file]
+  await writeFile(CONFIG_FILE, '{}\n')
 
-  if (content === undefined) {
-    throw new Error(
-      `Unknown config file ${file}, use one of ${Object.keys(CONFIG_FILES).join(', ')}`,
-    )
-  }
-  if (fileExists(file)) throw new Error(`${file} already exists`)
-
-  await writeFile(file, content)
-
-  return file
+  return CONFIG_FILE
 }
 
 export default initialize

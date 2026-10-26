@@ -38,8 +38,8 @@ class Perfekt {
     this.#release = new Release()
   }
 
-  async init(file?: string) {
-    return initialize(file)
+  async init() {
+    return initialize()
   }
 
   async setupCommits(

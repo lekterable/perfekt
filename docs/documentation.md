@@ -6,9 +6,9 @@ For the list of available commands you can always run:
 
 ## `init`
 
-Usage: `perfekt init [file]`
+Usage: `perfekt init`
 
-Writes an empty configuration file: `perfekt.json` by default, or `perfekt.yaml`, `.perfektrc` or `perfekt.config.js` when you name one. It never overwrites an existing file.
+Writes an empty `perfekt.json`, the only config file perfekt reads. It never overwrites an existing one.
 
 Options:
 
@@ -41,6 +41,7 @@ perfekt 4 replaces commitlint with the built-in [`perfekt lint`](#lint), and the
 1. Delete `commitlint.config.cjs` and remove `@commitlint/cli` and `@commitlint/config-conventional` from `devDependencies`.
 2. In `.husky/commit-msg`, replace the commitlint line with `npx --no -- perfekt lint --edit "$1"`, or delete the hook if PR title checks are enough.
 3. Keep `.github/workflows/commitlint.yml` as it is; the shared workflow it calls already runs `perfekt lint`'s rules.
+4. Move your config to `perfekt.json`: rename a JSON `.perfektrc`, or convert a YAML/JS one or a `"perfekt"` key in `package.json`. perfekt stops with an error while an old config file is there and `perfekt.json` isn't, so a release never runs without your settings.
 
 ## `lint`
 

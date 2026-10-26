@@ -6,9 +6,7 @@ export default defineConfig({
   platform: 'node',
   target: 'node20',
   clean: true,
-  // Dependencies are bundled so perfekt installs with none. cosmiconfig loads TypeScript only
-  // for .ts configs, which perfekt doesn't look for, so it stays out of the bundle.
-  external: ['typescript'],
+  // commander and semver are devDependencies, so they are bundled and perfekt installs with none.
   alias: {
     '~': './src/',
   },

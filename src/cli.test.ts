@@ -1,25 +1,22 @@
 import fs from 'node:fs'
 import { Command, CommanderError } from 'commander'
-import { cosmiconfigSync } from 'cosmiconfig'
 import {
-  CONFIG_SEARCH_PLACES,
   createPerfekt as createPerfektInstance,
   createProgram,
   getCommandName,
   getErrorCode,
-  loadConfig,
   readPackageVersion,
   run,
 } from './cli'
 import { Config, Perfekt } from './core'
+import { loadConfig } from './core/config/load'
 
 jest.mock('node:fs', () => ({
   readFileSync: jest.fn(),
 }))
 
-jest.mock('cosmiconfig', () => ({
-  cosmiconfigSync: jest.fn(),
-  getDefaultSearchPlacesSync: jest.fn(() => ['package.json']),
+jest.mock('./core/config/load', () => ({
+  loadConfig: jest.fn(),
 }))
 
 jest.mock('./core', () => ({
@@ -28,7 +25,7 @@ jest.mock('./core', () => ({
 }))
 
 const readFileSyncMock = jest.mocked(fs.readFileSync)
-const cosmiconfigSyncMock = jest.mocked(cosmiconfigSync)
+const loadConfigMock = jest.mocked(loadConfig)
 const ConfigMock = Config as unknown as jest.Mock
 const PerfektMock = Perfekt as unknown as jest.Mock
 
@@ -82,13 +79,8 @@ const createPerfektDouble = () => ({
   release: jest.fn().mockResolvedValue(createReleaseResult()),
 })
 
-const mockLoadedConfig = (config: Record<string, unknown> = { answer: 42 }) => {
-  const search = jest.fn().mockReturnValue({ config })
-
-  cosmiconfigSyncMock.mockReturnValue({ search } as never)
-
-  return search
-}
+const mockLoadedConfig = (config: Record<string, unknown> = { answer: 42 }) =>
+  loadConfigMock.mockReturnValue(config)
 
 const mockLoadedPerfekt = (
   instance = createPerfektDouble(),
@@ -136,24 +128,6 @@ describe('cli', () => {
         expect.stringMatching(/package\.json$/),
         'utf8',
       )
-    })
-
-    it('should load config when present and returns undefined otherwise', () => {
-      const search = jest
-        .fn()
-        .mockReturnValueOnce({ config: { foo: 'bar' } })
-        .mockReturnValueOnce(undefined)
-
-      cosmiconfigSyncMock.mockReturnValue({ search } as never)
-
-      expect(loadConfig()).toEqual({ foo: 'bar' })
-      expect(loadConfig()).toBe(undefined)
-      expect(cosmiconfigSyncMock).toHaveBeenNthCalledWith(1, 'perfekt', {
-        searchPlaces: CONFIG_SEARCH_PLACES,
-      })
-      expect(cosmiconfigSyncMock).toHaveBeenNthCalledWith(2, 'perfekt', {
-        searchPlaces: CONFIG_SEARCH_PLACES,
-      })
     })
 
     it('should create a perfekt instance from loaded config', () => {

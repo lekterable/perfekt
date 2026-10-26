@@ -2,7 +2,7 @@
 
 > **perfekt's** huge advantage is it's configurability.
 
-perfekt reads the first config it finds, searching up from the current folder: `perfekt.json`, `perfekt.yaml` (or `.yml`), then [cosmiconfig](https://github.com/cosmiconfig/cosmiconfig)'s usual places, such as a `perfekt` key in `package.json`, `.perfektrc` (JSON or YAML), `.perfektrc.json` and `perfekt.config.js`. `perfekt init` writes an empty `perfekt.json`.
+perfekt reads `perfekt.json` from the folder it runs in. `perfekt init` writes an empty one, and every field is optional.
 
 Default config looks like this:
 

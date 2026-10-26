@@ -3,7 +3,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { Command, CommanderError } from 'commander'
-import { cosmiconfigSync, getDefaultSearchPlacesSync } from 'cosmiconfig'
 import type {
   ChangelogOptions,
   ChangelogResult,
@@ -15,6 +14,7 @@ import type {
 import { Config, Perfekt } from './core'
 import { type CiResult, type CiStep, ci } from './core/ci'
 import { SQUASH_MERGE_NOTE } from './core/commits'
+import { loadConfig } from './core/config/load'
 import { cleanMessage, formatLint, lintMessage } from './core/lint'
 
 type ChangelogCommandOptions = ChangelogOptions & { json?: boolean }
@@ -103,19 +103,6 @@ export const readPackageVersion = (
 ) =>
   (JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')) as { version: string })
     .version
-
-// perfekt.json and perfekt.yaml first, like biome.json or turbo.json, then cosmiconfig's own
-// places (package.json, .perfektrc, perfekt.config.js and the rest).
-export const CONFIG_SEARCH_PLACES = [
-  'perfekt.json',
-  'perfekt.yaml',
-  'perfekt.yml',
-  ...getDefaultSearchPlacesSync('perfekt'),
-]
-
-export const loadConfig = () =>
-  cosmiconfigSync('perfekt', { searchPlaces: CONFIG_SEARCH_PLACES }).search()
-    ?.config
 
 export const createPerfekt = (overrides = loadConfig()) => {
   const { config } = new Config(overrides)
@@ -321,12 +308,10 @@ export const createProgram = (
   program.name('perfekt').version(version, '-v, --version')
 
   program
-    .command('init [file]')
-    .description(
-      'write an empty config: perfekt.json (default), perfekt.yaml, .perfektrc or perfekt.config.js',
-    )
-    .action(async (file?: string) => {
-      const written = await perfekt.init(file)
+    .command('init')
+    .description('write an empty perfekt.json config')
+    .action(async () => {
+      const written = await perfekt.init()
       process.stdout.write(`🌱 Wrote ${written}\n`)
     })
 

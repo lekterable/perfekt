@@ -9,17 +9,17 @@ import type {
   ReleaseChange,
   ReleaseOptions,
   ReleaseResult,
-  SetupCommitsOptions,
-  SetupCommitsResult,
 } from '~types'
-import { fileExists, groupCommits, resolveVersion } from '~utils'
-import getPackageManager from '~utils/npm/get-package-manager'
+import {
+  fileExists,
+  getPackageManager,
+  groupCommits,
+  resolveVersion,
+} from '~utils'
 import Changelog from './changelog'
 import type Commit from './commit'
 import Git from './git'
-import initialize from './initialize'
 import Release from './release'
-import setupCommits from './setup-commits'
 
 type BuildChangelogResult = ChangelogResult & {
   releaseMarkdown: string
@@ -36,16 +36,6 @@ class Perfekt {
     this.#git = new Git()
     this.#changelog = new Changelog(config)
     this.#release = new Release()
-  }
-
-  async init() {
-    await initialize()
-  }
-
-  async setupCommits(
-    options: SetupCommitsOptions = {},
-  ): Promise<SetupCommitsResult> {
-    return setupCommits(options)
   }
 
   #serializeCommit(commit: Commit): OutputCommit {
@@ -172,7 +162,6 @@ class Perfekt {
 
       await this.#changelog.save(changelog.markdown)
 
-      this.#release.options = options
       this.#release.finish(resolvedVersion, changelog.releaseMarkdown)
     }
 
@@ -212,7 +201,7 @@ class Perfekt {
     }
 
     if (output === 'default') {
-      this.#changelog.print(result.markdown)
+      process.stdout.write(result.markdown)
     }
 
     return result

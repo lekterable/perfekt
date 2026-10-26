@@ -3,7 +3,6 @@ import {
   createReleasedFilter,
   fileExists,
   generateChangelog,
-  printOutput,
   readFile,
   writeFile,
 } from '~utils'
@@ -17,20 +16,12 @@ class Changelog extends Optionable<ChangelogOptions> {
     this.#config = config
   }
 
-  get hasChangelog() {
-    return fileExists('CHANGELOG.md')
-  }
-
-  async getChangelog(): Promise<string> {
-    return (await readFile('CHANGELOG.md')) as string
-  }
-
   async getHistory(version: string): Promise<string | undefined> {
     const isFromOverwritten = Boolean(this.options.root || this.options.from)
 
-    if (!this.hasChangelog || isFromOverwritten) return
+    if (!fileExists('CHANGELOG.md') || isFromOverwritten) return
 
-    const changelog = await this.getChangelog()
+    const changelog = await readFile('CHANGELOG.md')
 
     if (!changelog) {
       throw new Error("CHANGELOG doesn't contain any history.")
@@ -60,22 +51,6 @@ class Changelog extends Optionable<ChangelogOptions> {
 
   save(changelog: string) {
     return writeFile('CHANGELOG.md', changelog)
-  }
-
-  print(changelog: string) {
-    printOutput(changelog)
-  }
-
-  async finish(
-    commits: GroupedCommits,
-    version: string | undefined,
-    previousVersion: string | undefined,
-  ) {
-    const changelog = await this.render(commits, version, previousVersion)
-
-    if (this.options.write) return this.save(changelog)
-
-    return this.print(changelog)
   }
 }
 

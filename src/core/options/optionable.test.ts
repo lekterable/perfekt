@@ -1,40 +1,23 @@
-import { defaults } from '.'
 import Optionable from './optionable'
 
 describe('Optionable', () => {
-  let optionable: Optionable<{ from?: string; root?: boolean; write?: boolean }>
+  const defaults = { from: undefined, root: false }
+  let optionable: Optionable<{ from?: string; root: boolean }>
 
   beforeEach(() => {
-    optionable = new Optionable(defaults.releaseOptions)
-  })
-
-  it('should expose the default options', () => {
-    expect(optionable.options).toStrictEqual(defaults.releaseOptions)
+    optionable = new Optionable(defaults)
   })
 
   it('should merge assigned options into the defaults', () => {
     optionable.options = { from: '1.1.1' }
 
-    expect(optionable.options).toStrictEqual({
-      ...defaults.releaseOptions,
-      from: '1.1.1',
-    })
+    expect(optionable.options).toStrictEqual({ ...defaults, from: '1.1.1' })
   })
 
-  it('should replace stale overrides when reassigned', () => {
+  it('should drop earlier overrides when options are reassigned', () => {
     optionable.options = { from: '1.1.1' }
-    optionable.options = defaults.changelogOptions
+    optionable.options = { root: true }
 
-    expect(optionable.options).toStrictEqual(defaults.changelogOptions)
-  })
-
-  it('should keep only the latest override values', () => {
-    optionable.options = { from: '1.1.1' }
-    optionable.options = { from: '2.2.2' }
-
-    expect(optionable.options).toStrictEqual({
-      ...defaults.releaseOptions,
-      from: '2.2.2',
-    })
+    expect(optionable.options).toStrictEqual({ ...defaults, root: true })
   })
 })

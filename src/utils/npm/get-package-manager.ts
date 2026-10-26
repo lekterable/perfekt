@@ -64,5 +64,3 @@ export const getReleaseFiles = () => {
 
 export const getVersionCommand = (version: string) =>
   packageManagers[getPackageManager()].versionCommand(version)
-
-export default getPackageManager

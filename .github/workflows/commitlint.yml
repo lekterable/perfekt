@@ -20,16 +20,21 @@ jobs:
           # perfekt's own PRs lint against their own rules; callers use master
           ref: ${{ github.repository == 'lekterable/perfekt' && github.event.pull_request.head.sha || 'master' }}
           path: perfekt
-          sparse-checkout: commitlint.cjs
+          sparse-checkout: src/core/lint.ts
           sparse-checkout-cone-mode: false
+      # Node 24 runs the TypeScript rules directly, so there is nothing to install.
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-      - name: Install commitlint
-        working-directory: perfekt
-        run: npm install --no-save --no-package-lock @commitlint/cli@20 @commitlint/config-conventional@20
+          node-version: 24
       - name: Lint PR title
         working-directory: perfekt
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
-        run: echo "$PR_TITLE" | npx --no -- commitlint --config commitlint.cjs
+        run: |
+          node --no-warnings --input-type=module -e '
+            import { formatLint, lintMessage } from "./src/core/lint.ts"
+            const title = process.env.PR_TITLE
+            const result = lintMessage(title)
+            console.log(formatLint(title, result))
+            process.exitCode = result.valid ? 0 : 1
+          '

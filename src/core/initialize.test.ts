@@ -1,31 +1,30 @@
-import inquirer from 'inquirer'
+import fs from 'fs'
 import * as writeFile from '../utils/misc/write-file'
-import initialize, { questions } from './initialize'
+import initialize from './initialize'
 
-jest.mock('inquirer')
 jest.mock('fs')
 
-const inquirerMock = jest.mocked(inquirer)
+const fsMock = jest.mocked(fs)
 
 describe('initialize', () => {
-  let writeFileSpy: jest.SpiedFunction<typeof writeFile.default>
+  it('should write an empty perfekt.json', async () => {
+    const writeFileSpy = jest.spyOn(writeFile, 'default').mockResolvedValue()
+    fsMock.existsSync.mockReturnValue(false)
 
-  beforeEach(() => {
-    writeFileSpy = jest.spyOn(writeFile, 'default')
+    expect(await initialize()).toBe('perfekt.json')
+    expect(writeFileSpy).toHaveBeenCalledWith('perfekt.json', '{}\n')
   })
 
-  it('should write to file with --write option and released', async () => {
-    const mockConfigFormat = '.prettierrc'
+  it.each([
+    ['.perfektrc', '.perfektrc already exists'],
+    ['.perfektrc.yml', '.perfektrc.yml already exists'],
+    ['package.json', 'the "perfekt" key in package.json already exists'],
+  ])('should refuse when %s holds a config', async (file, message) => {
+    const writeFileSpy = jest.spyOn(writeFile, 'default').mockResolvedValue()
+    fsMock.existsSync.mockImplementation((path) => String(path).endsWith(file))
+    fsMock.readFileSync.mockReturnValue('{"perfekt":{}}')
 
-    inquirerMock.prompt.mockResolvedValueOnce({
-      configFormat: mockConfigFormat,
-    })
-
-    await initialize()
-
-    expect(inquirer.prompt).toHaveBeenCalledTimes(1)
-    expect(inquirer.prompt).toHaveBeenCalledWith(questions)
-    expect(writeFileSpy).toHaveBeenCalledTimes(1)
-    expect(writeFileSpy).toHaveBeenCalledWith(mockConfigFormat, '')
+    await expect(initialize()).rejects.toThrow(message)
+    expect(writeFileSpy).not.toHaveBeenCalled()
   })
 })

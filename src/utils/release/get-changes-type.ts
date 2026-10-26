@@ -6,7 +6,7 @@ const changePriority: Record<ReleaseChange, number> = {
   patch: 2,
 }
 
-export const sortChangeTypes = (
+const sortChangeTypes = (
   left: ReleaseChange | undefined,
   right: ReleaseChange | undefined,
 ) => {

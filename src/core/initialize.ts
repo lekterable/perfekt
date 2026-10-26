@@ -1,25 +1,13 @@
-import inquirer from 'inquirer'
 import { writeFile } from '~utils'
-
-export const questions = [
-  {
-    type: 'list',
-    name: 'configFormat',
-    message: 'Which format do you want to use for your your config?',
-    choices: [
-      '.perfektrc',
-      'perfekt.config.js',
-      'perfekt.yaml',
-      'perfekt.json',
-    ],
-    default: '.perfektrc',
-  },
-]
+import { CONFIG_FILE, findConfigFiles } from './config/load'
 
 const initialize = async () => {
-  const { configFormat } = await inquirer.prompt(questions)
+  const [existing] = findConfigFiles()
+  if (existing) throw new Error(`${existing} already exists`)
 
-  writeFile(configFormat, '')
+  await writeFile(CONFIG_FILE, '{}\n')
+
+  return CONFIG_FILE
 }
 
 export default initialize

@@ -1,6 +1,9 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
-  "plugins": ["./node_modules/perfekt/biome/arrow.grit"],
+  "plugins": [
+    "./node_modules/perfekt/biome/arrow.grit",
+    "./node_modules/perfekt/biome/loop.grit"
+  ],
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "ignoreUnknown": true,

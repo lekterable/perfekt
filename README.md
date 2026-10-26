@@ -80,12 +80,13 @@ The config also enforces the house code conventions:
 | --- | --- | --- |
 | `complexity/useArrowFunction` | Function expressions become arrows: `const add = (left, right) => left + right`, not `function (left, right) {}`. Functions that use `this` are left alone. Auto-fixable. | Biome core rule |
 | No function declarations | `function name() {}` and `export default function () {}` are errors. Generators (`function*`) are allowed, since arrows can't yield. | GritQL plugin `biome/arrow.grit` |
+| No loops | `for`, `for…of`, `for…in`, `for await`, `while`, `do…while` and `.forEach(...)` are errors. Use `map`/`filter`/`reduce`/`flatMap`/`find`, `it.each` for test tables, and one named helper built on `reduce` or recursion for sequential async work. | GritQL plugin `biome/loop.grit` |
 | Test titles start with "should" | In `**/*.test.*` and `**/tests/**`, every `it(...)` and `test(...)` title (including `.only`, `.skip`, `.todo` and `.each`) must start with "should" or "should not": `it('should reject an expired token')`. `describe` blocks are exempt. | GritQL plugin `biome/should.grit` |
 | `style/useConsistentTypeDefinitions` | `type` instead of `interface`. | Biome core rule |
 
-These rules are new errors when you upgrade, so expect `biome check` to flag existing function declarations, function expressions and test titles. `biome check --write` fixes the function expressions; the rest need a rename or a rewrite to `const name = () => {}`.
+These rules are new errors when you upgrade, so expect `biome check` to flag existing function declarations, function expressions, loops and test titles. `biome check --write` fixes the function expressions; the rest need a rename or a rewrite (`const name = () => {}`, or a loop turned into `map`/`reduce`).
 
-Biome resolves plugin paths from your project root, so the config points at `./node_modules/perfekt/biome/`. That works with pnpm, npm and Yarn's `node-modules` linker when `biome.json` sits next to the `node_modules` that has `perfekt`. Yarn Plug'n'Play has no `node_modules`, so the two plugins can't load there.
+Biome resolves plugin paths from your project root, so the config points at `./node_modules/perfekt/biome/`. That works with pnpm, npm and Yarn's `node-modules` linker when `biome.json` sits next to the `node_modules` that has `perfekt`. Yarn Plug'n'Play has no `node_modules`, so the plugins can't load there.
 
 For CI, call the shared workflow. It installs with pnpm and runs `lint`, `typecheck`, `test` and `build`, skipping any script your `package.json` doesn't have:
 

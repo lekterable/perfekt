@@ -15,7 +15,7 @@ describe('initialize', () => {
   })
 
   it.each([
-    [undefined, '.perfektrc', '{}\n'],
+    [undefined, 'perfekt.json', '{}\n'],
     ['perfekt.config.js', 'perfekt.config.js', 'module.exports = {}\n'],
   ])('should write an empty config to %s', async (file, path, content) => {
     expect(await initialize(file)).toBe(path)

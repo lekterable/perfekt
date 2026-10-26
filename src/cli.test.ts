@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import { Command, CommanderError } from 'commander'
 import { cosmiconfigSync } from 'cosmiconfig'
 import {
+  CONFIG_SEARCH_PLACES,
   createPerfekt as createPerfektInstance,
   createProgram,
   getCommandName,
@@ -18,6 +19,7 @@ jest.mock('node:fs', () => ({
 
 jest.mock('cosmiconfig', () => ({
   cosmiconfigSync: jest.fn(),
+  getDefaultSearchPlacesSync: jest.fn(() => ['package.json']),
 }))
 
 jest.mock('./core', () => ({
@@ -74,7 +76,7 @@ const createSetupCommitsResult = () => ({
 })
 
 const createPerfektDouble = () => ({
-  init: jest.fn().mockResolvedValue('.perfektrc'),
+  init: jest.fn().mockResolvedValue('perfekt.json'),
   setupCommits: jest.fn().mockResolvedValue(createSetupCommitsResult()),
   changelog: jest.fn().mockResolvedValue(createChangelogResult()),
   release: jest.fn().mockResolvedValue(createReleaseResult()),
@@ -146,8 +148,12 @@ describe('cli', () => {
 
       expect(loadConfig()).toEqual({ foo: 'bar' })
       expect(loadConfig()).toBe(undefined)
-      expect(cosmiconfigSyncMock).toHaveBeenNthCalledWith(1, 'perfekt')
-      expect(cosmiconfigSyncMock).toHaveBeenNthCalledWith(2, 'perfekt')
+      expect(cosmiconfigSyncMock).toHaveBeenNthCalledWith(1, 'perfekt', {
+        searchPlaces: CONFIG_SEARCH_PLACES,
+      })
+      expect(cosmiconfigSyncMock).toHaveBeenNthCalledWith(2, 'perfekt', {
+        searchPlaces: CONFIG_SEARCH_PLACES,
+      })
     })
 
     it('should create a perfekt instance from loaded config', () => {

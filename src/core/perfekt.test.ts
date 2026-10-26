@@ -82,7 +82,7 @@ describe('Perfekt', () => {
     await perfekt.init()
 
     expect(fsMock.writeFile).toHaveBeenCalledWith(
-      '.perfektrc',
+      'perfekt.json',
       '{}\n',
       'utf8',
       expect.any(Function),

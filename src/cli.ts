@@ -3,7 +3,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { Command, CommanderError } from 'commander'
-import { cosmiconfigSync } from 'cosmiconfig'
+import { cosmiconfigSync, getDefaultSearchPlacesSync } from 'cosmiconfig'
 import type {
   ChangelogOptions,
   ChangelogResult,
@@ -104,7 +104,18 @@ export const readPackageVersion = (
   (JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')) as { version: string })
     .version
 
-export const loadConfig = () => cosmiconfigSync('perfekt').search()?.config
+// perfekt.json and perfekt.yaml first, like biome.json or turbo.json, then cosmiconfig's own
+// places (package.json, .perfektrc, perfekt.config.js and the rest).
+export const CONFIG_SEARCH_PLACES = [
+  'perfekt.json',
+  'perfekt.yaml',
+  'perfekt.yml',
+  ...getDefaultSearchPlacesSync('perfekt'),
+]
+
+export const loadConfig = () =>
+  cosmiconfigSync('perfekt', { searchPlaces: CONFIG_SEARCH_PLACES }).search()
+    ?.config
 
 export const createPerfekt = (overrides = loadConfig()) => {
   const { config } = new Config(overrides)
@@ -312,7 +323,7 @@ export const createProgram = (
   program
     .command('init [file]')
     .description(
-      'write an empty config: .perfektrc (default), .perfektrc.json, .perfektrc.yaml or perfekt.config.js',
+      'write an empty config: perfekt.json (default), perfekt.yaml, .perfektrc or perfekt.config.js',
     )
     .action(async (file?: string) => {
       const written = await perfekt.init(file)

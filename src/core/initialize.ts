@@ -1,14 +1,14 @@
 import { fileExists, writeFile } from '~utils'
 
-// Each file cosmiconfig reads, with an empty config in its format.
+// The config files init can write, each with an empty config in its format.
 export const CONFIG_FILES: Record<string, string> = {
+  'perfekt.json': '{}\n',
+  'perfekt.yaml': '{}\n',
   '.perfektrc': '{}\n',
-  '.perfektrc.json': '{}\n',
-  '.perfektrc.yaml': '{}\n',
   'perfekt.config.js': 'module.exports = {}\n',
 }
 
-const initialize = async (file = '.perfektrc') => {
+const initialize = async (file = 'perfekt.json') => {
   const content = CONFIG_FILES[file]
 
   if (content === undefined) {

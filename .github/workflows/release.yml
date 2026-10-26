@@ -50,7 +50,7 @@ jobs:
         run: corepack enable
       - name: Install perfekt
         # outside the repo, so the release never touches its lockfile
-        run: npm install --prefix "$RUNNER_TEMP/perfekt" --no-save --no-package-lock perfekt@3
+        run: npm install --prefix "$RUNNER_TEMP/perfekt" --no-save --no-package-lock perfekt@4
       - name: Configure git
         run: |
           git config user.name 'github-actions[bot]'

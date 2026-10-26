@@ -1,6 +1,5 @@
 import type Commit from '~core/commit'
 import type { Config, GroupedCommits } from '~types'
-import isObjectEmpty from '../object/is-empty'
 
 const getExistingGroup = (value: Commit | Commit[] | undefined) =>
   Array.isArray(value) ? value : []
@@ -20,7 +19,7 @@ const groupCommits = (commits: Commit[], config: Config): GroupedCommits =>
           return [...grouped]
 
         if (normalizedScope === 'release') {
-          const isLatest = isObjectEmpty(group)
+          const isLatest = Object.keys(group).length === 0
           const release = { release: commit }
 
           return isLatest ? [release] : [...grouped, release]

@@ -1,7 +1,5 @@
-import type { ReleaseOptions } from '~types'
+import { updateVersion } from '~utils'
 import Git from './git'
-import NPM from './npm'
-import { defaults, Optionable } from './options'
 
 export const createTagMessage = (changelog: string) => {
   const [, ...rest] = changelog.split('\n')
@@ -11,18 +9,11 @@ export const createTagMessage = (changelog: string) => {
   return rest.join('\n')
 }
 
-class Release extends Optionable<ReleaseOptions> {
-  #git: Git
-  #npm: NPM
-
-  constructor() {
-    super(defaults.releaseOptions)
-    this.#npm = new NPM()
-    this.#git = new Git()
-  }
+class Release {
+  #git = new Git()
 
   finish(version: string, changelog: string) {
-    this.#npm.updateVersion(version)
+    updateVersion(version)
     this.#git.release(version, createTagMessage(changelog))
   }
 }

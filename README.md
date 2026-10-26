@@ -27,97 +27,53 @@
 
 ## Intro
 
-**perfekt** is a release, changelog and versioning manager. It's easy to use and doesn't require any configuration to get it up and running.
+**perfekt** is a release, changelog and versioning manager for [Conventional Commits](https://www.conventionalcommits.org) repos. It needs no config to start, works with `pnpm`, `npm` and `yarn`, and installs as one file with no dependencies.
 
-It works with all package managers: `pnpm`, `npm` and `yarn`. `perfekt` detects the package manager from your `packageManager` field or lockfile and updates the matching lockfile during releases.
+| Command | What it does |
+| --- | --- |
+| `perfekt release <version>` | Bumps the version, writes `CHANGELOG.md`, commits and tags |
+| `perfekt changelog` | Prints the changelog, or writes it with `--write` |
+| `perfekt lint [message]` | Checks a commit message or pull request title against the shared rules |
+| `perfekt ci` | Runs install, commit lint, lint, typecheck, test and build like CI does |
+| `perfekt setup commits` | Adds a GitHub Action that lints pull request titles |
+| `perfekt init` | Writes an empty `perfekt.json` config |
 
-It can also return structured JSON for `release` and `changelog`, which makes it a good fit for CI jobs, scripts, and agents.
+Every command except `init` prints JSON with `--json`, for scripts, CI jobs and agents.
 
-## Convention
+perfekt also ships shared tooling other repos extend: a [Biome](https://biomejs.dev) config and reusable GitHub workflows for CI, pull request titles and releases. See [shared tooling](https://lekterable.github.io/perfekt/#/tooling).
 
-For **perfekt** to run with its full power, your project must follow the [conventional commits](https://www.conventionalcommits.org) specification, this allows it to know the type of changes introduced in a given commit.
+## Install
 
-If you want help enforcing that locally, run `perfekt setup commits`. That writes a [commitlint](https://commitlint.js.org/) config extending the shared `perfekt/commitlint` rules and a husky `commit-msg` hook, then prints the exact dependencies to install.
-
-The shared rules keep the usual types (`feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `ci`, `build`, `style`, `perf`, `revert`), reject subjects that end with `.` and headers over 72 characters, and warn on subjects over 50 characters or ones that don't start with an imperative verb. They accept `feat: init :seedling:` and a trailing GitHub squash suffix like `(#123)`.
-
-To lint pull request titles in any repo, call the shared workflow:
-
-```yaml
-jobs:
-  commitlint:
-    name: Commitlint
-    permissions:
-      contents: read
-    uses: lekterable/perfekt/.github/workflows/commitlint.yml@master
+```sh
+pnpm add -D perfekt   # or npm install -D perfekt, or pnpm add -g perfekt
 ```
 
-`perfekt setup commits --ci` writes that caller for you.
+## Quick start
 
-To release from CI instead of your machine, call the shared `lekterable/perfekt/.github/workflows/release.yml@master` workflow from a manually triggered one. It runs `perfekt release`, pushes the commit and tag, and publishes a GitHub release. See [releasing from GitHub Actions](https://lekterable.github.io/perfekt/#/documentation?id=releasing-from-github-actions).
-
-lekterable repos use `master` and start with `feat: init :seedling:`. That is a house tip, not a package rule. `perfekt setup commits` detects the consumer default branch for `--ci` and does not fail on `main`.
-
-GitHub squash titles still need repo settings or merge habit to strip `(#N)` — commitlint only catches local commits, and CI if you add `perfekt setup commits --ci`.
-
-If your project doesn't do it yet, you can start any time as there is no need for rewriting any git history, simply create an initial release which will contain all of the _unconventional_ commits and after that start naming your commits accordingly.
-
-If for some reason you can't follow the convention for your commits' names, you can still use **perfekt** but you will lose some of the features, like grouping the commits by type or ability to automatically determine the next release version based on unreleased changes using `new` keyword in the `perfekt release new` command, about which you can read more [here](https://lekterable.github.io/perfekt/#/documentation?id=release).
-
-## Shared lint, format and CI
-
-perfekt also ships the house [Biome](https://biomejs.dev) config, which replaces Prettier and ESLint. It matches the website and influensea setup: single quotes, no semicolons, trailing commas, 80 columns, sorted imports and Tailwind classes, and an explicit rule list (types over interfaces, `import type`, no `console.log`). React and Next rules switch on by themselves when a repo depends on them. Install `@biomejs/biome` and `perfekt`, then:
-
-```json
-{ "extends": ["perfekt/biome"] }
+```sh
+perfekt release new                  # pick the next version from the commits and release it
+perfekt changelog                    # preview the unreleased changes
+perfekt lint "feat(cli): add x"      # check a message
+perfekt ci                           # check the branch like CI would, before you push
+perfekt setup commits                # lint pull request titles on GitHub
 ```
 
-Use `biome check` as your `lint` script and `biome check --write` as `format`. Biome doesn't format Markdown or YAML.
+`release new` picks the version from the commit types: `feat` is a minor release, `fix` a patch, and a `!` or `BREAKING CHANGE` a major. You can also pass `major`, `minor`, `patch` or an exact version. Start with [getting started](https://lekterable.github.io/perfekt/#/getting-started), and see the [documentation](https://lekterable.github.io/perfekt/#/documentation) for every option.
 
-The config also enforces the house code conventions:
+Upgrading from perfekt 3? See [upgrading](https://lekterable.github.io/perfekt/#/upgrading).
 
-| Rule | Enforces | How |
-| --- | --- | --- |
-| `complexity/useArrowFunction` | Function expressions become arrows: `const add = (left, right) => left + right`, not `function (left, right) {}`. Functions that use `this` are left alone. Auto-fixable. | Biome core rule |
-| No function declarations | `function name() {}` and `export default function () {}` are errors. Generators (`function*`) are allowed, since arrows can't yield. | GritQL plugin `biome/arrow.grit` |
-| No loops | `for`, `for…of`, `for…in`, `for await`, `while` and `do…while` are errors; `.forEach(...)` is allowed for side effects. Use `map`/`filter`/`reduce`/`flatMap`/`find`, `it.each` for test tables, and one named helper built on `reduce` or recursion for sequential async work. | GritQL plugin `biome/loop.grit` |
-| Test titles start with "should" | In `**/*.test.*` and `**/tests/**`, every `it(...)` and `test(...)` title (including `.only`, `.skip`, `.todo` and `.each`) must start with "should" or "should not": `it('should reject an expired token')`. `describe` blocks are exempt. | GritQL plugin `biome/should.grit` |
-| `style/useConsistentTypeDefinitions` | `type` instead of `interface`. | Biome core rule |
+## Commit convention
 
-These rules are new errors when you upgrade, so expect `biome check` to flag existing function declarations, function expressions, loops and test titles. `biome check --write` fixes the function expressions; the rest need a rename or a rewrite (`const name = () => {}`, or a loop turned into `map`/`reduce`).
+perfekt reads the commit type to group the changelog and pick the next version, so commits should look like `type(scope): subject`:
 
-Biome resolves plugin paths from your project root, so the config points at `./node_modules/perfekt/biome/`. That works with pnpm, npm and Yarn's `node-modules` linker when `biome.json` sits next to the `node_modules` that has `perfekt`. Yarn Plug'n'Play has no `node_modules`, so the plugins can't load there.
+- Types: `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `ci`, `build`, `style`, `perf`, `revert`
+- A subject that starts lower-case with an imperative verb (`add`, not `added`) and has no trailing `.`
+- Header up to 72 characters; subjects over 50 characters get a warning
+- `!` after the type, or a `BREAKING CHANGE:` footer, marks a breaking change
 
-For CI, call the shared workflow. It installs with pnpm and runs `lint`, `typecheck`, `test` and `build`, skipping any script your `package.json` doesn't have:
+`perfekt lint` enforces these rules (commitlint's `config-conventional` plus a few house overrides, built in). When you squash-merge, the pull request title becomes the commit, so `perfekt setup commits` lints titles on GitHub, and `perfekt lint --edit "$1"` in a `commit-msg` hook lints local commits.
 
-```yaml
-jobs:
-  ci:
-    uses: lekterable/perfekt/.github/workflows/ci.yml@master
-    # with:
-    #   node-versions: '["22", "24"]'
-    #   bun: true
-```
-
-It needs a `packageManager` field in `package.json` for the pnpm version.
-
-## Getting started
-
-For a quick introduction and set up instructions head to the [getting started](https://lekterable.github.io/perfekt/#/getting-started.md) section.
-
-You can also view the entire documentation online at [lekterable.github.io/perfekt](https://lekterable.github.io/perfekt)
-
-To install **perfekt** globally, run:
-
-`pnpm add -g perfekt`
-
-or
-
-`npm install -g perfekt`
-
-or
-
-`yarn global add perfekt`
+Adopting the convention in an older repo needs no history rewrite: release once to collect the old commits, then name new commits by the convention. perfekt still works without it, but can't group changes by type or pick the version with `new`.
 
 ## Badge
 

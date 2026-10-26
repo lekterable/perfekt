@@ -10,7 +10,7 @@ type BumpKeyword = (typeof bumps)[number]
 const isBumpKeyword = (value: string): value is BumpKeyword =>
   bumps.includes(value as BumpKeyword)
 
-export type ResolvedVersion = {
+type ResolvedVersion = {
   currentVersion: string
   resolvedVersion: string
   resolvedBump: ReleaseChange | null

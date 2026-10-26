@@ -1,51 +1,40 @@
 # Getting started
 
-How to get started, depends mostly on your needs and on your project's state.
+Install perfekt in your project, or globally:
 
-If you're not interested in executing a release, and just want to generate a changelog, go to [changelog documentation](./documentation.md#changelog)
+```sh
+pnpm add -D perfekt   # or npm install -D perfekt, or pnpm add -g perfekt
+```
 
-If your project is fairly new, start with the [new projects section](#new-projects). If it has been in development for a while and has a lot of commits, proceed to the [old projects section](#old-projects).
+perfekt needs no config. To change the changelog format, run `perfekt init` and see [configuration](configuration.md).
 
-To install **perfekt** globally, run:
+## Your first release
 
-`pnpm add -g perfekt`
+perfekt releases everything since the last tag, so check for leftover tags first:
 
-or
+```sh
+git tag
+```
 
-`npm install -g perfekt`
+If that prints nothing, release:
 
-or
+```sh
+perfekt release 1.0.0      # or major, minor, patch, or new to pick from the commits
+```
 
-`yarn global add perfekt`
+perfekt bumps `package.json` and the lockfile, writes `CHANGELOG.md`, commits and tags. Add `--dry-run` to preview it first.
 
-## New projects
+In a repo with a long history, start from a recent commit instead: `perfekt release 1.0.0 --from <commit>`, where `<commit>` is the last commit to leave out.
 
-For new projects, all you need to do is make sure you don't have leftover git tags that could cause a problem. To confirm that, run:
+To only see the changelog, run `perfekt changelog`. See [`release`](documentation.md#release) and [`changelog`](documentation.md#changelog).
 
-`git tag`
+## Keep commits conventional
 
-If the output is empty, you should be able to run:
+perfekt groups the changelog and picks versions from commit types, so check messages with [`perfekt lint`](documentation.md#lint):
 
-`perfekt release <version>`
+- `perfekt setup commits` adds a GitHub Action that lints pull request titles, which become the commits when you squash-merge.
+- For local commits, add a `commit-msg` hook that runs `npx --no -- perfekt lint --edit "$1"`.
 
-where `<version>` is the version of your new release.
+## Check before you push
 
-lekterable repos often use `master` and first commit `feat: init :seedling:`. Other default branches work.
-
-To enforce Conventional Commits before they land, run:
-
-`perfekt setup commits`
-
-Then install the printed `commitlint` and `husky` dependencies. Use `perfekt setup commits --ci` if you also want a GitHub Action that lints pull request titles. The workflow uses the detected default branch when git exposes one.
-
-Refer to the [release documentation](./documentation.md#release) and [setup commits documentation](./documentation.md#setup-commits) for more information.
-
-## Old projects
-
-For projects with a long existing git history, which could potentially make the process time out, you can use:
-
-`perfekt release <version> --from <commit>`
-
-where `<version>` is the version of your new release and `<commit>` is the hash of the last commit that should **NOT** be part of the release.
-
-After this, you can follow the [new projects section](#new-projects) for future releases.
+`perfekt ci` runs install, the commit lint, and your `lint`, `typecheck`, `test` and `build` scripts on a clean checkout of `HEAD`, like CI would. See [`ci`](documentation.md#ci).

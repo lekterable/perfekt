@@ -1,3 +1,14 @@
+# 4.0.0
+
+## BREAKING
+
+- add ci and replace commitlint with perfekt lint (#22) [e0e02877](https://github.com/lekterable/perfekt/commit/e0e02877daad5ca416813011d2b5a502f2f83b4f)
+
+## Misc
+
+- move to pnpm 12.15.0 (#21) [f59843b1](https://github.com/lekterable/perfekt/commit/f59843b1eacc02cab1714528a1d42cd8e120fc9a)
+- move to pnpm 12 and hold back new releases (#20) [e182d0ec](https://github.com/lekterable/perfekt/commit/e182d0ecc6e78b2ac5e6ad1abe41a051689ef54a)
+
 # 3.2.0
 
 ## Features

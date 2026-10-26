@@ -1,9 +1,7 @@
-#!/usr/bin/env node
-
 import fs from 'node:fs'
 import path from 'node:path'
+import { isatty } from 'node:tty'
 import { Command, CommanderError } from 'commander'
-import { cosmiconfigSync } from 'cosmiconfig'
 import type {
   ChangelogOptions,
   ChangelogResult,
@@ -13,12 +11,19 @@ import type {
   SetupCommitsResult,
 } from '~types'
 import { Config, Perfekt } from './core'
-import { SQUASH_MERGE_NOTE } from './core/commitlint'
+import { type CiResult, type CiStep, ci } from './core/ci'
+import { SQUASH_MERGE_NOTE } from './core/commits'
+import { loadConfig } from './core/config/load'
+import initialize from './core/initialize'
+import { cleanMessage, formatLint, lintMessage } from './core/lint'
+import setupCommits from './core/setup-commits'
 
 type ChangelogCommandOptions = ChangelogOptions & { json?: boolean }
 type ReleaseCommandOptions = ReleaseOptions & { json?: boolean }
 
-type PerfektCLI = Pick<Perfekt, 'init' | 'setupCommits'> & {
+type PerfektCLI = {
+  init: () => Promise<string>
+  setupCommits: (options: SetupCommitsOptions) => Promise<SetupCommitsResult>
   changelog: (
     version: string | undefined,
     options: Partial<ChangelogOptions>,
@@ -45,9 +50,6 @@ type JsonResponse =
       success: true
       command: 'setup'
       files: SetupCommitsResult['files']
-      packageManager: SetupCommitsResult['packageManager']
-      installCommand: string
-      prepareHint: string
       defaultBranch: SetupCommitsResult['defaultBranch']
       lekterableTip: string
     }
@@ -70,8 +72,29 @@ type JsonResponse =
       changelog: ReleaseResult['changelog']
     }
   | {
+      success: boolean
+      command: 'ci'
+      dir: string
+      steps: CiStep[]
+    }
+  | {
+      success: boolean
+      command: 'lint'
+      input: string
+      ignored: boolean
+      errors: string[]
+      warnings: string[]
+    }
+  | {
       success: false
-      command: 'changelog' | 'release' | 'init' | 'setup' | 'unknown'
+      command:
+        | 'changelog'
+        | 'release'
+        | 'init'
+        | 'setup'
+        | 'ci'
+        | 'lint'
+        | 'unknown'
       error: {
         code: string
         message: string
@@ -84,13 +107,19 @@ export const readPackageVersion = (
   (JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')) as { version: string })
     .version
 
-export const loadConfig = () => cosmiconfigSync('perfekt').search()?.config
-
 export const createPerfekt = (overrides = loadConfig()) => {
   const { config } = new Config(overrides)
 
   return new Perfekt(config)
 }
+
+// Only changelog and release read the config, so the other commands work with a broken one.
+const createCommands = (): PerfektCLI => ({
+  init: initialize,
+  setupCommits,
+  changelog: (...args) => createPerfekt().changelog(...args),
+  release: (...args) => createPerfekt().release(...args),
+})
 
 const writeJson = (response: JsonResponse) =>
   process.stdout.write(JSON.stringify(response, null, 2) + '\n')
@@ -123,16 +152,32 @@ const printSetupCommitsSummary = (result: SetupCommitsResult) => {
     .filter((file) => file.status === 'skipped')
     .map((file) => file.path)
 
-  formatDetailBlock('🌱 Commitlint setup', [
+  formatDetailBlock('🌱 Commit linting setup', [
     ['Written', written.join(', ') || 'none'],
     ['Skipped', skipped.join(', ') || 'none'],
-    ['Install', result.installCommand],
-    ['Prepare', result.prepareHint],
     ['Default branch', result.defaultBranch ?? 'not detected'],
     ['Tip', result.lekterableTip],
   ])
 
   process.stdout.write(`\n  ${SQUASH_MERGE_NOTE}\n`)
+}
+
+const STEP_ICONS = { passed: '✓', failed: '✗', skipped: '–', 'not run': '·' }
+
+const printCiSummary = (result: CiResult) => {
+  const width = Math.max(...result.steps.map((step) => step.name.length))
+  const lines = result.steps.map((step) => {
+    const time = step.ms > 0 ? ` ${(step.ms / 1000).toFixed(1)}s` : ''
+    const detail = step.detail ? `  ${step.detail}` : ''
+
+    return `  ${STEP_ICONS[step.status]} ${step.name.padEnd(width)}${time}${detail}`
+  })
+  const failed = result.steps.find((step) => step.status === 'failed')
+
+  process.stdout.write(
+    `${result.success ? '✅ CI passed' : '❌ CI failed'}\n\n${lines.join('\n')}\n`,
+  )
+  if (failed?.output) process.stdout.write(`\n${failed.output}\n`)
 }
 
 const printReleaseSummary = (result: ReleaseResult) => {
@@ -187,9 +232,6 @@ const createSetupResponse = (result: SetupCommitsResult): JsonResponse => ({
   success: true,
   command: 'setup',
   files: result.files,
-  packageManager: result.packageManager,
-  installCommand: result.installCommand,
-  prepareHint: result.prepareHint,
   defaultBranch: result.defaultBranch,
   lekterableTip: result.lekterableTip,
 })
@@ -215,14 +257,16 @@ const createReleaseResponse = (result: ReleaseResult): JsonResponse => ({
 
 export const getCommandName = (
   argv = process.argv,
-): 'changelog' | 'release' | 'init' | 'setup' | 'unknown' => {
+): 'changelog' | 'release' | 'init' | 'setup' | 'ci' | 'lint' | 'unknown' => {
   const command = argv[2]
 
   if (
     command === 'changelog' ||
     command === 'release' ||
     command === 'init' ||
-    command === 'setup'
+    command === 'setup' ||
+    command === 'ci' ||
+    command === 'lint'
   ) {
     return command
   }
@@ -268,7 +312,8 @@ export const createProgram = (
           writeOut: () => undefined,
         }
       : {
-          writeErr: () => undefined,
+          // printCliError reports errors; help for a missing subcommand still prints
+          outputError: () => undefined,
         },
   )
 
@@ -276,8 +321,11 @@ export const createProgram = (
 
   program
     .command('init')
-    .description('initialize config')
-    .action(() => perfekt.init())
+    .description('write an empty perfekt.json config')
+    .action(async () => {
+      const written = await perfekt.init()
+      process.stdout.write(`🌱 Wrote ${written}\n`)
+    })
 
   const setup = program
     .command('setup')
@@ -285,14 +333,14 @@ export const createProgram = (
 
   setup
     .command('commits')
-    .description('add commitlint and a husky commit-msg hook')
-    .option('--ci', 'write a GitHub Action that lints pull request titles')
-    .option('--force', 'overwrite existing generated files')
+    .description(
+      'add a GitHub Action that lints pull request titles with perfekt lint',
+    )
+    .option('--force', 'overwrite an existing workflow')
     .option('--json', 'print the command result as JSON')
     .action(async (options: SetupCommitsOptions & { json?: boolean }) => {
       const { json = false, ...setupOptions } = options
       const result = await perfekt.setupCommits({
-        ci: Boolean(setupOptions.ci),
         force: Boolean(setupOptions.force),
       })
 
@@ -348,15 +396,119 @@ export const createProgram = (
       printReleaseSummary(result)
     })
 
+  program
+    .command('ci')
+    .description(
+      'run the shared CI steps on a clean checkout of HEAD: install, commits, lint, typecheck, test, build',
+    )
+    .option('--dirty', 'run in this folder, uncommitted changes included')
+    .option(
+      '--title <title>',
+      'lint this pull request title instead of the branch commits',
+    )
+    .option(
+      '--base <ref>',
+      'lint the commits since this ref (default: origin/HEAD, else origin/main, origin/master, main or master)',
+    )
+    .option('--json', 'print the command result as JSON')
+    .addHelpText(
+      'after',
+      `
+Stops at the first failing step, prints the end of its output and exits 1.
+
+Examples:
+  perfekt ci                          # before opening a pull request
+  perfekt ci --dirty                  # include uncommitted changes
+  perfekt ci --title "feat: add x"    # lint the PR title, not the commits
+  perfekt ci --json                   # steps, timings and failure output`,
+    )
+    .action(
+      async (options: {
+        dirty?: boolean
+        title?: string
+        base?: string
+        json?: boolean
+      }) => {
+        const { json = false, ...ciOptions } = options
+        const result = await ci(ciOptions)
+
+        if (json) writeJson({ command: 'ci', ...result })
+        else printCiSummary(result)
+
+        if (!result.success) process.exitCode = 1
+      },
+    )
+
+  program
+    .command('lint [message]')
+    .description(
+      'lint a commit message or pull request title with the shared rules (reads stdin without a message)',
+    )
+    .option(
+      '--edit <file>',
+      'lint the message in this file, as a commit-msg hook passes it',
+    )
+    .option('--json', 'print the command result as JSON')
+    .addHelpText(
+      'after',
+      `
+Exits 1 when the message breaks a rule; warnings print but pass.
+
+Examples:
+  perfekt lint "feat(cli): add x"
+  git log -1 --format=%B | perfekt lint
+  perfekt lint --edit "$1"          # in a git commit-msg hook`,
+    )
+    .action(
+      async (
+        message: string | undefined,
+        options: { edit?: string; json?: boolean },
+      ) => {
+        if (message !== undefined && options.edit) {
+          throw new Error('Pass a message or --edit <file>, not both')
+        }
+        // isatty, not process.stdin.isTTY: touching process.stdin makes fd 0 non-blocking, so
+        // reading a slow pipe would fail with EAGAIN.
+        if (message === undefined && !options.edit && isatty(0)) {
+          throw new Error(
+            'Pass a message, --edit <file>, or pipe the message in',
+          )
+        }
+
+        // Only a commit message file carries git's comments and the `git commit -v` diff.
+        const input = options.edit
+          ? cleanMessage(fs.readFileSync(options.edit, 'utf8'))
+          : (message ?? fs.readFileSync(0, 'utf8')).replace(/\n+$/, '')
+        const result = lintMessage(input)
+
+        if (options.json) {
+          writeJson({
+            success: result.valid,
+            command: 'lint',
+            input,
+            ignored: result.ignored,
+            errors: result.errors,
+            warnings: result.warnings,
+          })
+        } else if (result.errors.length + result.warnings.length > 0) {
+          const report = formatLint(input, result)
+          if (result.valid) process.stdout.write(`${report}\n`)
+          else process.stderr.write(`${report}\n`)
+        }
+
+        if (!result.valid) process.exitCode = 1
+      },
+    )
+
   return program
 }
 
-const isCommanderDisplayExit = (error: unknown) =>
-  error instanceof CommanderError && error.exitCode === 0
+const isCommanderDisplayExit = (error: unknown): error is CommanderError =>
+  error instanceof CommanderError &&
+  (error.exitCode === 0 || error.code === 'commander.help')
 
 export const run = async (argv = process.argv) => {
   const version = readPackageVersion()
-  const perfekt = createPerfekt()
   const jsonOutput = argv.includes('--json')
   const warn = console.warn
 
@@ -365,9 +517,10 @@ export const run = async (argv = process.argv) => {
       console.warn = () => undefined
     }
 
-    await createProgram(perfekt, version, jsonOutput).parseAsync(argv)
+    await createProgram(createCommands(), version, jsonOutput).parseAsync(argv)
   } catch (error) {
     if (isCommanderDisplayExit(error)) {
+      if (error.exitCode) process.exitCode = error.exitCode
       return
     }
 
@@ -389,9 +542,4 @@ export const run = async (argv = process.argv) => {
   } finally {
     console.warn = warn
   }
-}
-
-/* istanbul ignore next */
-if (require.main === module) {
-  void run()
 }

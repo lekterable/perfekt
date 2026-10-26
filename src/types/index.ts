@@ -22,20 +22,15 @@ export type ChangelogOptions = { write: boolean; root: boolean; from?: string }
 
 export type ReleaseOptions = { from?: string; dryRun?: boolean }
 
-export type SetupCommitsOptions = { ci?: boolean; force?: boolean }
-
-export type SetupFileStatus = 'written' | 'skipped'
+export type SetupCommitsOptions = { force?: boolean }
 
 export type SetupFileResult = {
   path: string
-  status: SetupFileStatus
+  status: 'written' | 'skipped'
 }
 
 export type SetupCommitsResult = {
   files: SetupFileResult[]
-  packageManager: PackageManagerName
-  installCommand: string
-  prepareHint: string
   defaultBranch: string | null
   lekterableTip: string
 }

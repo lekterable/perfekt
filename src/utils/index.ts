@@ -1,5 +1,4 @@
 export * from './changelog'
 export * from './misc'
 export * from './npm'
-export * from './object'
 export * from './release'

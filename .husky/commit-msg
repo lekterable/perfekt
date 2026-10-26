@@ -1,1 +1,1 @@
-pnpm exec commitlint --format @commitlint/format/lib/index.js --edit "$1"
+node dist/cli.js lint --edit "$1"

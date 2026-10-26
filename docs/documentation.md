@@ -59,7 +59,7 @@ Usage: `perfekt ci [options]`
 Runs the shared CI steps on your machine, for when GitHub Actions can't (no minutes left on a private repo) or before you push:
 
 1. `install`, with the lockfile frozen: `npm ci`, or `pnpm install` / `yarn install` with `CI=true`, which makes them refuse to change the lockfile, or `bun install --frozen-lockfile`. The package manager comes from `packageManager`, then the lockfile.
-2. `commits`, which lints every commit since the base branch with the shared `perfekt/commitlint` rules, or only the pull request title with `--title`. These are the rules of the perfekt version you have installed; the shared commitlint workflow reads perfekt's `master`.
+2. `commits`, which lints every commit since the base branch with the shared `perfekt/commitlint` rules, or only the pull request title with `--title`. These are the rules of the perfekt version you have installed; the shared commitlint workflow reads perfekt's `master`. Like that workflow, it fetches `@commitlint/cli` on demand with `npm exec`, so the first run needs the network and later runs use npm's cache.
 3. `lint`, `typecheck`, `test` and `build`, each only when `package.json` has that script.
 
 Every step runs with `CI=true`, like on GitHub Actions. It stops at the first failing step, prints the end of its output, and exits 1.

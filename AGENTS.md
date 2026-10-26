@@ -11,7 +11,7 @@ These are shared across Kornel's repos. Keep this block identical in every repo,
 
 - TypeScript first. Use types, not interfaces.
 - Write arrow functions only; no `function` declarations or expressions. Generators, and the rare case a framework needs `this`, are the exceptions.
-- Prefer declarative code to imperative. Use `map`/`filter`/`reduce`/`find`/`flatMap`/`Object.fromEntries` instead of `for`/`while` loops and mutating accumulators. When sequential async work or an early exit genuinely needs a loop, hide it behind one named helper so call sites stay declarative.
+- Write declarative code: no `for`, `for…of`, `for…in`, `while` or `do…while` loops and no `forEach`, tests included. Use `map`/`filter`/`reduce`/`find`/`flatMap`/`Object.fromEntries`/`Object.groupBy` instead of loops and mutating accumulators, and `it.each` for test tables. Sequential async work, pagination and early exits go in one small named helper built on `reduce` or recursion, so call sites stay declarative.
 - Give bindings descriptive names, comparators included (`(left, right)`, not `(a, b)`). Avoid single-letter and abbreviated names.
 - Use small direct exports, and short file and package names: one self-explanatory word when possible.
 - Use a library where custom code is risky: CLI parsing, escaping, frontmatter, schema validation. Add no new abstraction without two real callers.

@@ -41,7 +41,7 @@ jobs:
           node-version: 24
           cache: pnpm
           registry-url: https://registry.npmjs.org
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install
       - run: pnpm run ci
       - name: Publish
         # uses NPM_TOKEN when set, otherwise npm trusted publishing

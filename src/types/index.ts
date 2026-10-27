@@ -34,6 +34,19 @@ export type SetupCommitsResult = {
   defaultBranch: string | null
 }
 
+export type SetupLintOptions = {
+  force?: boolean
+  /** The versions to add: Biome as perfekt pins it, and the running perfekt. */
+  versions: { biome: string; perfekt: string }
+  dir?: string
+}
+
+export type SetupLintResult = {
+  files: SetupFileResult[]
+  /** The install command to run when dev dependencies were added, or null. */
+  installCommand: string | null
+}
+
 export type SetupHooksOptions = { force?: boolean; major: string; dir?: string }
 
 export type SetupHooksResult = {

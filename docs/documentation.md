@@ -130,15 +130,15 @@ Exit codes: `0` when every step passes or is skipped, `1` on the first failure.
 
 Usage: `perfekt setup [options]`
 
-Runs [`setup commits`](#setup-commits) and then [`setup hooks`](#setup-hooks).
+Runs [`setup commits`](#setup-commits), [`setup hooks`](#setup-hooks) and [`setup lint`](#setup-lint).
 
 Options:
 
 `-h, --help` - display help for command
 
-`--force` - overwrite the workflow and the hook if they already exist
+`--force` - overwrite the workflow, the hook and the Biome config if they already exist
 
-`--json` - print `{ success, command, files, defaultBranch, hooksPath, clonesNeed }`, with the files of both steps
+`--json` - print `{ success, command, files, defaultBranch, hooksPath, clonesNeed, installCommand }`, with the files of every step
 
 ## `setup commits`
 
@@ -176,6 +176,22 @@ Options:
 `--force` - overwrite the hook if it already exists
 
 `--json` - print `{ success, command, files, hooksPath, clonesNeed }`, where `hooksPath` is the hooks path set in this clone (or `null`) and `clonesNeed` is the command other clones still need (or `null`)
+
+## `setup lint`
+
+Usage: `perfekt setup lint [options]`
+
+Sets up the [shared Biome config](tooling.md#biome) for linting and formatting code. It writes a `biome.json` that extends `perfekt/biome`. In `package.json` it adds `@biomejs/biome` (the version perfekt is tested with) and `perfekt` as dev dependencies, and `lint` (`biome check`) and `format` (`biome check --write`) scripts. Dependencies and scripts the repo already has are kept. Run the printed install command afterwards.
+
+An existing `biome.json` or `biome.jsonc` is left alone unless you pass `--force`, which rewrites it in place.
+
+Options:
+
+`-h, --help` - display help for command
+
+`--force` - overwrite an existing Biome config
+
+`--json` - print `{ success, command, files, installCommand }`, where `installCommand` is the install to run when dependencies were added (or `null`)
 
 ## `init`
 

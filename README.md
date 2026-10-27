@@ -35,7 +35,7 @@
 | `perfekt changelog` | Prints the changelog, or writes it with `--write` |
 | `perfekt lint [message]` | Checks a commit message or pull request title against the shared rules |
 | `perfekt ci` | Runs install, commit lint, lint, typecheck, test and build like CI does |
-| `perfekt setup` | Adds a GitHub Action that lints pull request titles (`setup commits`) and a `commit-msg` hook that lints local commits (`setup hooks`) |
+| `perfekt setup` | Adds a GitHub Action that lints pull request titles (`setup commits`), a `commit-msg` hook that lints local commits (`setup hooks`) and the shared Biome config (`setup lint`) |
 | `perfekt init` | Writes an empty `perfekt.json` config |
 
 Every command except `init` prints JSON with `--json`, for scripts, CI jobs and agents.
@@ -55,7 +55,7 @@ perfekt release new                  # pick the next version from the commits an
 perfekt changelog                    # preview the unreleased changes
 perfekt lint "feat(cli): add x"      # check a message
 perfekt ci                           # check the branch like CI would, before you push
-perfekt setup                        # lint pull request titles on GitHub and commits locally
+perfekt setup                        # lint PR titles, commits and code the shared way
 ```
 
 `release new` picks the version from the commit types: `feat` is a minor release, `fix` a patch, and a `!` or `BREAKING CHANGE` a major. You can also pass `major`, `minor`, `patch` or an exact version. Start with [getting started](https://lekterable.github.io/perfekt/#/getting-started), and see the [documentation](https://lekterable.github.io/perfekt/#/documentation) for every option.

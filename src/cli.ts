@@ -11,6 +11,7 @@ import type {
   SetupCommitsResult,
   SetupHooksOptions,
   SetupHooksResult,
+  SetupLintResult,
 } from '~types'
 import { Config, Perfekt } from './core'
 import { type CiResult, type CiStep, ci } from './core/ci'
@@ -20,6 +21,7 @@ import initialize from './core/initialize'
 import { cleanMessage, formatLint, lintMessage } from './core/lint'
 import setupCommits from './core/setup-commits'
 import setupHooks from './core/setup-hooks'
+import setupLint from './core/setup-lint'
 
 type ChangelogCommandOptions = ChangelogOptions & { json?: boolean }
 type ReleaseCommandOptions = ReleaseOptions & { json?: boolean }
@@ -28,6 +30,7 @@ type PerfektCLI = {
   init: () => Promise<string>
   setupCommits: (options: SetupCommitsOptions) => Promise<SetupCommitsResult>
   setupHooks: (options: SetupHooksOptions) => SetupHooksResult
+  setupLint: (options: { force?: boolean }) => SetupLintResult
   changelog: (
     version: string | undefined,
     options: Partial<ChangelogOptions>,
@@ -57,6 +60,7 @@ type JsonResponse =
       defaultBranch?: SetupCommitsResult['defaultBranch']
       hooksPath?: SetupHooksResult['hooksPath']
       clonesNeed?: SetupHooksResult['clonesNeed']
+      installCommand?: SetupLintResult['installCommand']
     }
   | {
       success: true
@@ -106,11 +110,21 @@ type JsonResponse =
       }
     }
 
-export const readPackageVersion = (
-  packageJsonPath = path.resolve(__dirname, '../package.json'),
-) =>
+const ownPackageJsonPath = path.resolve(__dirname, '../package.json')
+
+export const readPackageVersion = (packageJsonPath = ownPackageJsonPath) =>
   (JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')) as { version: string })
     .version
+
+// setup lint adds the Biome version perfekt itself is built and tested with.
+const readLintVersions = () => {
+  const packageJson = JSON.parse(fs.readFileSync(ownPackageJsonPath, 'utf8'))
+
+  return {
+    biome: packageJson.devDependencies['@biomejs/biome'],
+    perfekt: packageJson.version,
+  }
+}
 
 export const createPerfekt = (overrides = loadConfig()) => {
   const { config } = new Config(overrides)
@@ -123,6 +137,8 @@ const createCommands = (): PerfektCLI => ({
   init: initialize,
   setupCommits,
   setupHooks,
+  setupLint: (options) =>
+    setupLint({ ...options, versions: readLintVersions() }),
   changelog: (...args) => createPerfekt().changelog(...args),
   release: (...args) => createPerfekt().release(...args),
 })
@@ -181,6 +197,24 @@ const printSetupHooksSummary = (result: SetupHooksResult) => {
   if (result.clonesNeed) {
     process.stdout.write(
       `\n  Other clones need \`${result.clonesNeed}\`; add it to your prepare script.\n`,
+    )
+  }
+}
+
+const printSetupLintSummary = (result: SetupLintResult) => {
+  formatDetailBlock(
+    '🧹 Code lint setup',
+    result.files.map(
+      (file): DetailRow => [
+        file.status === 'written' ? 'Written' : 'Skipped',
+        file.path,
+      ],
+    ),
+  )
+
+  if (result.installCommand) {
+    process.stdout.write(
+      `\n  Run \`${result.installCommand}\` to install Biome and perfekt.\n`,
     )
   }
 }
@@ -252,7 +286,7 @@ const createChangelogResponse = (result: ChangelogResult): JsonResponse => ({
 })
 
 const createSetupResponse = (
-  result: Partial<SetupCommitsResult & SetupHooksResult> &
+  result: Partial<SetupCommitsResult & SetupHooksResult & SetupLintResult> &
     Pick<SetupCommitsResult, 'files'>,
 ): JsonResponse => ({ success: true, command: 'setup', ...result })
 
@@ -355,20 +389,24 @@ export const createProgram = (
 
   const setup = program
     .command('setup')
-    .description('add the PR title workflow and the commit hook')
+    .description(
+      'add the PR title workflow, the commit hook and the shared Biome config',
+    )
     .option('--force', 'overwrite existing files')
     .option('--json', 'print the command result as JSON')
     .action(async (options: { force?: boolean; json?: boolean }) => {
       const force = Boolean(options.force)
       const commits = await perfekt.setupCommits({ force })
       const hooks = perfekt.setupHooks({ force, major })
+      const lint = perfekt.setupLint({ force })
 
       if (options.json) {
         writeJson(
           createSetupResponse({
             ...commits,
             ...hooks,
-            files: [...commits.files, ...hooks.files],
+            ...lint,
+            files: [...commits.files, ...hooks.files, ...lint.files],
           }),
         )
         return
@@ -377,6 +415,8 @@ export const createProgram = (
       printSetupCommitsSummary(commits)
       process.stdout.write('\n')
       printSetupHooksSummary(hooks)
+      process.stdout.write('\n')
+      printSetupLintSummary(lint)
     })
 
   setup
@@ -419,6 +459,24 @@ export const createProgram = (
       }
 
       printSetupHooksSummary(result)
+    })
+
+  setup
+    .command('lint')
+    .description(
+      'lint and format code with the shared Biome config: write biome.json and add Biome',
+    )
+    .option('--force', 'overwrite an existing Biome config')
+    .option('--json', 'print the command result as JSON')
+    .action((options: { force?: boolean; json?: boolean }) => {
+      const result = perfekt.setupLint({ force: Boolean(options.force) })
+
+      if (options.json) {
+        writeJson(createSetupResponse(result))
+        return
+      }
+
+      printSetupLintSummary(result)
     })
 
   program

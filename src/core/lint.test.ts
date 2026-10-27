@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process'
 import path from 'node:path'
 import { cleanMessage, formatLint, lintMessage } from './lint'
 
-const [major, minor] = process.versions.node.split('.').map(Number)
+const [major = 0, minor = 0] = process.versions.node.split('.').map(Number)
 const canStripTypes =
   'typescript' in process.features || major > 22 || (major === 22 && minor >= 6)
 const itWhenStrippable = canStripTypes ? it : it.skip

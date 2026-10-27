@@ -30,12 +30,14 @@
     "./biome/arrow.grit": "./biome/arrow.grit",
     "./biome/should.grit": "./biome/should.grit",
     "./biome/loop.grit": "./biome/loop.grit",
+    "./tsconfig": "./tsconfig.base.json",
     "./package.json": "./package.json"
   },
   "files": [
     "dist",
     "biome.json",
-    "biome"
+    "biome",
+    "tsconfig.base.json"
   ],
   "scripts": {
     "build": "tsdown",

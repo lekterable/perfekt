@@ -104,7 +104,7 @@ describe('ci', () => {
       ['test', 'failed'],
       ['build', 'not run'],
     ])
-    expect(steps[4].output).toBe('pnpm run test output')
+    expect(steps[4]?.output).toBe('pnpm run test output')
     expect(calls).toEqual(['pnpm install', 'pnpm run lint', 'pnpm run test'])
   })
 
@@ -148,8 +148,8 @@ describe('ci', () => {
     const steps = await runSteps(dir, options, recorder().run)
 
     expect(steps[1]).toMatchObject({ name: 'commits', status: 'failed' })
-    expect(steps[1].output).toContain(problem)
-    expect(steps[2].status).toBe('not run')
+    expect(steps[1]?.output).toContain(problem)
+    expect(steps[2]?.status).toBe('not run')
   })
 
   it('should not let uncommitted changes pass unless dirty', async () => {

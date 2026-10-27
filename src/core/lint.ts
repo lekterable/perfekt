@@ -50,7 +50,7 @@ const VERSION = new RegExp(
 const isVersion = (message: string) =>
   VERSION.test(
     message
-      .split('\n')[0]
+      .replace(/\n[\s\S]*/, '')
       .replace(/^chore(\([^)]+\))?:/, '')
       .replace(/\[(skip|ci)(-|\s)(ci|skip)\]/i, '')
       .replace(/\((skip|ci)(-|\s)(ci|skip)\)/i, '')
@@ -85,7 +85,7 @@ const isNonImperative = (word: string) =>
 export const cleanMessage = (raw: string) =>
   raw
     .replace(/\r\n?/g, '\n')
-    .split(/^# -+ >8 -+$/m)[0]
+    .replace(/^# -+ >8 -+$[\s\S]*/m, '')
     .split('\n')
     .filter((line) => !line.startsWith('#'))
     .join('\n')
@@ -101,7 +101,7 @@ export const lintMessage = (raw: string): LintResult => {
 
   const [header = '', ...rest] = message.split('\n')
   const [, type = '', , subject = ''] = HEADER.exec(header) ?? []
-  const firstWord = subject.split(' ')[0].toLowerCase()
+  const [firstWord = ''] = subject.toLowerCase().split(' ')
   const noteIndex = rest.findIndex((line) => NOTE.test(line))
   const tooLong = rest.some(
     (line) => line.length > LINE_MAX_LENGTH && !URL.test(line),

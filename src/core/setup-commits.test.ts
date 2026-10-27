@@ -60,9 +60,9 @@ describe('setup-commits', () => {
   it('should skip an existing workflow unless force is set', async () => {
     fsMock.existsSync.mockReturnValue(true)
 
-    expect((await setupCommits()).files[0].status).toBe('skipped')
+    expect((await setupCommits()).files[0]?.status).toBe('skipped')
     expect(writeFileSpy).not.toHaveBeenCalled()
-    expect((await setupCommits({ force: true })).files[0].status).toBe(
+    expect((await setupCommits({ force: true })).files[0]?.status).toBe(
       'written',
     )
   })

@@ -385,7 +385,7 @@ export const createProgram = (
       process.stdout.write(`🌱 Wrote ${written}\n`)
     })
 
-  const major = version.split('.')[0]
+  const [major = '0'] = version.split('.')
 
   const setup = program
     .command('setup')

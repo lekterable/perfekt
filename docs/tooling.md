@@ -1,6 +1,6 @@
 # Shared tooling
 
-Besides the CLI, perfekt ships tooling other repos extend, so lint, format and CI rules change in one place.
+Besides the CLI, perfekt ships tooling other repos extend, so lint, format, type-check and CI rules change in one place.
 
 ## Biome
 
@@ -25,6 +25,20 @@ The config also enforces the house code conventions:
 When you adopt the config, expect `biome check` to flag existing function declarations, function expressions, loops and test titles. `biome check --write` fixes the function expressions; the rest need a rename or a rewrite (`const name = () => {}`, or a loop turned into `map`/`reduce`).
 
 Biome resolves plugin paths from your project root, so the config points at `./node_modules/perfekt/biome/`. That works with pnpm, npm and Yarn's `node-modules` linker when `biome.json` sits next to the `node_modules` that has `perfekt`. Yarn Plug'n'Play has no `node_modules`, so the plugins can't load there.
+
+## TypeScript
+
+`perfekt/tsconfig` is the house compiler config: strict mode plus `noUncheckedIndexedAccess`, `noImplicitOverride` and `noFallthroughCasesInSwitch`, ES2022, and `verbatimModuleSyntax` so type-only imports stay `import type`. It assumes a bundler or runtime that reads TypeScript (`"moduleResolution": "bundler"`). It leaves out `include`, `types`, `jsx` and output settings, which belong to each repo:
+
+```json
+{
+  "extends": "perfekt/tsconfig",
+  "include": ["src"],
+  "compilerOptions": { "noEmit": true, "types": ["node"] }
+}
+```
+
+A repo that runs on Node without a bundler overrides `module` and `moduleResolution` with `nodenext`. Unused variables are left to Biome, which already flags them.
 
 ## CI
 

@@ -9,7 +9,7 @@ const createGroup = (): GroupedCommits[number] => ({})
 const groupCommits = (commits: Commit[], config: Config): GroupedCommits =>
   commits.reduce<GroupedCommits>(
     (grouped, commit) => {
-      const group = grouped[grouped.length - 1]
+      const group = grouped.at(-1) ?? createGroup()
       const rest = grouped.slice(0, -1)
 
       if (commit.isConventional) {
@@ -41,7 +41,7 @@ const groupCommits = (commits: Commit[], config: Config): GroupedCommits =>
         return [...rest, { ...group, misc: [...existing, commit] }]
       }
 
-      const key = matchingGroup.types[0]
+      const [key = 'misc'] = matchingGroup.types
       const existing = getExistingGroup(group[key])
       return [...rest, { ...group, [key]: [...existing, commit] }]
     },

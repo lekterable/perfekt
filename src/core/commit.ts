@@ -28,8 +28,13 @@ class Commit {
       return
     }
 
-    // A match always has the named groups.
-    const groups = commitDetails.groups as Record<string, string>
+    // A match always has the named groups; the optional ones are undefined when absent.
+    const groups = commitDetails.groups as {
+      type: string
+      scope?: string
+      isBreaking?: string
+      message: string
+    }
 
     this.#hash = hash
     this.#message = groups.message

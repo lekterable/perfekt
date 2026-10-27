@@ -1,3 +1,18 @@
+# 4.1.0
+
+## Features
+
+- share a tsconfig and rename the shared checks (#29) [f69b520c](https://github.com/lekterable/perfekt/commit/f69b520c76ac6cec337550e97f3dcc6806c5d29d)
+- add setup lint for the shared biome config (#28) [08e98112](https://github.com/lekterable/perfekt/commit/08e98112126ee24dc0a50eea8097e7d51f4b86f3)
+- add setup hooks and a bare setup that runs both (#27) [cedde50c](https://github.com/lekterable/perfekt/commit/cedde50c25e2d1d2c24fbfd19d8274f2e9fefffa)
+- ban loops with a lint plugin and in the shared rules (#23) [c440b451](https://github.com/lekterable/perfekt/commit/c440b451d7711c38c2dc384bd42165e2c6831cd3)
+
+## Misc
+
+- switch from jest to vitest (#26) [41006c12](https://github.com/lekterable/perfekt/commit/41006c1248693b67e9a1b47d8de9fed895bc3a82)
+- drop the lekterable tip and personal mentions (#25) [f175f0aa](https://github.com/lekterable/perfekt/commit/f175f0aa8b147e449c748afe44c3c28cf81dda93)
+- release with perfekt 4 (#24) [ef2a5ac3](https://github.com/lekterable/perfekt/commit/ef2a5ac38e766df168e0ea4eddfb9519dd4bcf9b)
+
 # 4.0.0
 
 ## BREAKING

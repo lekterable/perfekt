@@ -54,7 +54,7 @@ jobs:
     #   bun: true
 ```
 
-It needs a `packageManager` field in `package.json` for the pnpm version. Its checks read `CI / Validate / Node 22`, one per Node version.
+It needs a `packageManager` field in `package.json` for the pnpm version. Its checks read `CI / Validate / Node 24`, one per Node version (24 unless you pass `node-versions`).
 
 `perfekt ci` runs the same steps on your machine, plus [`perfekt lint`](documentation.md#lint) on the branch's commits. See [`ci`](documentation.md#ci).
 

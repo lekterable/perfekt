@@ -4,7 +4,8 @@ name: CI
 # `typecheck` (plain JS) or `build` simply skips it:
 #
 #   jobs:
-#     ci:
+#     validate:
+#       name: Validate
 #       uses: lekterable/perfekt/.github/workflows/ci.yml@master
 #
 # perfekt runs it on itself too, across every Node version it supports, and uploads coverage.
@@ -15,7 +16,7 @@ on:
       node-versions:
         description: JSON list of Node versions to test on
         type: string
-        default: '["22"]'
+        default: '["24"]'
       bun:
         description: Also install Bun, for repos whose scripts call it
         type: boolean

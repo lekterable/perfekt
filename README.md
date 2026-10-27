@@ -40,7 +40,7 @@
 
 Every command except `init` prints JSON with `--json`, for scripts, CI jobs and agents.
 
-perfekt also ships shared tooling other repos extend: a [Biome](https://biomejs.dev) config and reusable GitHub workflows for CI, pull request titles and releases. See [shared tooling](https://lekterable.github.io/perfekt/#/tooling).
+perfekt also ships shared tooling other repos extend: a [Biome](https://biomejs.dev) config, a TypeScript config and reusable GitHub workflows for CI, pull request titles and releases. See [shared tooling](https://lekterable.github.io/perfekt/#/tooling).
 
 ## Install
 

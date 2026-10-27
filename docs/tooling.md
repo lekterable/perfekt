@@ -1,6 +1,6 @@
 # Shared tooling
 
-Besides the CLI, perfekt ships tooling other repos extend, so lint, format and CI rules change in one place.
+Besides the CLI, perfekt ships tooling other repos extend, so lint, format, type-check and CI rules change in one place.
 
 ## Biome
 
@@ -26,20 +26,35 @@ When you adopt the config, expect `biome check` to flag existing function declar
 
 Biome resolves plugin paths from your project root, so the config points at `./node_modules/perfekt/biome/`. That works with pnpm, npm and Yarn's `node-modules` linker when `biome.json` sits next to the `node_modules` that has `perfekt`. Yarn Plug'n'Play has no `node_modules`, so the plugins can't load there.
 
+## TypeScript
+
+`perfekt/tsconfig` is the house compiler config: strict mode plus `noUncheckedIndexedAccess`, `noImplicitOverride`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, ES2023 (Node 20 and up), `verbatimModuleSyntax` so type-only imports stay `import type`, and `erasableSyntaxOnly`, which rules out enums, namespaces and parameter properties so Node and Bun can run the source by stripping types. It assumes a bundler or runtime that reads TypeScript (`"moduleResolution": "bundler"`). It leaves out `include`, `types`, `jsx` and output settings, which belong to each repo:
+
+```json
+{
+  "extends": "perfekt/tsconfig",
+  "include": ["src"],
+  "compilerOptions": { "noEmit": true, "types": ["node"] }
+}
+```
+
+A repo that runs on Node without a bundler overrides `module` and `moduleResolution` with `nodenext`. It also fails on unused locals and parameters, unreachable code and unused labels, so editors without Biome still catch them.
+
 ## CI
 
 Call the shared CI workflow. It installs with pnpm and runs `lint`, `typecheck`, `test` and `build`, skipping any script your `package.json` doesn't have:
 
 ```yaml
 jobs:
-  ci:
+  validate:
+    name: Validate
     uses: lekterable/perfekt/.github/workflows/ci.yml@master
     # with:
     #   node-versions: '["22", "24"]'
     #   bun: true
 ```
 
-It needs a `packageManager` field in `package.json` for the pnpm version.
+It needs a `packageManager` field in `package.json` for the pnpm version. Its checks read `CI / Validate / Node 24`, one per Node version (24 unless you pass `node-versions`).
 
 `perfekt ci` runs the same steps on your machine, plus [`perfekt lint`](documentation.md#lint) on the branch's commits. See [`ci`](documentation.md#ci).
 
@@ -49,14 +64,14 @@ When you squash-merge, the pull request title becomes the commit, so lint titles
 
 ```yaml
 jobs:
-  commitlint:
-    name: Commitlint
+  conventional-commits:
+    name: Conventional Commits
     permissions:
       contents: read
     uses: lekterable/perfekt/.github/workflows/commitlint.yml@master
 ```
 
-`perfekt setup commits` writes that caller for you. The workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 24, so it installs nothing and rule changes reach every repo at once.
+Its check reads `Commitlint / Conventional Commits / PR title`. `perfekt setup commits` writes that caller for you. The workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 24, so it installs nothing and rule changes reach every repo at once.
 
 ## Releases
 

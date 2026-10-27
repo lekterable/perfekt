@@ -1,18 +1,10 @@
 {
-  "include": ["src/**/*"],
+  "extends": "./tsconfig.base.json",
+  "include": ["src/**/*", "*.ts"],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": { "~*": ["src/*"] },
-    "outDir": "dist",
-    "strict": true,
-    "declaration": true,
-    "esModuleInterop": true,
-    "target": "es2020",
-    "lib": ["es2020"],
-    "types": ["node", "vitest/globals"],
-    "skipLibCheck": true,
-    "module": "commonjs",
-    "moduleResolution": "node"
+    "paths": { "~*": ["./src/*"] },
+    "noEmit": true,
+    "types": ["node", "vitest/globals"]
   }
 }

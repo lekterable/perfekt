@@ -28,7 +28,7 @@ Biome resolves plugin paths from your project root, so the config points at `./n
 
 ## TypeScript
 
-`perfekt/tsconfig` is the house compiler config: strict mode plus `noUncheckedIndexedAccess`, `noImplicitOverride`, `noImplicitReturns` and `noFallthroughCasesInSwitch`, ES2023 (Node 20 and up), `verbatimModuleSyntax` so type-only imports stay `import type`, and `erasableSyntaxOnly`, which rules out enums, namespaces and parameter properties so Node and Bun can run the source by stripping types. It assumes a bundler or runtime that reads TypeScript (`"moduleResolution": "bundler"`). It leaves out `include`, `types`, `jsx` and output settings, which belong to each repo:
+`perfekt/tsconfig` is the house compiler config: strict mode plus `noUncheckedIndexedAccess`, `noImplicitOverride`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, ES2023 (Node 20 and up), `verbatimModuleSyntax` so type-only imports stay `import type`, and `erasableSyntaxOnly`, which rules out enums, namespaces and parameter properties so Node and Bun can run the source by stripping types. It assumes a bundler or runtime that reads TypeScript (`"moduleResolution": "bundler"`). It leaves out `include`, `types`, `jsx` and output settings, which belong to each repo:
 
 ```json
 {
@@ -38,7 +38,7 @@ Biome resolves plugin paths from your project root, so the config points at `./n
 }
 ```
 
-A repo that runs on Node without a bundler overrides `module` and `moduleResolution` with `nodenext`. Unused variables are left to Biome, which already flags them.
+A repo that runs on Node without a bundler overrides `module` and `moduleResolution` with `nodenext`. It also fails on unused locals and parameters, unreachable code and unused labels, so editors without Biome still catch them.
 
 ## CI
 

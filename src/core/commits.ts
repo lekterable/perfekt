@@ -20,8 +20,8 @@ on:
     types: [opened, edited, reopened, synchronize]
 
 jobs:
-  pr-title:
-    name: PR title
+  conventional-commits:
+    name: Conventional Commits
     permissions:
       contents: read
     uses: ${COMMITS_REUSABLE_WORKFLOW}

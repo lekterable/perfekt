@@ -46,15 +46,15 @@ Call the shared CI workflow. It installs with pnpm and runs `lint`, `typecheck`,
 
 ```yaml
 jobs:
-  checks:
-    name: Checks
+  validate:
+    name: Validate
     uses: lekterable/perfekt/.github/workflows/ci.yml@master
     # with:
     #   node-versions: '["22", "24"]'
     #   bun: true
 ```
 
-It needs a `packageManager` field in `package.json` for the pnpm version. Its checks read `CI / Checks / Node 22`, one per Node version.
+It needs a `packageManager` field in `package.json` for the pnpm version. Its checks read `CI / Validate / Node 22`, one per Node version.
 
 `perfekt ci` runs the same steps on your machine, plus [`perfekt lint`](documentation.md#lint) on the branch's commits. See [`ci`](documentation.md#ci).
 
@@ -64,14 +64,14 @@ When you squash-merge, the pull request title becomes the commit, so lint titles
 
 ```yaml
 jobs:
-  pr-title:
-    name: PR title
+  conventional-commits:
+    name: Conventional Commits
     permissions:
       contents: read
     uses: lekterable/perfekt/.github/workflows/commitlint.yml@master
 ```
 
-Its check reads `Commitlint / PR title / Conventional Commits`. `perfekt setup commits` writes that caller for you. The workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 24, so it installs nothing and rule changes reach every repo at once.
+Its check reads `Commitlint / Conventional Commits / PR title`. `perfekt setup commits` writes that caller for you. The workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 24, so it installs nothing and rule changes reach every repo at once.
 
 ## Releases
 

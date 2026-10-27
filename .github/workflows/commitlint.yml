@@ -8,8 +8,8 @@ on:
     types: [opened, edited, reopened, synchronize]
 
 jobs:
-  conventional-commits:
-    name: Conventional Commits
+  pr-title:
+    name: PR title
     runs-on: ubuntu-latest
     permissions:
       contents: read

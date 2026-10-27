@@ -9,7 +9,7 @@ Before pushing, run `pnpm build && node dist/cli.js ci` (or `pnpm lint`, `pnpm t
 <!-- synapse:code-conventions -->
 ## Code conventions
 
-Synapse syncs this block across repos from `~/.synapse/source/blocks/code-conventions.md` (tracked in `.dotfiles`). Edit it there, or edit it here and run `synapse blocks pull AGENTS.md`, then run `synapse blocks sync --repos ~/.config/projects.json`.
+[Synapse](https://github.com/lekterable/synapse-ai) keeps this block identical across repos, so change its shared source, not this copy.
 
 - TypeScript first. Use types, not interfaces.
 - Write arrow functions only; no `function` declarations or expressions. Generators, and the rare case a framework needs `this`, are the exceptions.

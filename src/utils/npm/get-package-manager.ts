@@ -37,6 +37,8 @@ const getPackageManagerFromPackageJson = () => {
 
     if (isPackageManager(packageManager)) return packageManager
   } catch {}
+
+  return undefined
 }
 
 export const getPackageManager = (): PackageManagerName => {

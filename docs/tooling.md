@@ -38,7 +38,7 @@ Biome resolves plugin paths from your project root, so the config points at `./n
 }
 ```
 
-A repo that runs on Node without a bundler overrides `module` and `moduleResolution` with `nodenext`. It also fails on unused locals and parameters, unreachable code and unused labels, so editors without Biome still catch them.
+It needs TypeScript 5.8 or newer for `erasableSyntaxOnly`. A repo that runs on Node without a bundler overrides `module` and `moduleResolution` with `nodenext`. It also fails on unused locals and parameters, unreachable code and unused labels, so editors without Biome still catch them.
 
 ## CI
 

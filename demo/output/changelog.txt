@@ -1,0 +1,15 @@
+# Latest
+
+## Features
+
+- add --json output b48c1ec4
+- add rate limits per token bfb10e15
+
+## Fixes
+
+- refresh expired sessions 1fc4dbff
+
+## Misc
+
+- batch the nightly writes 54721cc9
+- explain the config file 63fe0b1b

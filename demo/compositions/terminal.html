@@ -1,0 +1,337 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+    }
+    .cap {
+      position: absolute;
+      left: 108px;
+      right: 108px;
+      top: 150px;
+      height: 190px;
+      display: flex;
+      align-items: flex-end;
+    }
+    .cap p {
+      font-size: 64px;
+      font-weight: 700;
+      line-height: 1.12;
+      letter-spacing: -0.03em;
+    }
+    .cap em {
+      font-style: normal;
+      color: var(--accent);
+    }
+    .cap code {
+      font-family: var(--font-mono);
+      font-size: 0.86em;
+      letter-spacing: 0;
+    }
+    #term-cam {
+      position: absolute;
+      left: 60px;
+      top: 390px;
+      width: 960px;
+      height: 860px;
+    }
+    #term-win {
+      position: absolute;
+      inset: 0;
+      border-radius: 22px;
+      background: #15151b;
+      border: 1px solid #2a2a33;
+      box-shadow: 0 40px 120px rgba(0, 0, 0, 0.55);
+      overflow: hidden;
+    }
+    #term-bar {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 22px;
+      gap: 10px;
+      background: #1c1c23;
+      border-bottom: 1px solid #2a2a33;
+      position: relative;
+    }
+    #term-bar i {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #3a3a44;
+    }
+    #term-bar span {
+      position: absolute;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 22px;
+      color: var(--muted);
+    }
+    #term-body {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 56px;
+      bottom: 0;
+      overflow: hidden;
+      font-family: var(--font-mono);
+      font-size: 30px;
+      line-height: 45px;
+      font-variant-ligatures: none;
+      color: #e6e6ea;
+    }
+    .block {
+      position: absolute;
+      left: 36px;
+      right: 36px;
+      top: 30px;
+    }
+    .line {
+      white-space: pre-wrap;
+      min-height: 45px;
+    }
+    .ps {
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .cmd {
+      display: inline-block;
+      overflow: hidden;
+      vertical-align: bottom;
+      white-space: pre;
+    }
+    .caret {
+      display: inline-block;
+      width: 15px;
+      height: 32px;
+      margin-left: 2px;
+      vertical-align: -6px;
+      background: #e6e6ea;
+    }
+    .h {
+      color: #d9b85c;
+    }
+    .dim {
+      color: #6e6e7a;
+    }
+    .b {
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .k {
+      color: var(--muted);
+    }
+    .err {
+      color: #ff5f61;
+    }
+    .ok {
+      color: #4ade80;
+    }
+    .emo {
+      height: 1.1em;
+      vertical-align: -0.2em;
+    }
+    #rel-ver {
+      border-radius: 8px;
+      margin: 0 -10px;
+      padding: 0 10px;
+    }
+  </style>
+  <div id="root" data-composition-id="terminal" data-width="1080" data-height="1350">
+    <div id="cap-setup" class="cap clip" data-start="0" data-duration="5.4">
+      <p>Set up commit checks in <em>one command.</em></p>
+    </div>
+    <div id="cap-hook" class="cap clip" data-start="5.4" data-duration="4.2">
+      <p>Bad commit messages <em>never land.</em></p>
+    </div>
+    <div id="cap-log" class="cap clip" data-start="9.6" data-duration="4">
+      <p>Write commits the way you <em>already do.</em></p>
+    </div>
+    <div id="cap-changelog" class="cap clip" data-start="13.6" data-duration="4.4">
+      <p>perfekt turns them into a <em>changelog.</em></p>
+    </div>
+    <div id="cap-release" class="cap clip" data-start="18" data-duration="2.4">
+      <p>Release with <em>one command.</em></p>
+    </div>
+    <div id="cap-ci" class="cap clip" data-start="23.6" data-duration="4.6">
+      <p>Run the whole <em>CI on your laptop.</em></p>
+    </div>
+    <div id="cap-bump" class="cap clip" data-start="20.4" data-duration="3.2">
+      <p>Each <code>feat</code> means a <em>minor</em> bump.</p>
+    </div>
+
+    <div id="term-cam" class="clip" data-start="0" data-duration="28.2">
+      <div id="term-win">
+        <div id="term-bar"><i></i><i></i><i></i><span data-layout-ignore>~/acme</span></div>
+        <div id="term-body">
+          <div id="blk-setup" class="block clip" data-start="0" data-duration="5.4">
+            <div class="line"><span class="ps">$</span> <span class="cmd" id="cmd-setup">perfekt setup</span><span class="caret" id="caret-setup"></span></div>
+            <div class="line out-setup"><span class="b"><img class="emo" src="assets/emoji/1f331.png" alt="🌱" /> Commit linting setup</span></div>
+            <div class="line out-setup"></div>
+            <div class="line out-setup"><span class="k">  Written:         </span>.github/workflows/commitlint.yml</div>
+            <div class="line out-setup"><span class="k">  Skipped:         </span>none</div>
+            <div class="line out-setup"><span class="k">  Default branch:  </span>master</div>
+            <div class="line out-setup"></div>
+            <div class="line out-setup"><span class="k">  The workflow lints pull request titles, which become the commit when you squash-merge. A trailing (#N) from GitHub squash is allowed. Run perfekt ci to lint the branch commits too.</span></div>
+            <div class="line out-setup"></div>
+            <div class="line out-setup"><span class="b"><img class="emo" src="assets/emoji/1fa9d.png" alt="🪝" /> Commit hook setup</span></div>
+            <div class="line out-setup"></div>
+            <div class="line out-setup"><span class="k">  Written:     </span>.githooks/commit-msg</div>
+            <div class="line out-setup"><span class="k">  Written:     </span>package.json</div>
+            <div class="line out-setup"><span class="k">  Hooks path:  </span>.githooks</div>
+            <div class="line out-setup"></div>
+            <div class="line out-setup"><span class="b"><img class="emo" src="assets/emoji/1f9f9.png" alt="🧹" /> Code lint setup</span></div>
+            <div class="line out-setup"></div>
+            <div class="line out-setup"><span class="k">  Written:  </span>biome.json</div>
+            <div class="line out-setup"><span class="k">  Written:  </span>package.json</div>
+            <div class="line out-setup"></div>
+            <div class="line out-setup"><span class="k">  Run `npm install` to install Biome and perfekt.</span></div>
+          </div>
+          <div id="blk-hook" class="block clip" data-start="5.4" data-duration="4.2">
+            <div class="line"><span class="ps">$</span> <span class="cmd" id="cmd-hook">git commit -m "Added new stuff."</span><span class="caret" id="caret-hook"></span></div>
+            <div class="line out-hook"><span class="dim">⧗ input: Added new stuff.</span></div>
+            <div class="line out-hook"><span class="err">✖</span> type may not be empty</div>
+            <div class="line out-hook"><span class="err">✖</span> subject may not be empty</div>
+            <div class="line out-hook"><span class="err">✖</span> subject may not end with full stop</div>
+            <div class="line out-hook"><span class="err">✖</span> found 3 problems, 0 warnings</div>
+          </div>
+          <div id="blk-log" class="block clip" data-start="9.6" data-duration="4">
+            <div class="line"><span class="ps">$</span> <span class="cmd" id="cmd-log">git log --oneline v1.2.0..HEAD</span><span class="caret" id="caret-log"></span></div>
+            <div class="line out-log"><span class="h">54721cc</span> perf(db): batch the nightly writes</div>
+            <div class="line out-log"><span class="h">63fe0b1</span> docs: explain the config file</div>
+            <div class="line out-log"><span class="h">b48c1ec</span> feat(cli): add --json output</div>
+            <div class="line out-log"><span class="h">1fc4dbf</span> fix(auth): refresh expired sessions</div>
+            <div class="line out-log"><span class="h">bfb10e1</span> feat(api): add rate limits per token</div>
+          </div>
+          <div id="blk-changelog" class="block clip" data-start="13.6" data-duration="4.4">
+            <div class="line"><span class="ps">$</span> <span class="cmd" id="cmd-changelog">perfekt changelog</span><span class="caret" id="caret-changelog"></span></div>
+            <div class="line out-changelog"><span class="b"># Latest</span></div>
+            <div class="line out-changelog"></div>
+            <div class="line out-changelog"><span class="b">## Features</span></div>
+            <div class="line out-changelog"></div>
+            <div class="line out-changelog">- add --json output <span class="dim">b48c1ec4</span></div>
+            <div class="line out-changelog">- add rate limits per token <span class="dim">bfb10e15</span></div>
+            <div class="line out-changelog"></div>
+            <div class="line out-changelog"><span class="b">## Fixes</span></div>
+            <div class="line out-changelog"></div>
+            <div class="line out-changelog">- refresh expired sessions <span class="dim">1fc4dbff</span></div>
+            <div class="line out-changelog"></div>
+            <div class="line out-changelog"><span class="b">## Misc</span></div>
+            <div class="line out-changelog"></div>
+            <div class="line out-changelog">- batch the nightly writes <span class="dim">54721cc9</span></div>
+            <div class="line out-changelog">- explain the config file <span class="dim">63fe0b1b</span></div>
+          </div>
+          <div id="blk-release" class="block clip" data-start="18" data-duration="5.6">
+            <div class="line"><span class="ps">$</span> <span class="cmd" id="cmd-release">perfekt release new</span><span class="caret" id="caret-release"></span></div>
+            <div class="line out-release"><span class="b"><img class="emo" src="assets/emoji/1f4e6.png" alt="📦" /> Release summary</span></div>
+            <div class="line out-release"></div>
+            <div class="line out-release" id="rel-ver"><span class="k">  Version:           </span>1.2.0 -&gt; 1.3.0</div>
+            <div class="line out-release"><span class="k">  Package manager:   </span>npm</div>
+            <div class="line out-release"><span class="k">  From:              </span>v1.2.0</div>
+            <div class="line out-release"><span class="k">  Files:             </span>CHANGELOG.md, package.json, package-lock.json</div>
+            <div class="line out-release"><span class="k">  Commit:            </span>chore(release): 1.3.0</div>
+            <div class="line out-release"><span class="k">  Tag:               </span>1.3.0</div>
+            <div class="line out-release"><span class="k">  Commits included:  </span>5</div>
+          </div>
+          <div id="blk-ci" class="block clip" data-start="23.6" data-duration="4.6">
+            <div class="line"><span class="ps">$</span> <span class="cmd" id="cmd-ci">perfekt ci</span><span class="caret" id="caret-ci"></span></div>
+            <div class="line out-ci"><span class="b"><img class="emo" src="assets/emoji/2705.png" alt="✅" /> CI passed</span></div>
+            <div class="line out-ci"></div>
+            <div class="line out-ci">  <span class="ok">✓</span> install   3.0s  npm ci</div>
+            <div class="line out-ci">  <span class="ok">✓</span> commits   0.0s  6 commits</div>
+            <div class="line out-ci">  <span class="ok">✓</span> lint      0.2s</div>
+            <div class="line out-ci">  <span class="ok">✓</span> typecheck 2.0s</div>
+            <div class="line out-ci">  <span class="ok">✓</span> test      0.3s</div>
+            <div class="line out-ci">  <span class="ok">✓</span> build     1.8s</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const timeline = gsap.timeline({ paused: true });
+
+    // Window arrives, leaves at the end.
+    timeline.fromTo(
+      "#term-win",
+      { y: 90, opacity: 0, filter: "blur(10px)" },
+      { y: 0, opacity: 1, filter: "blur(0px)", duration: 0.6, ease: "expo.out" },
+      0,
+    );
+
+    // Captions: blur in on their start, blur out just before their end.
+    const captions = [
+      ["#cap-setup p", 0.1, 5.4],
+      ["#cap-hook p", 5.4, 9.6],
+      ["#cap-log p", 9.6, 13.6],
+      ["#cap-changelog p", 13.6, 18],
+      ["#cap-release p", 18, 20.4],
+      ["#cap-bump p", 20.4, 23.6],
+      ["#cap-ci p", 23.6, 28.2],
+    ];
+    captions.forEach(([selector, start, end]) => {
+      timeline.fromTo(
+        selector,
+        { opacity: 0, filter: "blur(8px)" },
+        { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power3.out" },
+        start,
+      );
+      timeline.fromTo(
+        selector,
+        { opacity: 1, filter: "blur(0px)" },
+        { opacity: 0, filter: "blur(8px)", duration: 0.15, ease: "power3.in", immediateRender: false },
+        end - 0.17,
+      );
+    });
+
+    // Each block: type the command, then print its output.
+    const blocks = [
+      ["setup", 0.5],
+      ["hook", 5.55],
+      ["log", 9.75],
+      ["changelog", 13.75],
+      ["release", 18.15],
+      ["ci", 23.75],
+    ];
+    const typing = (length) => Math.min(0.85, length * 0.028);
+    const steps = blocks.map(([id, start]) => {
+      const [command, caret, output] = [`#cmd-${id}`, `#caret-${id}`, `.out-${id}`];
+      const length = document.querySelector(command).textContent.length;
+      const lines = document.querySelectorAll(output).length;
+      return { id, start, command, caret, output, length, lines };
+    });
+    steps.forEach(({ start, command, caret, output, length }) => {
+      timeline.fromTo(command, { width: "0ch" }, { width: `${length + 0.4}ch`, duration: typing(length), ease: `steps(${length})` }, start);
+      timeline.fromTo(caret, { opacity: 1 }, { opacity: 0, duration: 0.01 }, start + typing(length) + 0.25);
+      timeline.fromTo(output, { opacity: 0 }, { opacity: 1, duration: 0.01, stagger: 0.035 }, start + typing(length) + 0.3);
+    });
+    // When each block's last output line has printed.
+    const printed = Object.fromEntries(
+      steps.map(({ id, start, length, lines }) => [id, start + typing(length) + 0.3 + lines * 0.035]),
+    );
+
+    // setup prints more than the window holds: scroll to its last line, like a terminal does.
+    const setupBlock = document.querySelector("#blk-setup");
+    const overflow = setupBlock.scrollHeight - (document.querySelector("#term-body").clientHeight - 60);
+    if (overflow > 0) {
+      timeline.fromTo(setupBlock, { y: 0 }, { y: -overflow, duration: 0.6, ease: "power2.inOut" }, printed.setup + 0.9);
+    }
+
+    // Punch in on the version line.
+    timeline.set("#term-win", { transformOrigin: "50% 27%" }, 0);
+    timeline.fromTo("#term-win", { scale: 1 }, { scale: 1.12, duration: 0.55, ease: "power2.inOut" }, 20.4);
+    timeline.fromTo(
+      "#rel-ver",
+      { backgroundColor: "rgba(255, 77, 79, 0)" },
+      { backgroundColor: "rgba(255, 77, 79, 0.28)", duration: 0.3, ease: "power2.out" },
+      20.55,
+    );
+    timeline.to("#term-win", { scale: 1, duration: 0.5, ease: "power2.inOut" }, 23.1);
+
+    // Leave: shrink and blur into the end card.
+    timeline.to("#term-win", { scale: 0.86, opacity: 0, filter: "blur(12px)", duration: 0.35, ease: "power3.in" }, 27.8);
+
+    window.__timelines["terminal"] = timeline;
+  </script>
+</template>

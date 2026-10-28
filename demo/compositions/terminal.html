@@ -295,19 +295,20 @@
       ["ci", 23.75],
     ];
     const typing = (length) => Math.min(0.85, length * 0.028);
-    blocks.forEach(([id, start]) => {
+    const steps = blocks.map(([id, start]) => {
       const [command, caret, output] = [`#cmd-${id}`, `#caret-${id}`, `.out-${id}`];
       const length = document.querySelector(command).textContent.length;
+      const lines = document.querySelectorAll(output).length;
+      return { id, start, command, caret, output, length, lines };
+    });
+    steps.forEach(({ start, command, caret, output, length }) => {
       timeline.fromTo(command, { width: "0ch" }, { width: `${length + 0.4}ch`, duration: typing(length), ease: `steps(${length})` }, start);
       timeline.fromTo(caret, { opacity: 1 }, { opacity: 0, duration: 0.01 }, start + typing(length) + 0.25);
       timeline.fromTo(output, { opacity: 0 }, { opacity: 1, duration: 0.01, stagger: 0.035 }, start + typing(length) + 0.3);
     });
     // When each block's last output line has printed.
     const printed = Object.fromEntries(
-      blocks.map(([id, start]) => {
-        const length = document.querySelector(`#cmd-${id}`).textContent.length;
-        return [id, start + typing(length) + 0.3 + document.querySelectorAll(`.out-${id}`).length * 0.035];
-      }),
+      steps.map(({ id, start, length, lines }) => [id, start + typing(length) + 0.3 + lines * 0.035]),
     );
 
     // setup prints more than the window holds: scroll to its last line, like a terminal does.

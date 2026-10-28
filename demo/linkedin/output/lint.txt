@@ -1,0 +1,5 @@
+⧗ input: Added new stuff.
+✖ type may not be empty
+✖ subject may not be empty
+✖ subject may not end with full stop
+✖ found 3 problems, 0 warnings

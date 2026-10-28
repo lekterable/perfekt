@@ -46,18 +46,18 @@
     </div>
   </div>
   <script>
-    const tl = gsap.timeline({ paused: true });
+    const timeline = gsap.timeline({ paused: true });
     const words = gsap.utils.toArray("#hook-title .word");
     words.forEach((word, index) => {
       const color = word.classList.contains("hot") ? "#ff4d4f" : "#f5f5f7";
-      tl.fromTo(word, { color: "#55555f" }, { color, duration: 0.18, ease: "power2.out" }, 0.15 + index * 0.1);
+      timeline.fromTo(word, { color: "#55555f" }, { color, duration: 0.18, ease: "power2.out" }, 0.15 + index * 0.1);
     });
-    tl.fromTo(
+    timeline.fromTo(
       "#hook-wrap > *",
       { opacity: 1, filter: "blur(0px)" },
       { opacity: 0, filter: "blur(10px)", duration: 0.22, ease: "power3.in", stagger: 0.05 },
       3.05,
     );
-    window.__timelines["hook"] = tl;
+    window.__timelines["hook"] = timeline;
   </script>
 </template>

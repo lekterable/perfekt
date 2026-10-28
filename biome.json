@@ -12,8 +12,7 @@
       "!**/*.snap",
       "!**/next-env.d.ts",
       "!**/*.tsbuildinfo",
-      "!**/pnpm-lock.yaml",
-      "!demo/**/*.html"
+      "!**/pnpm-lock.yaml"
     ]
   },
   "formatter": {

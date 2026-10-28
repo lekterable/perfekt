@@ -157,7 +157,7 @@
     <div id="cap-ci" class="cap clip" data-start="23.6" data-duration="4.6">
       <p>Run the whole <em>CI on your laptop.</em></p>
     </div>
-    <div id="cap-release2" class="cap clip" data-start="20.4" data-duration="3.2">
+    <div id="cap-bump" class="cap clip" data-start="20.4" data-duration="3.2">
       <p>Each <code>feat</code> means a <em>minor</em> bump.</p>
     </div>
 
@@ -250,10 +250,10 @@
     </div>
   </div>
   <script>
-    const tl = gsap.timeline({ paused: true });
+    const timeline = gsap.timeline({ paused: true });
 
     // Window arrives, leaves at the end.
-    tl.fromTo(
+    timeline.fromTo(
       "#term-win",
       { y: 90, opacity: 0, filter: "blur(10px)" },
       { y: 0, opacity: 1, filter: "blur(0px)", duration: 0.6, ease: "expo.out" },
@@ -267,17 +267,17 @@
       ["#cap-log p", 9.6, 13.6],
       ["#cap-changelog p", 13.6, 18],
       ["#cap-release p", 18, 20.4],
+      ["#cap-bump p", 20.4, 23.6],
       ["#cap-ci p", 23.6, 28.2],
-      ["#cap-release2 p", 20.4, 23.6],
     ];
     captions.forEach(([selector, start, end]) => {
-      tl.fromTo(
+      timeline.fromTo(
         selector,
         { opacity: 0, filter: "blur(8px)" },
         { opacity: 1, filter: "blur(0px)", duration: 0.18, ease: "power3.out" },
         start,
       );
-      tl.fromTo(
+      timeline.fromTo(
         selector,
         { opacity: 1, filter: "blur(0px)" },
         { opacity: 0, filter: "blur(8px)", duration: 0.15, ease: "power3.in", immediateRender: false },
@@ -295,37 +295,42 @@
       ["ci", 23.75],
     ];
     const typing = (length) => Math.min(0.85, length * 0.028);
-    const printed = {};
     blocks.forEach(([id, start]) => {
-      const [cmd, caret, out] = [`#cmd-${id}`, `#caret-${id}`, `.out-${id}`];
-      const length = document.querySelector(cmd).textContent.length;
-      printed[id] = start + typing(length) + 0.3 + document.querySelectorAll(out).length * 0.035;
-      tl.fromTo(cmd, { width: "0ch" }, { width: `${length + 0.4}ch`, duration: typing(length), ease: `steps(${length})` }, start);
-      tl.fromTo(caret, { opacity: 1 }, { opacity: 0, duration: 0.01 }, start + typing(length) + 0.25);
-      tl.fromTo(out, { opacity: 0 }, { opacity: 1, duration: 0.01, stagger: 0.035 }, start + typing(length) + 0.3);
+      const [command, caret, output] = [`#cmd-${id}`, `#caret-${id}`, `.out-${id}`];
+      const length = document.querySelector(command).textContent.length;
+      timeline.fromTo(command, { width: "0ch" }, { width: `${length + 0.4}ch`, duration: typing(length), ease: `steps(${length})` }, start);
+      timeline.fromTo(caret, { opacity: 1 }, { opacity: 0, duration: 0.01 }, start + typing(length) + 0.25);
+      timeline.fromTo(output, { opacity: 0 }, { opacity: 1, duration: 0.01, stagger: 0.035 }, start + typing(length) + 0.3);
     });
+    // When each block's last output line has printed.
+    const printed = Object.fromEntries(
+      blocks.map(([id, start]) => {
+        const length = document.querySelector(`#cmd-${id}`).textContent.length;
+        return [id, start + typing(length) + 0.3 + document.querySelectorAll(`.out-${id}`).length * 0.035];
+      }),
+    );
 
     // setup prints more than the window holds: scroll to its last line, like a terminal does.
     const setupBlock = document.querySelector("#blk-setup");
     const overflow = setupBlock.scrollHeight - (document.querySelector("#term-body").clientHeight - 60);
     if (overflow > 0) {
-      tl.fromTo(setupBlock, { y: 0 }, { y: -overflow, duration: 0.6, ease: "power2.inOut" }, printed.setup + 0.9);
+      timeline.fromTo(setupBlock, { y: 0 }, { y: -overflow, duration: 0.6, ease: "power2.inOut" }, printed.setup + 0.9);
     }
 
     // Punch in on the version line.
-    tl.set("#term-win", { transformOrigin: "50% 27%" }, 0);
-    tl.fromTo("#term-win", { scale: 1 }, { scale: 1.12, duration: 0.55, ease: "power2.inOut" }, 20.4);
-    tl.fromTo(
+    timeline.set("#term-win", { transformOrigin: "50% 27%" }, 0);
+    timeline.fromTo("#term-win", { scale: 1 }, { scale: 1.12, duration: 0.55, ease: "power2.inOut" }, 20.4);
+    timeline.fromTo(
       "#rel-ver",
       { backgroundColor: "rgba(255, 77, 79, 0)" },
       { backgroundColor: "rgba(255, 77, 79, 0.28)", duration: 0.3, ease: "power2.out" },
       20.55,
     );
-    tl.to("#term-win", { scale: 1, duration: 0.5, ease: "power2.inOut" }, 23.1);
+    timeline.to("#term-win", { scale: 1, duration: 0.5, ease: "power2.inOut" }, 23.1);
 
     // Leave: shrink and blur into the end card.
-    tl.to("#term-win", { scale: 0.86, opacity: 0, filter: "blur(12px)", duration: 0.35, ease: "power3.in" }, 27.8);
+    timeline.to("#term-win", { scale: 0.86, opacity: 0, filter: "blur(12px)", duration: 0.35, ease: "power3.in" }, 27.8);
 
-    window.__timelines["terminal"] = tl;
+    window.__timelines["terminal"] = timeline;
   </script>
 </template>

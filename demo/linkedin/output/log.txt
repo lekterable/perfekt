@@ -1,5 +1,0 @@
-b54254a perf(db): batch the nightly writes
-a059e0e docs: explain the config file
-c6745f3 feat(cli): add --json output
-02699ff fix(auth): refresh expired sessions
-303ca2b feat(api): add rate limits per token

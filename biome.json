@@ -93,7 +93,7 @@
         "noUnusedImports": "error",
         "noUnusedLabels": "error",
         "noUnusedVariables": "error",
-        "useExhaustiveDependencies": "warn",
+        "useExhaustiveDependencies": "error",
         "useHookAtTopLevel": "error",
         "useIsNan": "error",
         "useJsxKeyInIterable": "error",
@@ -103,13 +103,13 @@
       },
       "security": {
         "noBlankTarget": "error",
-        "noDangerouslySetInnerHtml": "warn",
+        "noDangerouslySetInnerHtml": "error",
         "noDangerouslySetInnerHtmlWithChildren": "error",
         "noGlobalEval": "error"
       },
       "style": {
         "noNamespace": "error",
-        "noNonNullAssertion": "warn",
+        "noNonNullAssertion": "error",
         "noRestrictedImports": {
           "level": "error",
           "options": {
@@ -124,7 +124,7 @@
         "noYodaExpression": "error",
         "useArrayLiterals": "error",
         "useConsistentArrayType": {
-          "level": "warn",
+          "level": "error",
           "options": { "syntax": "shorthand" }
         },
         "useConsistentTypeDefinitions": {
@@ -138,7 +138,7 @@
         "useSingleVarDeclarator": "error"
       },
       "suspicious": {
-        "noArrayIndexKey": "warn",
+        "noArrayIndexKey": "error",
         "noAssignInExpressions": "error",
         "noAsyncPromiseExecutor": "error",
         "noCatchAssign": "error",
@@ -187,7 +187,7 @@
       },
       "nursery": {
         "useSortedClasses": {
-          "level": "warn",
+          "level": "error",
           "options": {
             "attributes": ["className"],
             "functions": ["cn", "clsx", "cva"]

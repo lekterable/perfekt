@@ -1,0 +1,63 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+    }
+    #hook-wrap {
+      position: absolute;
+      left: 108px;
+      right: 108px;
+      top: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    #hook-brand {
+      font-size: 44px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 48px;
+    }
+    #hook-brand .ok {
+      height: 1em;
+      vertical-align: -0.12em;
+    }
+    #hook-title {
+      font-size: 112px;
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.035em;
+    }
+    #hook-title .word {
+      display: inline-block;
+      color: #55555f;
+    }
+  </style>
+  <div id="root" data-composition-id="hook" data-width="1080" data-height="1350">
+    <div id="hook-wrap" class="clip" data-start="0" data-duration="3.4">
+      <div id="hook-brand">perfekt <img class="ok" src="assets/emoji/1f44c.png" alt="👌" /></div>
+      <h1 id="hook-title">
+        <span class="word">Your</span> <span class="word">commits</span>
+        <span class="word">already</span> <span class="word">wrote</span>
+        <span class="word">your</span> <span class="word hot">changelog.</span>
+      </h1>
+    </div>
+  </div>
+  <script>
+    const timeline = gsap.timeline({ paused: true });
+    const words = gsap.utils.toArray("#hook-title .word");
+    words.forEach((word, index) => {
+      const color = word.classList.contains("hot") ? "#ff4d4f" : "#f5f5f7";
+      timeline.fromTo(word, { color: "#55555f" }, { color, duration: 0.18, ease: "power2.out" }, 0.15 + index * 0.1);
+    });
+    timeline.fromTo(
+      "#hook-wrap > *",
+      { opacity: 1, filter: "blur(0px)" },
+      { opacity: 0, filter: "blur(10px)", duration: 0.22, ease: "power3.in", stagger: 0.05 },
+      3.05,
+    );
+    window.__timelines["hook"] = timeline;
+  </script>
+</template>

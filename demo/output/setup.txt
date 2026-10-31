@@ -1,0 +1,20 @@
+🌱 Commit linting setup
+
+  Written:         .github/workflows/commitlint.yml
+  Skipped:         none
+  Default branch:  master
+
+  The workflow lints pull request titles, which become the commit when you squash-merge. A trailing (#N) from GitHub squash is allowed. Run perfekt ci to lint the branch commits too.
+
+🪝 Commit hook setup
+
+  Written:     .githooks/commit-msg
+  Written:     package.json
+  Hooks path:  .githooks
+
+🧹 Code lint setup
+
+  Written:  biome.json
+  Written:  package.json
+
+  Run `npm install` to install Biome and perfekt.

@@ -5,7 +5,7 @@ import { resolveReadFile, resolveWriteFile } from '~testing/fs'
 import exec, { execFile } from '~utils/misc/exec'
 import Perfekt from './perfekt'
 
-vi.mock('fs')
+vi.mock('node:fs')
 vi.mock('~utils/misc/exec')
 
 const fsMock = vi.mocked(fs)

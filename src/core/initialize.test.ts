@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import * as writeFile from '../utils/misc/write-file'
 import initialize from './initialize'
 
-vi.mock('fs')
+vi.mock('node:fs')
 
 const fsMock = vi.mocked(fs)
 

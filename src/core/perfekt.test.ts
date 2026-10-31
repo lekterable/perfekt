@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'node:fs'
 import type { MockInstance } from 'vitest'
 import { createConfig } from '~testing/fixtures'
 import { resolveReadFile, resolveWriteFile } from '~testing/fs'

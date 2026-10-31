@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'node:fs'
 
 const readFile = (fileName: string) =>
   new Promise<string>((resolve, reject) => {

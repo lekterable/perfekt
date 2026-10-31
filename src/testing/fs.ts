@@ -1,4 +1,4 @@
-import type fs from 'fs'
+import type fs from 'node:fs'
 
 type ReadFileCallback = (
   error: NodeJS.ErrnoException | null,

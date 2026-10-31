@@ -22,6 +22,8 @@ The config also enforces the house code conventions:
 | Test titles start with "should" | In `**/*.test.*` and `**/tests/**`, every `it(...)` and `test(...)` title (including `.only`, `.skip`, `.todo` and `.each`) must start with "should" or "should not": `it('should reject an expired token')`. `describe` blocks are exempt. | GritQL plugin `biome/should.grit` |
 | `style/useConsistentTypeDefinitions` | `type` instead of `interface`. | Biome core rule |
 
+Every rule is an error, never a warning, so `biome check` either passes clean or fails CI. Non-null assertions (`value!`) are allowed only in tests. Besides Biome's usual correctness checks, it bans `any` (explicit, implicit and evolving), floating and misused promises, import cycles, undeclared dependencies, unused parameters and empty blocks (a block holding a comment that says why it's empty passes), and asks for `node:` imports and template literals.
+
 When you adopt the config, expect `biome check` to flag existing function declarations, function expressions, loops and test titles. `biome check --write` fixes the function expressions; the rest need a rename or a rewrite (`const name = () => {}`, or a loop turned into `map`/`reduce`).
 
 Biome resolves plugin paths from your project root, so the config points at `./node_modules/perfekt/biome/`. That works with pnpm, npm and Yarn's `node-modules` linker when `biome.json` sits next to the `node_modules` that has `perfekt`. Yarn Plug'n'Play has no `node_modules`, so the plugins can't load there.

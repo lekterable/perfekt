@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'node:fs'
 import type { MockInstance } from 'vitest'
 import exec from '~utils/misc/exec'
 import * as writeFile from '../utils/misc/write-file'

@@ -1,4 +1,4 @@
-import Options from '.'
+import Options from './options'
 
 class Optionable<T extends object> {
   #options: Options<T>

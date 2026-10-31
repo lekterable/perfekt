@@ -83,4 +83,20 @@ describe('setupLint', () => {
       ).toEqual([file])
     },
   )
+
+  it('should not ship repo-only paths in the shared Biome config', () => {
+    const shared = JSON.parse(
+      fs.readFileSync(
+        path.resolve(import.meta.dirname, '../../biome.json'),
+        'utf8',
+      ),
+    )
+    const ignores = shared.files.includes.filter((pattern: string) =>
+      pattern.startsWith('!'),
+    )
+
+    expect(
+      ignores.filter((pattern: string) => !pattern.startsWith('!**/')),
+    ).toEqual([])
+  })
 })

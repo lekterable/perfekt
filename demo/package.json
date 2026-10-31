@@ -1,0 +1,11 @@
+{
+  "name": "perfekt-demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "capture": "./capture.sh",
+    "dev": "npx --yes hyperframes@0.8.209 preview",
+    "check": "npx --yes hyperframes@0.8.209 check",
+    "render": "npx --yes hyperframes@0.8.209 render -o perfekt.mp4"
+  }
+}

@@ -1,4 +1,4 @@
-import process from 'child_process'
+import process from 'node:child_process'
 
 const defaultOptions = { stdio: 'pipe' } as const
 

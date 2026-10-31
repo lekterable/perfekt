@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'node:fs'
 import { createCommit, createConfig } from '~testing/fixtures'
 import { resolveReadFile } from '~testing/fs'
 import Changelog from './changelog'

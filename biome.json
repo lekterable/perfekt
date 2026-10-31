@@ -4,7 +4,11 @@
     "./node_modules/perfekt/biome/arrow.grit",
     "./node_modules/perfekt/biome/loop.grit"
   ],
-  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
   "files": {
     "ignoreUnknown": true,
     "includes": [
@@ -30,7 +34,11 @@
       "arrowParentheses": "always"
     }
   },
-  "css": { "parser": { "tailwindDirectives": true } },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
   "assist": {
     "enabled": true,
     "actions": {
@@ -86,10 +94,12 @@
         "noSelfAssign": "error",
         "noSetterReturn": "error",
         "noSwitchDeclarations": "error",
+        "noUndeclaredDependencies": "error",
         "noUnreachable": "error",
         "noUnreachableSuper": "error",
         "noUnsafeFinally": "error",
         "noUnsafeOptionalChaining": "error",
+        "noUnusedFunctionParameters": "error",
         "noUnusedImports": "error",
         "noUnusedLabels": "error",
         "noUnusedVariables": "error",
@@ -125,17 +135,23 @@
         "useArrayLiterals": "error",
         "useConsistentArrayType": {
           "level": "error",
-          "options": { "syntax": "shorthand" }
+          "options": {
+            "syntax": "shorthand"
+          }
         },
         "useConsistentTypeDefinitions": {
           "level": "error",
-          "options": { "style": "type" }
+          "options": {
+            "style": "type"
+          }
         },
         "useConst": "error",
         "useExportType": "error",
         "useImportType": "error",
+        "useNodejsImportProtocol": "error",
         "useShorthandFunctionType": "error",
-        "useSingleVarDeclarator": "error"
+        "useSingleVarDeclarator": "error",
+        "useTemplate": "error"
       },
       "suspicious": {
         "noArrayIndexKey": "error",
@@ -149,7 +165,9 @@
         "noConfusingVoidType": "error",
         "noConsole": {
           "level": "error",
-          "options": { "allow": ["warn", "error"] }
+          "options": {
+            "allow": ["warn", "error"]
+          }
         },
         "noControlCharactersInRegex": "error",
         "noDebugger": "error",
@@ -160,12 +178,17 @@
         "noDuplicateJsxProps": "error",
         "noDuplicateObjectKeys": "error",
         "noDuplicateParameters": "error",
+        "noEmptyBlockStatements": "error",
         "noEmptyInterface": "error",
+        "noEvolvingTypes": "error",
+        "noExplicitAny": "error",
         "noExtraNonNullAssertion": "error",
         "noFallthroughSwitchClause": "error",
         "noFunctionAssign": "error",
         "noGlobalAssign": "error",
+        "noImplicitAnyLet": "error",
         "noImportAssign": "error",
+        "noImportCycles": "error",
         "noIrregularWhitespace": "error",
         "noMisleadingCharacterClass": "error",
         "noMisleadingInstantiator": "error",
@@ -186,6 +209,8 @@
         "useGetterReturn": "error"
       },
       "nursery": {
+        "noFloatingPromises": "error",
+        "noMisusedPromises": "error",
         "useSortedClasses": {
           "level": "error",
           "options": {
@@ -200,7 +225,13 @@
     {
       "includes": ["**/*.test.*", "**/tests/**"],
       "plugins": ["./node_modules/perfekt/biome/should.grit"],
-      "linter": { "rules": { "style": { "noNonNullAssertion": "off" } } }
+      "linter": {
+        "rules": {
+          "style": {
+            "noNonNullAssertion": "off"
+          }
+        }
+      }
     }
   ]
 }

@@ -1,3 +1,15 @@
+# 4.2.0
+
+## Features
+
+- make warnings errors and add stricter rules (#34) [14af3eca](https://github.com/lekterable/perfekt/commit/14af3eca2f61bb9cee8ec0f49fe08ad3dc973da1)
+
+## Misc
+
+- add a perfekt demo video (#33) [6608f47c](https://github.com/lekterable/perfekt/commit/6608f47c06a1543b900cc3cf366bfd7b76b9d17e)
+- drop --frozen-lockfile, which pnpm already sets in CI (#32) [b6e4a8df](https://github.com/lekterable/perfekt/commit/b6e4a8dff7a58e0ff61db1158f65ffa8b5cacdba)
+- note the typescript version the shared tsconfig needs (#31) [413d1bcb](https://github.com/lekterable/perfekt/commit/413d1bcbce5beefab152150afee40d740157c0f5)
+
 # 4.1.0
 
 ## Features

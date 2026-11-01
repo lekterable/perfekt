@@ -42,7 +42,7 @@ jobs:
           cache: pnpm
           registry-url: https://registry.npmjs.org
       - run: pnpm install
-      - run: pnpm run ci
+      - run: pnpm run verify
       - name: Publish
         # uses NPM_TOKEN when set, otherwise npm trusted publishing
         env:

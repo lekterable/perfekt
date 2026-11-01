@@ -124,7 +124,7 @@ class Git {
 
     if (!log) {
       const detail = from ? ` since \`${from}\`` : ''
-      const message = "Couldn't find any commits" + detail + '.'
+      const message = `Couldn't find any commits${detail}.`
 
       throw new Error(message)
     }

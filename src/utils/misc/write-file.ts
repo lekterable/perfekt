@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'node:fs'
 
 const writeFile = (fileName: string, content: string) =>
   new Promise<void>((resolve, reject) =>

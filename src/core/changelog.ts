@@ -46,7 +46,7 @@ class Changelog extends Optionable<ChangelogOptions> {
       ? await this.getHistory(previousVersion)
       : undefined
 
-    return history ? changelog + '\n' + history : changelog
+    return history ? `${changelog}\n${history}` : changelog
   }
 
   save(changelog: string) {

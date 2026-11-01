@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'node:fs'
 import type { PackageManagerName } from '~types'
 import fileExists from '~utils/misc/file-exists'
 
@@ -36,7 +36,9 @@ const getPackageManagerFromPackageJson = () => {
     const [packageManager] = packageJson.packageManager.split('@')
 
     if (isPackageManager(packageManager)) return packageManager
-  } catch {}
+  } catch {
+    // An unreadable package.json falls back to the lockfile check.
+  }
 
   return undefined
 }

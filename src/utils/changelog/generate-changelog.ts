@@ -50,10 +50,10 @@ const generateChangelog = (
 
         const groupHeader = isBreaking ? config.breakingHeader : header
 
-        return groupHeader + '\n\n' + lines.join('')
+        return `${groupHeader}\n\n${lines.join('')}`
       })
 
-      return title + '\n\n' + grouped.join('')
+      return `${title}\n\n${grouped.join('')}`
     })
 
   return releases.join('')

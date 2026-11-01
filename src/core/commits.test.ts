@@ -1,5 +1,5 @@
-import fs from 'fs'
-import path from 'path'
+import fs from 'node:fs'
+import path from 'node:path'
 import { COMMITS_REUSABLE_WORKFLOW, getCommitsWorkflow } from './commits'
 
 const repoRoot = path.resolve(__dirname, '../..')

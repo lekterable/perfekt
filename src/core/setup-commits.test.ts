@@ -1,11 +1,11 @@
-import fs from 'fs'
+import fs from 'node:fs'
 import type { MockInstance } from 'vitest'
 import exec from '~utils/misc/exec'
 import * as writeFile from '../utils/misc/write-file'
 import { COMMITS_WORKFLOW_PATH, getCommitsWorkflow } from './commits'
 import setupCommits, { getDefaultBranch } from './setup-commits'
 
-vi.mock('fs')
+vi.mock('node:fs')
 vi.mock('~utils/misc/exec')
 
 const fsMock = vi.mocked(fs)

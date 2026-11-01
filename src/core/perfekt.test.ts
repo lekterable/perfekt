@@ -1,11 +1,11 @@
-import fs from 'fs'
+import fs from 'node:fs'
 import type { MockInstance } from 'vitest'
 import { createConfig } from '~testing/fixtures'
 import { resolveReadFile, resolveWriteFile } from '~testing/fs'
 import exec, { execFile } from '~utils/misc/exec'
 import Perfekt from './perfekt'
 
-vi.mock('fs')
+vi.mock('node:fs')
 vi.mock('~utils/misc/exec')
 
 const fsMock = vi.mocked(fs)

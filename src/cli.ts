@@ -144,7 +144,7 @@ const createCommands = (): PerfektCLI => ({
 })
 
 const writeJson = (response: JsonResponse) =>
-  process.stdout.write(JSON.stringify(response, null, 2) + '\n')
+  process.stdout.write(`${JSON.stringify(response, null, 2)}\n`)
 
 type DetailRow = [label: string, value: string]
 
@@ -163,7 +163,7 @@ const formatDetailBlock = (
     ...rows.map(([label, value]) => `  ${`${label}:`.padEnd(width)}  ${value}`),
   ]
 
-  writer(lines.join('\n') + '\n')
+  writer(`${lines.join('\n')}\n`)
 }
 
 const printSetupCommitsSummary = (result: SetupCommitsResult) => {

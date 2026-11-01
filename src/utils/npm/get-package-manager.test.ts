@@ -1,7 +1,7 @@
-import fs from 'fs'
+import fs from 'node:fs'
 import { getPackageManager } from './get-package-manager'
 
-vi.mock('fs')
+vi.mock('node:fs')
 
 const fsMock = vi.mocked(fs)
 

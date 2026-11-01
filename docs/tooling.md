@@ -48,15 +48,15 @@ Call the shared CI workflow. It installs with pnpm and runs `lint`, `typecheck`,
 
 ```yaml
 jobs:
-  validate:
-    name: Validate
+  verify:
+    name: Verify
     uses: lekterable/perfekt/.github/workflows/ci.yml@master
     # with:
     #   node-versions: '["22", "24"]'
     #   bun: true
 ```
 
-It needs a `packageManager` field in `package.json` for the pnpm version. Its checks read `CI / Validate / Node 24`, one per Node version (24 unless you pass `node-versions`).
+It needs a `packageManager` field in `package.json` for the pnpm version. Its checks read `CI / Verify / Node 24`, one per Node version (24 unless you pass `node-versions`).
 
 `perfekt ci` runs the same steps on your machine, plus [`perfekt lint`](documentation.md#lint) on the branch's commits. See [`ci`](documentation.md#ci).
 

@@ -46,7 +46,6 @@
     "lint": "biome check",
     "prepare": "pnpm run build && husky",
     "test": "vitest run",
-    "test:ci": "vitest run --coverage",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",

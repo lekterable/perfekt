@@ -60,6 +60,21 @@ It needs a `packageManager` field in `package.json` for the pnpm version. Its ch
 
 `perfekt ci` runs the same steps on your machine, plus [`perfekt lint`](documentation.md#lint) on the branch's commits. See [`ci`](documentation.md#ci).
 
+Add it as a `verify` script, so `pnpm verify` runs everything CI runs. Keep `lint`, `typecheck`, `test` and `build` as the step scripts, with no umbrella `check` or `validate` script:
+
+```json
+{
+  "scripts": {
+    "lint": "biome check",
+    "format": "biome check --write",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "tsdown",
+    "verify": "perfekt ci"
+  }
+}
+```
+
 ## Pull request titles
 
 When you squash-merge, the pull request title becomes the commit, so lint titles with the shared workflow:

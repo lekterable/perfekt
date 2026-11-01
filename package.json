@@ -41,7 +41,6 @@
   ],
   "scripts": {
     "build": "tsdown",
-    "ci": "pnpm run validate && pnpm run test:ci && pnpm run build",
     "dev": "tsdown --watch",
     "format": "biome check --write",
     "lint": "biome check",
@@ -51,7 +50,7 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "validate": "pnpm run lint && pnpm run typecheck"
+    "verify": "pnpm run build && node dist/cli.js ci"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",

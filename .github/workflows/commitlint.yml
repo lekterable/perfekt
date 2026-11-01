@@ -13,6 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    # A newer push or title edit on the same PR cancels the older run. Keyed on
+    # the repository too, since every repo calls this workflow at @master.
+    concurrency:
+      group: commitlint-${{ github.repository }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v6
         with:

@@ -1,3 +1,15 @@
+# 4.3.0
+
+## Features
+
+- ban null in types and add setup scripts (#38) [f97987bf](https://github.com/lekterable/perfekt/commit/f97987bfa2678612c1610f060fc93ec9cc6ec0a1)
+
+## Misc
+
+- name the example CI job Verify (#37) [adf0d907](https://github.com/lekterable/perfekt/commit/adf0d907f7b1a8b1bf1390fc492e6f1b20ba367a)
+- add pnpm verify and sync the PR template (#35) [ba275d67](https://github.com/lekterable/perfekt/commit/ba275d67970cb705becc3981b691d6dfcd13a110)
+- cancel superseded commitlint and CI runs (#36) [98c03dc6](https://github.com/lekterable/perfekt/commit/98c03dc60220a2792551dba71c5c4e77459aa2f5)
+
 # 4.2.0
 
 ## Features

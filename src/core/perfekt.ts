@@ -115,9 +115,9 @@ class Perfekt {
     )
 
     return {
-      version: version,
+      version,
       latestTag,
-      from: from,
+      from,
       root,
       write,
       commitCount: commits.length,

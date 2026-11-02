@@ -9,7 +9,7 @@ export const isSafeBranchName = (value: string) =>
 export const COMMITS_REUSABLE_WORKFLOW =
   'lekterable/perfekt/.github/workflows/commitlint.yml@master'
 
-export const getCommitsWorkflow = (branch?: string | undefined) => {
+export const getCommitsWorkflow = (branch?: string) => {
   const branchLine =
     branch && isSafeBranchName(branch) ? `\n    branches: [${branch}]` : ''
 

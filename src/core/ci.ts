@@ -166,7 +166,10 @@ const time = async <T>(work: () => T | Promise<T>) => {
 const tail = (output: string, lines = 60) =>
   output.trimEnd().split('\n').slice(-lines).join('\n')
 
-/** Runs the steps in order and stops at the first failure, like a CI job. */
+/**
+ * Runs the steps in order and stops at the first failure, like a CI job. A step leaves out the
+ * `detail` and `output` it doesn't have, because `--json` prints a key set to undefined as null.
+ */
 export const runSteps = async (
   dir: string,
   options: CiOptions,
@@ -184,7 +187,9 @@ export const runSteps = async (
     status: install.value.status === 0 ? 'passed' : 'failed',
     ms: install.ms,
     detail: [installCommand, ...installArgs].join(' '),
-    output: install.value.status === 0 ? undefined : tail(install.value.output),
+    ...(install.value.status === 0
+      ? {}
+      : { output: tail(install.value.output) }),
   })
 
   const base = options.title ? undefined : getBase(dir, options.base, run)
@@ -220,12 +225,16 @@ export const runSteps = async (
       name: 'commits',
       status: commits.value.problems.length === 0 ? 'passed' : 'failed',
       ms: commits.ms,
-      detail: options.title
-        ? 'pull request title'
+      ...(options.title
+        ? { detail: 'pull request title' }
         : commits.value.count === undefined
-          ? undefined
-          : `${commits.value.count} commit${commits.value.count === 1 ? '' : 's'}`,
-      output: commits.value.problems.join('\n') || undefined,
+          ? {}
+          : {
+              detail: `${commits.value.count} commit${commits.value.count === 1 ? '' : 's'}`,
+            }),
+      ...(commits.value.problems.length === 0
+        ? {}
+        : { output: commits.value.problems.join('\n') }),
     })
   }
 
@@ -245,7 +254,9 @@ export const runSteps = async (
       name: script,
       status: result.value.status === 0 ? 'passed' : 'failed',
       ms: result.ms,
-      output: result.value.status === 0 ? undefined : tail(result.value.output),
+      ...(result.value.status === 0
+        ? {}
+        : { output: tail(result.value.output) }),
     }
   }
 

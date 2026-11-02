@@ -35,7 +35,7 @@
 | `perfekt changelog` | Prints the changelog, or writes it with `--write` |
 | `perfekt lint [message]` | Checks a commit message or pull request title against the shared rules |
 | `perfekt ci` | Runs install, commit lint, lint, typecheck, test and build like CI does |
-| `perfekt setup` | Adds a GitHub Action that lints pull request titles (`setup commits`), a `commit-msg` hook that lints local commits (`setup hooks`) the shared Biome config (`setup lint`) and the standard `lint`, `format`, `typecheck` and `verify` scripts (`setup scripts`) |
+| `perfekt setup` | Adds a GitHub Action that lints pull request titles (`setup commits`), a `commit-msg` hook that lints local commits (`setup hooks`), the shared Biome config (`setup lint`) and the standard `lint`, `format`, `typecheck` and `verify` scripts (`setup scripts`) |
 | `perfekt init` | Writes an empty `perfekt.json` config |
 
 Every command except `init` prints JSON with `--json`, for scripts, CI jobs and agents.

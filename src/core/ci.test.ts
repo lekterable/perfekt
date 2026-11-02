@@ -133,6 +133,18 @@ describe('ci', () => {
     expect(calls).toEqual(['pnpm install', 'pnpm run lint', 'pnpm run test'])
   })
 
+  it('should leave output off passed steps, so --json does not print it as null', async () => {
+    const dir = makeDir({
+      'package.json': JSON.stringify({ scripts: { lint: 'biome check' } }),
+    })
+
+    const steps = await runSteps(dir, { title: 'feat: add ci' }, recorder().run)
+
+    expect(
+      steps.filter((step) => 'output' in step).map((step) => step.name),
+    ).toEqual([])
+  })
+
   it('should run nothing after a failed install', async () => {
     const dir = makeDir({
       'package.json': JSON.stringify({ scripts: { test: 'jest' } }),

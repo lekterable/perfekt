@@ -13,7 +13,7 @@ const isBumpKeyword = (value: string): value is BumpKeyword =>
 type ResolvedVersion = {
   currentVersion: string
   resolvedVersion: string
-  resolvedBump: ReleaseChange | null
+  resolvedBump: ReleaseChange | undefined
 }
 
 const getCurrentVersion = async () => {
@@ -47,7 +47,7 @@ const resolveVersion = async (
     throw new Error(`Version \`${version}\` doesn't look right.`)
   }
 
-  return { currentVersion, resolvedVersion, resolvedBump: null }
+  return { currentVersion, resolvedVersion, resolvedBump: undefined }
 }
 
 export default resolveVersion

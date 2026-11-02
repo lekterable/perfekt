@@ -27,13 +27,13 @@ describe('setup-commits', () => {
     ['origin HEAD', answer('origin/HEAD', 'origin/main'), 'main'],
     ['init.defaultBranch', answer('init.defaultBranch', 'develop'), 'develop'],
     ['a current master branch', answer('show-current', 'master'), 'master'],
-    ['a current topic branch', answer('show-current', 'topic'), null],
+    ['a current topic branch', answer('show-current', 'topic'), undefined],
     [
       'no git',
       () => {
         throw new Error('no git')
       },
-      null,
+      undefined,
     ],
   ])('should detect the default branch from %s', (_label, run, expected) => {
     execMock.mockImplementation(run)

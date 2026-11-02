@@ -84,7 +84,7 @@ const createPerfektDouble = () => ({
   setupHooks: vi.fn().mockReturnValue({
     files: [{ path: '.githooks/commit-msg', status: 'written' as const }],
     hooksPath: '.githooks',
-    clonesNeed: null,
+    clonesNeed: undefined,
   }),
   setupLint: vi.fn().mockReturnValue({
     files: [{ path: 'biome.json', status: 'written' as const }],
@@ -303,6 +303,23 @@ describe('cli', () => {
 
       expect(perfekt[method]).toHaveBeenCalledWith(...call)
       expect(lastJson(stdoutSpy)).toMatchObject({ success: true, command })
+    })
+
+    it('should print an undefined result field as null in JSON', async () => {
+      const perfekt = createPerfektDouble()
+      perfekt.changelog.mockResolvedValue({
+        ...createChangelogResult(),
+        version: undefined,
+      })
+
+      await createProgram(perfekt, '3.0.0').parseAsync([
+        'node',
+        'perfekt',
+        'changelog',
+        '--json',
+      ])
+
+      expect(lastJson(stdoutSpy)).toHaveProperty('version', null)
     })
 
     it('should parse changelog options', async () => {

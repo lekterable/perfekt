@@ -51,7 +51,7 @@ describe('setupHooks', () => {
         { path: 'package.json', status: 'written' },
       ],
       hooksPath: '.githooks',
-      clonesNeed: null,
+      clonesNeed: undefined,
     })
   })
 
@@ -87,7 +87,7 @@ describe('setupHooks', () => {
 
     expect(read(dir, '.husky/commit-msg')).toContain('perfekt@4 lint')
     expect(() => hooksPath(dir)).toThrow()
-    expect(result.hooksPath).toBeNull()
+    expect(result.hooksPath).toBeUndefined()
   })
 
   it('should skip an existing hook unless force is set', () => {

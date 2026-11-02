@@ -44,9 +44,9 @@ type JsonResponse =
       success: true
       command: 'changelog'
       write: boolean
-      version: string | null
-      latestTag: string | null
-      from: string | null
+      version: string | undefined
+      latestTag: string | undefined
+      from: string | undefined
       root: boolean
       commitCount: number
       commits: ChangelogResult['commits']
@@ -71,8 +71,8 @@ type JsonResponse =
       resolvedBump: ReleaseResult['resolvedBump']
       packageManager: ReleaseResult['packageManager']
       currentVersion: string
-      latestTag: string | null
-      from: string | null
+      latestTag: string | undefined
+      from: string | undefined
       files: string[]
       git: ReleaseResult['git']
       commitCount: number
@@ -143,8 +143,11 @@ const createCommands = (): PerfektCLI => ({
   release: (...args) => createPerfekt().release(...args),
 })
 
+// JSON output keeps every key: a value perfekt leaves undefined prints as null.
+const keepUndefinedKeys = (_key: string, value: unknown) => value ?? null
+
 const writeJson = (response: JsonResponse) =>
-  process.stdout.write(`${JSON.stringify(response, null, 2)}\n`)
+  process.stdout.write(`${JSON.stringify(response, keepUndefinedKeys, 2)}\n`)
 
 type DetailRow = [label: string, value: string]
 

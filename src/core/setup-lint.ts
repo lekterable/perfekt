@@ -37,7 +37,7 @@ const setupLint = (options: SetupLintOptions): SetupLintResult => {
   if (!force && existing) {
     return {
       files: [{ path: existing, status: 'skipped' }],
-      installCommand: null,
+      installCommand: undefined,
     }
   }
 
@@ -50,7 +50,7 @@ const setupLint = (options: SetupLintOptions): SetupLintResult => {
   if (!packageJson) {
     return {
       files: [{ path: configPath, status: 'written' }],
-      installCommand: null,
+      installCommand: undefined,
     }
   }
 
@@ -100,7 +100,9 @@ const setupLint = (options: SetupLintOptions): SetupLintResult => {
         : []),
     ],
     installCommand:
-      Object.keys(devDependencies).length > 0 ? `${manager} install` : null,
+      Object.keys(devDependencies).length > 0
+        ? `${manager} install`
+        : undefined,
   }
 }
 

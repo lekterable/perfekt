@@ -12,6 +12,8 @@ import type {
   SetupHooksOptions,
   SetupHooksResult,
   SetupLintResult,
+  SetupScriptsOptions,
+  SetupScriptsResult,
 } from '~types'
 import { Config, Perfekt } from './core'
 import { type CiResult, type CiStep, ci } from './core/ci'
@@ -22,6 +24,7 @@ import { cleanMessage, formatLint, lintMessage } from './core/lint'
 import setupCommits from './core/setup-commits'
 import setupHooks from './core/setup-hooks'
 import setupLint from './core/setup-lint'
+import setupScripts from './core/setup-scripts'
 
 type ChangelogCommandOptions = ChangelogOptions & { json?: boolean }
 type ReleaseCommandOptions = ReleaseOptions & { json?: boolean }
@@ -31,6 +34,7 @@ type PerfektCLI = {
   setupCommits: (options: SetupCommitsOptions) => Promise<SetupCommitsResult>
   setupHooks: (options: SetupHooksOptions) => SetupHooksResult
   setupLint: (options: { force?: boolean }) => SetupLintResult
+  setupScripts: (options: SetupScriptsOptions) => SetupScriptsResult
   changelog: (
     version: string | undefined,
     options: Partial<ChangelogOptions>,
@@ -61,6 +65,7 @@ type JsonResponse =
       hooksPath?: SetupHooksResult['hooksPath']
       clonesNeed?: SetupHooksResult['clonesNeed']
       installCommand?: SetupLintResult['installCommand']
+      scripts?: SetupScriptsResult['scripts']
     }
   | {
       success: true
@@ -85,6 +90,7 @@ type JsonResponse =
       command: 'ci'
       dir: string
       steps: CiStep[]
+      warnings: string[]
     }
   | {
       success: boolean
@@ -139,6 +145,7 @@ const createCommands = (): PerfektCLI => ({
   setupHooks,
   setupLint: (options) =>
     setupLint({ ...options, versions: readLintVersions() }),
+  setupScripts,
   changelog: (...args) => createPerfekt().changelog(...args),
   release: (...args) => createPerfekt().release(...args),
 })
@@ -222,6 +229,18 @@ const printSetupLintSummary = (result: SetupLintResult) => {
   }
 }
 
+const printSetupScriptsSummary = (result: SetupScriptsResult) => {
+  formatDetailBlock('📜 Package scripts setup', [
+    ...result.files.map(
+      (file): DetailRow => [
+        file.status === 'written' ? 'Written' : 'Skipped',
+        file.path,
+      ],
+    ),
+    ['Scripts', result.scripts.join(', ') || 'none added'],
+  ])
+}
+
 const STEP_ICONS = { passed: '✓', failed: '✗', skipped: '–', 'not run': '·' }
 
 const printCiSummary = (result: CiResult) => {
@@ -238,6 +257,9 @@ const printCiSummary = (result: CiResult) => {
     `${result.success ? '✅ CI passed' : '❌ CI failed'}\n\n${lines.join('\n')}\n`,
   )
   if (failed?.output) process.stdout.write(`\n${failed.output}\n`)
+  result.warnings.forEach((warning) =>
+    process.stderr.write(`\n⚠️  ${warning}\n`),
+  )
 }
 
 const printReleaseSummary = (result: ReleaseResult) => {
@@ -289,7 +311,9 @@ const createChangelogResponse = (result: ChangelogResult): JsonResponse => ({
 })
 
 const createSetupResponse = (
-  result: Partial<SetupCommitsResult & SetupHooksResult & SetupLintResult> &
+  result: Partial<
+    SetupCommitsResult & SetupHooksResult & SetupLintResult & SetupScriptsResult
+  > &
     Pick<SetupCommitsResult, 'files'>,
 ): JsonResponse => ({ success: true, command: 'setup', ...result })
 
@@ -393,7 +417,7 @@ export const createProgram = (
   const setup = program
     .command('setup')
     .description(
-      'add the PR title workflow, the commit hook and the shared Biome config',
+      'add the PR title workflow, the commit hook, the shared Biome config and the standard scripts',
     )
     .option('--force', 'overwrite existing files')
     .option('--json', 'print the command result as JSON')
@@ -402,6 +426,7 @@ export const createProgram = (
       const commits = await perfekt.setupCommits({ force })
       const hooks = perfekt.setupHooks({ force, major })
       const lint = perfekt.setupLint({ force })
+      const scripts = perfekt.setupScripts({ force })
 
       if (options.json) {
         writeJson(
@@ -409,7 +434,13 @@ export const createProgram = (
             ...commits,
             ...hooks,
             ...lint,
-            files: [...commits.files, ...hooks.files, ...lint.files],
+            ...scripts,
+            files: [
+              ...commits.files,
+              ...hooks.files,
+              ...lint.files,
+              ...scripts.files,
+            ],
           }),
         )
         return
@@ -420,6 +451,8 @@ export const createProgram = (
       printSetupHooksSummary(hooks)
       process.stdout.write('\n')
       printSetupLintSummary(lint)
+      process.stdout.write('\n')
+      printSetupScriptsSummary(scripts)
     })
 
   setup
@@ -480,6 +513,24 @@ export const createProgram = (
       }
 
       printSetupLintSummary(result)
+    })
+
+  setup
+    .command('scripts')
+    .description(
+      'add the standard lint, format, typecheck and verify scripts to package.json where missing',
+    )
+    .option('--force', 'overwrite those scripts')
+    .option('--json', 'print the command result as JSON')
+    .action((options: { force?: boolean; json?: boolean }) => {
+      const result = perfekt.setupScripts({ force: Boolean(options.force) })
+
+      if (options.json) {
+        writeJson(createSetupResponse(result))
+        return
+      }
+
+      printSetupScriptsSummary(result)
     })
 
   program

@@ -2,7 +2,15 @@ import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { ci, type Exec, exec, getBase, getInstallCommand, runSteps } from './ci'
+import {
+  ci,
+  type Exec,
+  exec,
+  getBase,
+  getInstallCommand,
+  getWarnings,
+  runSteps,
+} from './ci'
 
 const dirs: string[] = []
 
@@ -74,6 +82,23 @@ describe('ci', () => {
 
     expect(getInstallCommand(dir, packageJson).flat().join(' ')).toBe(expected)
   })
+
+  const ADVICE =
+    'script: replace it with `"verify": "perfekt ci"` (perfekt setup scripts adds it)'
+
+  it.each([
+    [{ lint: 'biome check', verify: 'perfekt ci' }, []],
+    [{ check: 'pnpm lint' }, [`package.json still has a \`check\` ${ADVICE}`]],
+    [
+      { validate: 'pnpm lint', ci: 'pnpm test' },
+      [`package.json still has a \`validate\` and a \`ci\` ${ADVICE}`],
+    ],
+  ])(
+    'should warn once about leftover umbrella scripts in %j',
+    (scripts, expected) => {
+      expect(getWarnings({ scripts })).toEqual(expected)
+    },
+  )
 
   it('should run commands with CI=true so lockfiles stay frozen', () => {
     expect(

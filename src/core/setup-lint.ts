@@ -14,9 +14,12 @@ export const LINT_CONFIG = `{
 }
 `
 
-const LINT_SCRIPTS = { lint: 'biome check', format: 'biome check --write' }
+export const LINT_SCRIPTS = {
+  lint: 'biome check',
+  format: 'biome check --write',
+}
 
-const readPackageJson = (dir: string) => {
+export const readPackageJson = (dir: string) => {
   try {
     return JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'))
   } catch {

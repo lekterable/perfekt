@@ -30,6 +30,8 @@ export type CiResult = {
   success: boolean
   dir: string
   steps: CiStep[]
+  /** Advice that doesn't fail CI, such as a leftover umbrella script. */
+  warnings: string[]
 }
 
 export type Exec = (
@@ -87,6 +89,21 @@ export const getInstallCommand = (
   }
 
   return has('package-lock.json') ? ['npm', ['ci']] : ['npm', ['install']]
+}
+
+const UMBRELLA_SCRIPTS = ['check', 'validate', 'ci']
+
+/** One warning naming the umbrella scripts `verify: perfekt ci` replaces, if any are left. */
+export const getWarnings = (packageJson: PackageJson): string[] => {
+  const leftover = UMBRELLA_SCRIPTS.filter(
+    (name) => packageJson.scripts?.[name],
+  )
+
+  return leftover.length === 0
+    ? []
+    : [
+        `package.json still has ${leftover.map((name) => `a \`${name}\``).join(' and ')} script: replace it with \`"verify": "perfekt ci"\` (perfekt setup scripts adds it)`,
+      ]
 }
 
 const BASE_CANDIDATES = ['origin/main', 'origin/master', 'main', 'master']
@@ -259,6 +276,7 @@ export const ci = async (
       success: !steps.some((step) => step.status === 'failed'),
       dir: cwd,
       steps,
+      warnings: getWarnings(readPackageJson(cwd)),
     }
   }
 
@@ -281,6 +299,7 @@ export const ci = async (
       success: !steps.some((step) => step.status === 'failed'),
       dir,
       steps,
+      warnings: getWarnings(readPackageJson(dir)),
     }
   } finally {
     run('git', ['worktree', 'remove', '--force', worktree], repo)

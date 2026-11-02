@@ -61,7 +61,7 @@ It needs a `packageManager` field in `package.json` for the pnpm version. Its ch
 
 `perfekt ci` runs the same steps on your machine, plus [`perfekt lint`](documentation.md#lint) on the branch's commits. See [`ci`](documentation.md#ci).
 
-Add it as a `verify` script, so `pnpm verify` runs everything CI runs. Keep `lint`, `typecheck`, `test` and `build` as the step scripts, with no umbrella `check` or `validate` script:
+Add it as a `verify` script, so `pnpm verify` runs everything CI runs. Keep `lint`, `typecheck`, `test` and `build` as the step scripts, with no umbrella `check`, `validate` or `ci` script (`perfekt ci` warns about one). [`perfekt setup scripts`](documentation.md#setup-scripts) adds `lint`, `format`, `typecheck` and `verify` where they are missing:
 
 ```json
 {

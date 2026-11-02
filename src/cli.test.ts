@@ -90,6 +90,10 @@ const createPerfektDouble = () => ({
     files: [{ path: 'biome.json', status: 'written' as const }],
     installCommand: 'pnpm install',
   }),
+  setupScripts: vi.fn().mockReturnValue({
+    files: [{ path: 'package.json', status: 'written' as const }],
+    scripts: ['verify'],
+  }),
   changelog: vi.fn().mockResolvedValue(createChangelogResult()),
   release: vi.fn().mockResolvedValue(createReleaseResult()),
 })
@@ -217,16 +221,19 @@ describe('cli', () => {
         major: '4',
       })
       expect(perfekt.setupLint).toHaveBeenCalledWith({ force: false })
+      expect(perfekt.setupScripts).toHaveBeenCalledWith({ force: false })
       expect(lastJson(stdoutSpy)).toMatchObject({
         command: 'setup',
         files: [
           { path: '.github/workflows/commitlint.yml', status: 'written' },
           { path: '.githooks/commit-msg', status: 'written' },
           { path: 'biome.json', status: 'written' },
+          { path: 'package.json', status: 'written' },
         ],
         defaultBranch: 'main',
         hooksPath: '.githooks',
         installCommand: 'pnpm install',
+        scripts: ['verify'],
       })
     })
 
@@ -279,6 +286,12 @@ describe('cli', () => {
         ['setup', 'commits', '--json'],
         'setupCommits' as const,
         [{ force: false }],
+      ],
+      [
+        'setup',
+        ['setup', 'scripts', '--force', '--json'],
+        'setupScripts' as const,
+        [{ force: true }],
       ],
       [
         'changelog',
@@ -402,6 +415,7 @@ describe('cli', () => {
         { name: 'test', status: 'failed' as const, ms: 300, output: 'boom' },
         { name: 'build', status: 'not run' as const, ms: 0 },
       ],
+      warnings: ['package.json still has a `check` script'],
     }
 
     it('should print the failing step output and exit 1 when CI fails', async () => {
@@ -414,6 +428,9 @@ describe('cli', () => {
       expect(output).toContain('❌ CI failed')
       expect(output).toContain('✗ test    0.3s')
       expect(output).toContain('boom')
+      expect(stderrSpy).toHaveBeenCalledWith(
+        expect.stringContaining('⚠️  package.json still has a `check` script'),
+      )
       expect(process.exitCode).toBe(1)
     })
 
@@ -431,6 +448,7 @@ describe('cli', () => {
         success: true,
         dir: '/repo',
         steps: [{ name: 'install', status: 'passed', ms: 10 }],
+        warnings: [],
       })
 
       await parse('ci')

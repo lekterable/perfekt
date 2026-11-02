@@ -47,6 +47,14 @@ export type SetupLintResult = {
   installCommand: string | undefined
 }
 
+export type SetupScriptsOptions = { force?: boolean; dir?: string }
+
+export type SetupScriptsResult = {
+  files: SetupFileResult[]
+  /** The package.json scripts this run added or, with force, overwrote. */
+  scripts: string[]
+}
+
 export type SetupHooksOptions = { force?: boolean; major: string; dir?: string }
 
 export type SetupHooksResult = {

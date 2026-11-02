@@ -30,6 +30,8 @@ export type CiResult = {
   success: boolean
   dir: string
   steps: CiStep[]
+  /** Advice that doesn't fail CI, such as a leftover umbrella script. */
+  warnings: string[]
 }
 
 export type Exec = (
@@ -87,6 +89,21 @@ export const getInstallCommand = (
   }
 
   return has('package-lock.json') ? ['npm', ['ci']] : ['npm', ['install']]
+}
+
+const UMBRELLA_SCRIPTS = ['check', 'validate', 'ci']
+
+/** One warning naming the umbrella scripts `verify: perfekt ci` replaces, if any are left. */
+export const getWarnings = (packageJson: PackageJson): string[] => {
+  const leftover = UMBRELLA_SCRIPTS.filter(
+    (name) => packageJson.scripts?.[name],
+  )
+
+  return leftover.length === 0
+    ? []
+    : [
+        `package.json still has ${leftover.map((name) => `a \`${name}\``).join(' and ')} script: replace it with \`"verify": "perfekt ci"\` (perfekt setup scripts adds it)`,
+      ]
 }
 
 const BASE_CANDIDATES = ['origin/main', 'origin/master', 'main', 'master']
@@ -149,7 +166,10 @@ const time = async <T>(work: () => T | Promise<T>) => {
 const tail = (output: string, lines = 60) =>
   output.trimEnd().split('\n').slice(-lines).join('\n')
 
-/** Runs the steps in order and stops at the first failure, like a CI job. */
+/**
+ * Runs the steps in order and stops at the first failure, like a CI job. A step leaves out the
+ * `detail` and `output` it doesn't have, because `--json` prints a key set to undefined as null.
+ */
 export const runSteps = async (
   dir: string,
   options: CiOptions,
@@ -167,7 +187,9 @@ export const runSteps = async (
     status: install.value.status === 0 ? 'passed' : 'failed',
     ms: install.ms,
     detail: [installCommand, ...installArgs].join(' '),
-    output: install.value.status === 0 ? undefined : tail(install.value.output),
+    ...(install.value.status === 0
+      ? {}
+      : { output: tail(install.value.output) }),
   })
 
   const base = options.title ? undefined : getBase(dir, options.base, run)
@@ -203,12 +225,16 @@ export const runSteps = async (
       name: 'commits',
       status: commits.value.problems.length === 0 ? 'passed' : 'failed',
       ms: commits.ms,
-      detail: options.title
-        ? 'pull request title'
+      ...(options.title
+        ? { detail: 'pull request title' }
         : commits.value.count === undefined
-          ? undefined
-          : `${commits.value.count} commit${commits.value.count === 1 ? '' : 's'}`,
-      output: commits.value.problems.join('\n') || undefined,
+          ? {}
+          : {
+              detail: `${commits.value.count} commit${commits.value.count === 1 ? '' : 's'}`,
+            }),
+      ...(commits.value.problems.length === 0
+        ? {}
+        : { output: commits.value.problems.join('\n') }),
     })
   }
 
@@ -228,7 +254,9 @@ export const runSteps = async (
       name: script,
       status: result.value.status === 0 ? 'passed' : 'failed',
       ms: result.ms,
-      output: result.value.status === 0 ? undefined : tail(result.value.output),
+      ...(result.value.status === 0
+        ? {}
+        : { output: tail(result.value.output) }),
     }
   }
 
@@ -259,6 +287,7 @@ export const ci = async (
       success: !steps.some((step) => step.status === 'failed'),
       dir: cwd,
       steps,
+      warnings: getWarnings(readPackageJson(cwd)),
     }
   }
 
@@ -281,6 +310,7 @@ export const ci = async (
       success: !steps.some((step) => step.status === 'failed'),
       dir,
       steps,
+      warnings: getWarnings(readPackageJson(dir)),
     }
   } finally {
     run('git', ['worktree', 'remove', '--force', worktree], repo)

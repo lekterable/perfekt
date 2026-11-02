@@ -19,12 +19,13 @@ The config also enforces the house code conventions:
 | `complexity/useArrowFunction` | Function expressions become arrows: `const add = (left, right) => left + right`, not `function (left, right) {}`. Functions that use `this` are left alone. Auto-fixable. | Biome core rule |
 | No function declarations | `function name() {}` and `export default function () {}` are errors. Generators (`function*`) are allowed, since arrows can't yield. | GritQL plugin `biome/arrow.grit` |
 | No loops | `for`, `for…of`, `for…in`, `for await`, `while` and `do…while` are errors; `.forEach(...)` is allowed for side effects. Use `map`/`filter`/`reduce`/`flatMap`/`find`, `it.each` for test tables, and one named helper built on `reduce` or recursion for sequential async work. | GritQL plugin `biome/loop.grit` |
+| No `null` in types | `string \| null`, `: null` and any other `null` type are errors: use `undefined`, as an optional field (`name?: string`) or `T \| undefined`. `null` values passed to APIs that want them (`JSON.stringify(value, null, 2)`, Node callbacks) are fine; convert `null` that arrives from JSON, databases or the DOM with `?? undefined`. | GritQL plugin `biome/null.grit` |
 | Test titles start with "should" | In `**/*.test.*` and `**/tests/**`, every `it(...)` and `test(...)` title (including `.only`, `.skip`, `.todo` and `.each`) must start with "should" or "should not": `it('should reject an expired token')`. `describe` blocks are exempt. | GritQL plugin `biome/should.grit` |
 | `style/useConsistentTypeDefinitions` | `type` instead of `interface`. | Biome core rule |
 
 Every rule is an error, never a warning, so `biome check` either passes clean or fails CI. Non-null assertions (`value!`) are allowed only in tests. Besides Biome's usual correctness checks, it bans `any` (explicit, implicit and evolving), floating and misused promises, import cycles, undeclared dependencies, unused parameters and empty blocks (a block holding a comment that says why it's empty passes), and asks for `node:` imports and template literals.
 
-When you adopt the config, expect `biome check` to flag existing function declarations, function expressions, loops and test titles. `biome check --write` fixes the function expressions; the rest need a rename or a rewrite (`const name = () => {}`, or a loop turned into `map`/`reduce`).
+When you adopt the config, expect `biome check` to flag existing function declarations, function expressions, loops, `null` types and test titles. `biome check --write` fixes the function expressions; the rest need a rename or a rewrite (`const name = () => {}`, a loop turned into `map`/`reduce`, or `T | null` turned into `T | undefined`).
 
 Biome resolves plugin paths from your project root, so the config points at `./node_modules/perfekt/biome/`. That works with pnpm, npm and Yarn's `node-modules` linker when `biome.json` sits next to the `node_modules` that has `perfekt`. Yarn Plug'n'Play has no `node_modules`, so the plugins can't load there.
 
@@ -60,7 +61,7 @@ It needs a `packageManager` field in `package.json` for the pnpm version. Its ch
 
 `perfekt ci` runs the same steps on your machine, plus [`perfekt lint`](documentation.md#lint) on the branch's commits. See [`ci`](documentation.md#ci).
 
-Add it as a `verify` script, so `pnpm verify` runs everything CI runs. Keep `lint`, `typecheck`, `test` and `build` as the step scripts, with no umbrella `check` or `validate` script:
+Add it as a `verify` script, so `pnpm verify` runs everything CI runs. Keep `lint`, `typecheck`, `test` and `build` as the step scripts, with no umbrella `check`, `validate` or `ci` script (`perfekt ci` warns about one). [`perfekt setup scripts`](documentation.md#setup-scripts) adds `lint`, `format`, `typecheck` and `verify` where they are missing:
 
 ```json
 {

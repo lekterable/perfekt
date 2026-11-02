@@ -14,9 +14,12 @@ export const LINT_CONFIG = `{
 }
 `
 
-const LINT_SCRIPTS = { lint: 'biome check', format: 'biome check --write' }
+export const LINT_SCRIPTS = {
+  lint: 'biome check',
+  format: 'biome check --write',
+}
 
-const readPackageJson = (dir: string) => {
+export const readPackageJson = (dir: string) => {
   try {
     return JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'))
   } catch {
@@ -37,7 +40,7 @@ const setupLint = (options: SetupLintOptions): SetupLintResult => {
   if (!force && existing) {
     return {
       files: [{ path: existing, status: 'skipped' }],
-      installCommand: null,
+      installCommand: undefined,
     }
   }
 
@@ -50,7 +53,7 @@ const setupLint = (options: SetupLintOptions): SetupLintResult => {
   if (!packageJson) {
     return {
       files: [{ path: configPath, status: 'written' }],
-      installCommand: null,
+      installCommand: undefined,
     }
   }
 
@@ -100,7 +103,9 @@ const setupLint = (options: SetupLintOptions): SetupLintResult => {
         : []),
     ],
     installCommand:
-      Object.keys(devDependencies).length > 0 ? `${manager} install` : null,
+      Object.keys(devDependencies).length > 0
+        ? `${manager} install`
+        : undefined,
   }
 }
 

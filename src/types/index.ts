@@ -31,7 +31,7 @@ export type SetupFileResult = {
 
 export type SetupCommitsResult = {
   files: SetupFileResult[]
-  defaultBranch: string | null
+  defaultBranch: string | undefined
 }
 
 export type SetupLintOptions = {
@@ -43,18 +43,26 @@ export type SetupLintOptions = {
 
 export type SetupLintResult = {
   files: SetupFileResult[]
-  /** The install command to run when dev dependencies were added, or null. */
-  installCommand: string | null
+  /** The install command to run when dev dependencies were added, or undefined. */
+  installCommand: string | undefined
+}
+
+export type SetupScriptsOptions = { force?: boolean; dir?: string }
+
+export type SetupScriptsResult = {
+  files: SetupFileResult[]
+  /** The package.json scripts this run added or, with force, overwrote. */
+  scripts: string[]
 }
 
 export type SetupHooksOptions = { force?: boolean; major: string; dir?: string }
 
 export type SetupHooksResult = {
   files: SetupFileResult[]
-  /** The hooks path set in this clone's git config, or null when untouched. */
-  hooksPath: string | null
+  /** The hooks path set in this clone's git config, or undefined when untouched. */
+  hooksPath: string | undefined
   /** The command other clones must run when no prepare script sets the hooks path. */
-  clonesNeed: string | null
+  clonesNeed: string | undefined
 }
 
 export type Config = {
@@ -69,8 +77,8 @@ export type Config = {
 
 export type OutputCommit = {
   hash: string
-  type: string | null
-  scope: string | null
+  type: string | undefined
+  scope: string | undefined
   message: string
   isBreaking: boolean
   isRelease: boolean
@@ -79,19 +87,19 @@ export type OutputCommit = {
 export type OutputSection = {
   key: string
   title: string
-  change: ReleaseChange | null
+  change: ReleaseChange | undefined
   commits: OutputCommit[]
 }
 
 export type OutputGroup = {
-  release: OutputCommit | null
+  release: OutputCommit | undefined
   sections: OutputSection[]
 }
 
 export type ChangelogResult = {
-  version: string | null
-  latestTag: string | null
-  from: string | null
+  version: string | undefined
+  latestTag: string | undefined
+  from: string | undefined
   root: boolean
   write: boolean
   commitCount: number
@@ -104,11 +112,11 @@ export type ReleaseResult = {
   dryRun: boolean
   requestedVersion: string
   resolvedVersion: string
-  resolvedBump: ReleaseChange | null
+  resolvedBump: ReleaseChange | undefined
   packageManager: PackageManagerName
   currentVersion: string
-  latestTag: string | null
-  from: string | null
+  latestTag: string | undefined
+  from: string | undefined
   files: string[]
   git: {
     commitMessage: string

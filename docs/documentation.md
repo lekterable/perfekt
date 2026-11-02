@@ -110,6 +110,8 @@ Runs the shared CI steps on your machine, for when GitHub Actions can't (no minu
 
 Every step runs with `CI=true`, like on GitHub Actions. It stops at the first failing step, prints the end of its output, and exits 1.
 
+When `package.json` still has an umbrella `check`, `validate` or `ci` script, it prints one warning to stderr suggesting `"verify": "perfekt ci"` instead (see [`setup scripts`](#setup-scripts)). The warning never fails the run.
+
 By default it runs on a clean checkout of `HEAD` in a temporary git worktree, so uncommitted or untracked files can't make it pass. It runs on one Node version, the one on your PATH, not the shared workflow's matrix.
 
 Options:
@@ -122,7 +124,7 @@ Options:
 
 `--base <ref>` - lint the commits since this ref; defaults to `origin/HEAD`, else the first of `origin/main`, `origin/master`, `main` and `master` that exists; with none, the step is skipped
 
-`--json` - print `{ success, command, dir, steps }`, where each step has its `name`, `status` (`passed`, `failed`, `skipped` or `not run`), time in `ms`, an optional `detail` (the install command, the number of commits linted, why a step was skipped) and the failing step's `output`
+`--json` - print `{ success, command, dir, steps, warnings }`, where `warnings` lists advice that doesn't fail CI (such as a leftover umbrella script) and each step has its `name`, `status` (`passed`, `failed`, `skipped` or `not run`), time in `ms`, an optional `detail` (the install command, the number of commits linted, why a step was skipped) and the failing step's `output`
 
 Exit codes: `0` when every step passes or is skipped, `1` on the first failure.
 
@@ -130,15 +132,15 @@ Exit codes: `0` when every step passes or is skipped, `1` on the first failure.
 
 Usage: `perfekt setup [options]`
 
-Runs [`setup commits`](#setup-commits), [`setup hooks`](#setup-hooks) and [`setup lint`](#setup-lint).
+Runs [`setup commits`](#setup-commits), [`setup hooks`](#setup-hooks), [`setup lint`](#setup-lint) and [`setup scripts`](#setup-scripts).
 
 Options:
 
 `-h, --help` - display help for command
 
-`--force` - overwrite the workflow, the hook and the Biome config if they already exist
+`--force` - overwrite the workflow, the hook, the Biome config and the standard scripts if they already exist
 
-`--json` - print `{ success, command, files, defaultBranch, hooksPath, clonesNeed, installCommand }`, with the files of every step
+`--json` - print `{ success, command, files, defaultBranch, hooksPath, clonesNeed, installCommand, scripts }`, with the files of every step
 
 ## `setup commits`
 
@@ -192,6 +194,27 @@ Options:
 `--force` - overwrite an existing Biome config
 
 `--json` - print `{ success, command, files, installCommand }`, where `installCommand` is the install to run when dependencies were added (or `null`)
+
+## `setup scripts`
+
+Usage: `perfekt setup scripts [options]`
+
+Adds the standard scripts to `package.json` where they are missing:
+
+- `lint`: `biome check`
+- `format`: `biome check --write`
+- `typecheck`: `tsc --noEmit`, only when the folder has a `tsconfig.json`
+- `verify`: `perfekt ci`, so `npm run verify` runs everything CI runs
+
+Scripts the repo already has are kept unless you pass `--force`. Without a `package.json`, it skips with no error.
+
+Options:
+
+`-h, --help` - display help for command
+
+`--force` - overwrite those scripts if they already exist
+
+`--json` - print `{ success, command, files, scripts }`, where `scripts` names the scripts this run added or overwrote
 
 ## `init`
 

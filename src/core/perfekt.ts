@@ -41,8 +41,8 @@ class Perfekt {
   #serializeCommit(commit: Commit): OutputCommit {
     return {
       hash: commit.hash,
-      type: commit.type ?? null,
-      scope: commit.scope ?? null,
+      type: commit.type,
+      scope: commit.scope,
       message: commit.message,
       isBreaking: Boolean(commit.isBreaking),
       isRelease: commit.scope?.toLowerCase() === 'release',
@@ -58,20 +58,17 @@ class Perfekt {
     )
   }
 
-  #getSectionChange(type: string): ReleaseChange | null {
+  #getSectionChange(type: string): ReleaseChange | undefined {
     if (type === 'breaking') return 'major'
 
-    return (
-      this.#config.groups.find(({ types }) => types.includes(type))?.change ??
-      null
-    )
+    return this.#config.groups.find(({ types }) => types.includes(type))?.change
   }
 
   #serializeGroups(groupedCommits: GroupedCommits): OutputGroup[] {
     return groupedCommits.map((group) => {
       const release = group.release
         ? this.#serializeCommit(group.release)
-        : null
+        : undefined
       const sections = Object.entries(group)
         .filter(
           (entry): entry is [string, Commit[]] =>
@@ -97,7 +94,7 @@ class Perfekt {
     version: string | undefined,
     options: Partial<ChangelogOptions>,
   ): Promise<BuildChangelogResult> {
-    const latestTag = this.#git.latestTag ?? null
+    const latestTag = this.#git.latestTag
     const latestRelease = this.#git.latestRelease
 
     this.#changelog.options = options
@@ -118,9 +115,9 @@ class Perfekt {
     )
 
     return {
-      version: version ?? null,
+      version,
       latestTag,
-      from: from ?? null,
+      from,
       root,
       write,
       commitCount: commits.length,

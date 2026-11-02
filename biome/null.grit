@@ -1,0 +1,8 @@
+// Bans null in types: use undefined (an optional field or `T | undefined`).
+// null values passed to APIs that want them (JSON.stringify(value, null, 2), callbacks) stay allowed;
+// convert null that comes from outside (JSON, databases, DOM) with `?? undefined`.
+language js
+
+TsNullLiteralType() as $null where {
+  register_diagnostic(span=$null, message="Use undefined (an optional field or `T | undefined`) instead of null in types. Convert null from outside (JSON, databases, DOM) with `?? undefined`.")
+}

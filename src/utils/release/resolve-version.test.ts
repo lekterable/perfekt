@@ -17,7 +17,7 @@ describe('resolveVersion', () => {
 
   it.each([
     ['major', '2.0.0', 'major'],
-    ['v3', '3.0.0', null],
+    ['v3', '3.0.0', undefined],
   ])('should resolve %j to %s', async (version, resolvedVersion, bump) => {
     readFileMock.mockResolvedValueOnce('{ "version": "1.2.3" }')
 

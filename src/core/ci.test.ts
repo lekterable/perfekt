@@ -2,7 +2,15 @@ import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { ci, type Exec, exec, getBase, getInstallCommand, runSteps } from './ci'
+import {
+  ci,
+  type Exec,
+  exec,
+  getBase,
+  getInstallCommand,
+  getWarnings,
+  runSteps,
+} from './ci'
 
 const dirs: string[] = []
 
@@ -75,6 +83,23 @@ describe('ci', () => {
     expect(getInstallCommand(dir, packageJson).flat().join(' ')).toBe(expected)
   })
 
+  const ADVICE =
+    'script: replace it with `"verify": "perfekt ci"` (perfekt setup scripts adds it)'
+
+  it.each([
+    [{ lint: 'biome check', verify: 'perfekt ci' }, []],
+    [{ check: 'pnpm lint' }, [`package.json still has a \`check\` ${ADVICE}`]],
+    [
+      { validate: 'pnpm lint', ci: 'pnpm test' },
+      [`package.json still has a \`validate\` and a \`ci\` ${ADVICE}`],
+    ],
+  ])(
+    'should warn once about leftover umbrella scripts in %j',
+    (scripts, expected) => {
+      expect(getWarnings({ scripts })).toEqual(expected)
+    },
+  )
+
   it('should run commands with CI=true so lockfiles stay frozen', () => {
     expect(
       exec(
@@ -106,6 +131,18 @@ describe('ci', () => {
     ])
     expect(steps[4]?.output).toBe('pnpm run test output')
     expect(calls).toEqual(['pnpm install', 'pnpm run lint', 'pnpm run test'])
+  })
+
+  it('should leave output off passed steps, so --json does not print it as null', async () => {
+    const dir = makeDir({
+      'package.json': JSON.stringify({ scripts: { lint: 'biome check' } }),
+    })
+
+    const steps = await runSteps(dir, { title: 'feat: add ci' }, recorder().run)
+
+    expect(
+      steps.filter((step) => 'output' in step).map((step) => step.name),
+    ).toEqual([])
   })
 
   it('should run nothing after a failed install', async () => {

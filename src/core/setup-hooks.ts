@@ -56,8 +56,8 @@ const setupHooks = (options: SetupHooksOptions): SetupHooksResult => {
   if (!force && fs.existsSync(path.join(dir, hookPath))) {
     return {
       files: [{ path: hookPath, status: 'skipped' }],
-      hooksPath: null,
-      clonesNeed: null,
+      hooksPath: undefined,
+      clonesNeed: undefined,
     }
   }
 
@@ -71,8 +71,8 @@ const setupHooks = (options: SetupHooksOptions): SetupHooksResult => {
   if (husky) {
     return {
       files: [{ path: hookPath, status: 'written' }],
-      hooksPath: null,
-      clonesNeed: null,
+      hooksPath: undefined,
+      clonesNeed: undefined,
     }
   }
 
@@ -98,11 +98,11 @@ const setupHooks = (options: SetupHooksOptions): SetupHooksResult => {
         ? [{ path: 'package.json', status: 'written' as const }]
         : []),
     ],
-    hooksPath: setGitHooksPath(dir) ? HOOKS_DIR : null,
+    hooksPath: setGitHooksPath(dir) ? HOOKS_DIR : undefined,
     // Without a prepare script to set it, every other clone has to set the hooks path by hand.
     clonesNeed:
       addPrepare || existingPrepare?.includes('core.hooksPath')
-        ? null
+        ? undefined
         : prepare,
   }
 }

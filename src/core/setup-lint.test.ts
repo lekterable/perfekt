@@ -61,7 +61,7 @@ describe('setupLint', () => {
     expect(readJson(dir, 'package.json')).toEqual(packageJson)
     expect(result).toEqual({
       files: [{ path: 'biome.json', status: 'written' }],
-      installCommand: null,
+      installCommand: undefined,
     })
   })
 

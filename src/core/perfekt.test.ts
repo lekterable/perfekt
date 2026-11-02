@@ -132,23 +132,23 @@ describe('Perfekt', () => {
 
       expect(stdoutSpy).not.toHaveBeenCalled()
       expect(result).toMatchObject({
-        version: null,
-        latestTag: null,
-        from: null,
+        version: undefined,
+        latestTag: undefined,
+        from: undefined,
         root: false,
         write: false,
         commitCount: 3,
         commits: [
           { type: 'chore', scope: 'release' },
           { type: 'feat', isBreaking: true },
-          { type: null, scope: null },
+          { type: undefined, scope: undefined },
         ],
         groups: [
           {
             release: { message: '1.2.0', isRelease: true },
             sections: [
               { key: 'breaking', title: '## BREAKING', change: 'major' },
-              { key: 'misc', title: '## Misc', change: null },
+              { key: 'misc', title: '## Misc', change: undefined },
             ],
           },
         ],
@@ -257,7 +257,7 @@ describe('Perfekt', () => {
         dryRun: false,
         requestedVersion: '2.2.2',
         resolvedVersion: '2.2.2',
-        resolvedBump: null,
+        resolvedBump: undefined,
         currentVersion: '1.2.0',
         latestTag: '1.2.0',
         from: '1.2.0',

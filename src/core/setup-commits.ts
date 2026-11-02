@@ -39,7 +39,7 @@ export const getDefaultBranch = () => {
     return current
   }
 
-  return null
+  return undefined
 }
 
 const setupCommits = async (

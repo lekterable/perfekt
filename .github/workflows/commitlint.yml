@@ -27,10 +27,10 @@ jobs:
           path: perfekt
           sparse-checkout: src/core/lint.ts
           sparse-checkout-cone-mode: false
-      # Node 24 runs the TypeScript rules directly, so there is nothing to install.
+      # Node 26 runs the TypeScript rules directly, so there is nothing to install.
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 26
       - name: Lint PR title
         working-directory: perfekt
         env:

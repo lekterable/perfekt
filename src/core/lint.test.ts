@@ -2,11 +2,6 @@ import { execFileSync } from 'node:child_process'
 import path from 'node:path'
 import { cleanMessage, formatLint, lintMessage } from './lint'
 
-const [major = 0, minor = 0] = process.versions.node.split('.').map(Number)
-const canStripTypes =
-  'typescript' in process.features || major > 22 || (major === 22 && minor >= 6)
-const itWhenStrippable = canStripTypes ? it : it.skip
-
 describe('lint', () => {
   it.each([
     ['feat: init :seedling:', true],
@@ -105,7 +100,7 @@ describe('lint', () => {
   })
 
   // The shared PR title workflow imports this file with plain node from a sparse checkout.
-  itWhenStrippable('should run under plain node without other files', () => {
+  it('should run under plain node without other files', () => {
     const script =
       'const { lintMessage } = await import(process.argv[1]); process.stdout.write(String(lintMessage("feat: add x").valid))'
     const output = execFileSync(

@@ -3,4 +3,4 @@
 - [Documentation](documentation.md)
 - [Configuration](configuration.md)
 - [Shared tooling](tooling.md)
-- [Upgrading from perfekt 3](upgrading.md)
+- [Upgrading](upgrading.md)

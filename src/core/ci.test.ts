@@ -8,7 +8,9 @@ import {
   exec,
   getBase,
   getInstallCommand,
+  getUnnamedCiJobs,
   getWarnings,
+  getWorkflowWarnings,
   runSteps,
 } from './ci'
 
@@ -99,6 +101,64 @@ describe('ci', () => {
       expect(getWarnings({ scripts })).toEqual(expected)
     },
   )
+
+  const caller = (job: string) => `name: CI
+
+on:
+  pull_request:
+
+jobs:
+${job}
+  conventional-commits:
+    name: Conventional Commits
+    uses: lekterable/perfekt/.github/workflows/commitlint.yml@master
+`
+
+  it.each([
+    [
+      'a nameless caller',
+      '  ci:\n    permissions:\n      contents: read\n    uses: lekterable/perfekt/.github/workflows/ci.yml@master\n    with:\n      node-versions: \'["24"]\'',
+      ['ci'],
+    ],
+    [
+      'a named caller',
+      '  verify:\n    name: Verify\n    uses: lekterable/perfekt/.github/workflows/ci.yml@master',
+      [],
+    ],
+    [
+      'a name only under with',
+      '  ci:\n    uses: lekterable/perfekt/.github/workflows/ci.yml@v4\n    with:\n      name: x',
+      ['ci'],
+    ],
+    [
+      'a job running its own steps',
+      '  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: lekterable/perfekt/.github/workflows/ci.yml@master',
+      [],
+    ],
+  ])(
+    'should find the shared CI callers without a name in %s',
+    (_label, job, expected) => {
+      expect(getUnnamedCiJobs(caller(job))).toEqual(expected)
+    },
+  )
+
+  it('should warn about each nameless caller in the repo workflows', () => {
+    const dir = makeDir({})
+    fs.mkdirSync(path.join(dir, '.github/workflows'), { recursive: true })
+    fs.writeFileSync(
+      path.join(dir, '.github/workflows/ci.yml'),
+      caller(
+        '  ci:\n    uses: lekterable/perfekt/.github/workflows/ci.yml@master',
+      ),
+    )
+
+    expect(getWorkflowWarnings(dir)).toEqual([
+      expect.stringContaining(
+        '.github/workflows/ci.yml calls the shared CI from job `ci`',
+      ),
+    ])
+    expect(getWorkflowWarnings(makeDir({}))).toEqual([])
+  })
 
   it('should run commands with CI=true so lockfiles stay frozen', () => {
     expect(

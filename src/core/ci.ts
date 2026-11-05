@@ -106,6 +106,74 @@ export const getWarnings = (packageJson: PackageJson): string[] => {
       ]
 }
 
+export const CI_REUSABLE_WORKFLOW =
+  'lekterable/perfekt/.github/workflows/ci.yml'
+
+const WORKFLOWS_DIR = '.github/workflows'
+
+/**
+ * Jobs that call the shared CI without a `name:`. GitHub names a reusable workflow's checks
+ * `<caller workflow> / <caller job> / <called job>`, and only the caller can set the middle part,
+ * so a nameless caller shows its job id, as in `CI / ci / Node 26`. Reads the indentation of a
+ * plain workflow file rather than parsing YAML: it only has to spot `jobs.<id>.uses` and `.name`.
+ */
+export const getUnnamedCiJobs = (workflow: string): string[] => {
+  const lines = workflow.split('\n')
+  const jobsAt = lines.findIndex((line) => /^jobs:\s*(#.*)?$/.test(line))
+  if (jobsAt === -1) return []
+
+  const body = lines.slice(jobsAt + 1)
+  const end = body.findIndex((line) => /^\S/.test(line))
+  const jobLines = end === -1 ? body : body.slice(0, end)
+  const indent = jobLines
+    .find((line) => line.trim() && !line.trim().startsWith('#'))
+    ?.match(/^ */)?.[0].length
+
+  if (!indent) return []
+
+  const jobs = jobLines.reduce<{ id: string; lines: string[] }[]>(
+    (all, line) => {
+      const id = line.match(
+        new RegExp(`^ {${indent}}([\\w-]+):\\s*(#.*)?$`),
+      )?.[1]
+      if (id) return [...all, { id, lines: [] }]
+      const last = all.at(-1)
+      return last
+        ? [...all.slice(0, -1), { ...last, lines: [...last.lines, line] }]
+        : all
+    },
+    [],
+  )
+  const key = (lines: string[], name: string) =>
+    lines.find((line) => new RegExp(`^ {${indent * 2}}${name}:`).test(line))
+
+  return jobs
+    .filter(
+      ({ lines }) =>
+        key(lines, 'uses')?.includes(`${CI_REUSABLE_WORKFLOW}@`) &&
+        !key(lines, 'name'),
+    )
+    .map(({ id }) => id)
+}
+
+/** One warning per caller of the shared CI whose checks would show a bare job id. */
+export const getWorkflowWarnings = (root: string): string[] => {
+  const dir = path.join(root, WORKFLOWS_DIR)
+  const files = fs.existsSync(dir)
+    ? fs
+        .readdirSync(dir)
+        .filter((file) => /\.ya?ml$/.test(file))
+        .sort()
+    : []
+
+  return files.flatMap((file) =>
+    getUnnamedCiJobs(fs.readFileSync(path.join(dir, file), 'utf8')).map(
+      (job) =>
+        `${WORKFLOWS_DIR}/${file} calls the shared CI from job \`${job}\` with no \`name:\`, so its checks read \`… / ${job} / Node …\`: add \`name: Verify\` to that job`,
+    ),
+  )
+}
+
 const BASE_CANDIDATES = ['origin/main', 'origin/master', 'main', 'master']
 
 /** The commits a pull request would add: everything since the base branch, if one is found. */
@@ -287,7 +355,10 @@ export const ci = async (
       success: !steps.some((step) => step.status === 'failed'),
       dir: cwd,
       steps,
-      warnings: getWarnings(readPackageJson(cwd)),
+      warnings: [
+        ...getWarnings(readPackageJson(cwd)),
+        ...getWorkflowWarnings(repo),
+      ],
     }
   }
 
@@ -310,7 +381,10 @@ export const ci = async (
       success: !steps.some((step) => step.status === 'failed'),
       dir,
       steps,
-      warnings: getWarnings(readPackageJson(dir)),
+      warnings: [
+        ...getWarnings(readPackageJson(dir)),
+        ...getWorkflowWarnings(worktree),
+      ],
     }
   } finally {
     run('git', ['worktree', 'remove', '--force', worktree], repo)

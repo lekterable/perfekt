@@ -110,7 +110,7 @@ Runs the shared CI steps on your machine, for when GitHub Actions can't (no minu
 
 Every step runs with `CI=true`, like on GitHub Actions. It stops at the first failing step, prints the end of its output, and exits 1.
 
-When `package.json` still has an umbrella `check`, `validate` or `ci` script, it prints one warning to stderr suggesting `"verify": "perfekt ci"` instead (see [`setup scripts`](#setup-scripts)). The warning never fails the run.
+When `package.json` still has an umbrella `check`, `validate` or `ci` script, it prints one warning to stderr suggesting `"verify": "perfekt ci"` instead (see [`setup scripts`](#setup-scripts)). It also warns about each job in `.github/workflows` that calls the shared CI without a `name:`, because GitHub then shows the job id in the check, as in `CI / ci / Node 26`, and only the caller can name it (see [CI](tooling.md#ci)). Warnings never fail the run.
 
 By default it runs on a clean checkout of `HEAD` in a temporary git worktree, so uncommitted or untracked files can't make it pass. It runs on one Node version, the one on your PATH, not the shared workflow's matrix.
 
@@ -124,7 +124,7 @@ Options:
 
 `--base <ref>` - lint the commits since this ref; defaults to `origin/HEAD`, else the first of `origin/main`, `origin/master`, `main` and `master` that exists; with none, the step is skipped
 
-`--json` - print `{ success, command, dir, steps, warnings }`, where `warnings` lists advice that doesn't fail CI (such as a leftover umbrella script) and each step has its `name`, `status` (`passed`, `failed`, `skipped` or `not run`), time in `ms`, an optional `detail` (the install command, the number of commits linted, why a step was skipped) and the failing step's `output`
+`--json` - print `{ success, command, dir, steps, warnings }`, where `warnings` lists advice that doesn't fail CI (such as a leftover umbrella script or a nameless CI caller) and each step has its `name`, `status` (`passed`, `failed`, `skipped` or `not run`), time in `ms`, an optional `detail` (the install command, the number of commits linted, why a step was skipped) and the failing step's `output`
 
 Exit codes: `0` when every step passes or is skipped, `1` on the first failure.
 

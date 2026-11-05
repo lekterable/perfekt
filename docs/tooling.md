@@ -57,7 +57,7 @@ jobs:
     #   bun: true
 ```
 
-It needs a `packageManager` field in `package.json` for the pnpm version. Its checks read `CI / Verify / Node 26`, one per Node version (26 unless you pass `node-versions`).
+It needs a `packageManager` field in `package.json` for the pnpm version. Its checks read `CI / Verify / Node 26`, one per Node version (26 unless you pass `node-versions`). Keep the job's `name: Verify`: GitHub names a reusable workflow's checks `<workflow> / <caller job> / <called job>`, and the shared workflow can't set the middle part, so without it the check shows the job id (`CI / ci / Node 26`). `perfekt ci` warns about a caller without one.
 
 `perfekt ci` runs the same steps on your machine, plus [`perfekt lint`](documentation.md#lint) on the branch's commits. See [`ci`](documentation.md#ci).
 

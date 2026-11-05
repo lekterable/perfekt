@@ -106,7 +106,6 @@ describe('lint', () => {
     const output = execFileSync(
       process.execPath,
       [
-        '--experimental-strip-types',
         '--no-warnings',
         '--input-type=module',
         '-e',

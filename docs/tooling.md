@@ -31,7 +31,7 @@ Biome resolves plugin paths from your project root, so the config points at `./n
 
 ## TypeScript
 
-`perfekt/tsconfig` is the house compiler config: strict mode plus `noUncheckedIndexedAccess`, `noImplicitOverride`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, ES2023 (Node 20 and up), `verbatimModuleSyntax` so type-only imports stay `import type`, and `erasableSyntaxOnly`, which rules out enums, namespaces and parameter properties so Node and Bun can run the source by stripping types. It assumes a bundler or runtime that reads TypeScript (`"moduleResolution": "bundler"`). It leaves out `include`, `types`, `jsx` and output settings, which belong to each repo:
+`perfekt/tsconfig` is the house compiler config: strict mode plus `noUncheckedIndexedAccess`, `noImplicitOverride`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, ES2023, `verbatimModuleSyntax` so type-only imports stay `import type`, and `erasableSyntaxOnly`, which rules out enums, namespaces and parameter properties so Node and Bun can run the source by stripping types. It assumes a bundler or runtime that reads TypeScript (`"moduleResolution": "bundler"`). It leaves out `include`, `types`, `jsx` and output settings, which belong to each repo:
 
 ```json
 {
@@ -53,11 +53,11 @@ jobs:
     name: Verify
     uses: lekterable/perfekt/.github/workflows/ci.yml@master
     # with:
-    #   node-versions: '["22", "24"]'
+    #   node-versions: '["24"]'
     #   bun: true
 ```
 
-It needs a `packageManager` field in `package.json` for the pnpm version. Its checks read `CI / Verify / Node 24`, one per Node version (24 unless you pass `node-versions`).
+It needs a `packageManager` field in `package.json` for the pnpm version. Its checks read `CI / Verify / Node 26`, one per Node version (26 unless you pass `node-versions`).
 
 `perfekt ci` runs the same steps on your machine, plus [`perfekt lint`](documentation.md#lint) on the branch's commits. See [`ci`](documentation.md#ci).
 
@@ -89,7 +89,7 @@ jobs:
     uses: lekterable/perfekt/.github/workflows/commitlint.yml@master
 ```
 
-Its check reads `Commitlint / Conventional Commits / PR title`. `perfekt setup commits` writes that caller for you. The workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 24, so it installs nothing and rule changes reach every repo at once.
+Its check reads `Commitlint / Conventional Commits / PR title`. `perfekt setup commits` writes that caller for you. The workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 26, so it installs nothing and rule changes reach every repo at once.
 
 ## Releases
 

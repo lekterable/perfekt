@@ -44,10 +44,11 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 26
       - name: Enable corepack
-        # lets perfekt bump the version with the package manager the repo pins
-        run: corepack enable
+        # lets perfekt bump the version with the package manager the repo pins;
+        # Node 25 and later no longer ship corepack, so install it first
+        run: npm install -g corepack && corepack enable
       - name: Install perfekt
         # outside the repo, so the release never touches its lockfile
         run: npm install --prefix "$RUNNER_TEMP/perfekt" --no-save --no-package-lock perfekt@4

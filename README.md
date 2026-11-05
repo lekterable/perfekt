@@ -60,7 +60,7 @@ perfekt setup                        # lint PR titles, commits and code the shar
 
 `release new` picks the version from the commit types: `feat` is a minor release, `fix` a patch, and a `!` or `BREAKING CHANGE` a major. You can also pass `major`, `minor`, `patch` or an exact version. Start with [getting started](https://lekterable.github.io/perfekt/#/getting-started), and see the [documentation](https://lekterable.github.io/perfekt/#/documentation) for every option.
 
-Upgrading from perfekt 3? See [upgrading](https://lekterable.github.io/perfekt/#/upgrading).
+Upgrading from perfekt 3 or 4? See [upgrading](https://lekterable.github.io/perfekt/#/upgrading).
 
 ## Commit convention
 

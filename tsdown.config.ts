@@ -6,7 +6,7 @@ export default defineConfig({
   format: 'esm',
   fixedExtension: false,
   platform: 'node',
-  target: 'node20',
+  target: 'node26',
   clean: true,
   // __dirname for reading package.json
   shims: true,

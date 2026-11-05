@@ -1,3 +1,12 @@
+# Upgrading from perfekt 4
+
+perfekt 5 needs Node 26 or later. Run it on Node 26 (`.nvmrc`, `engines.node`, your local install).
+
+The shared workflows moved to Node 26 at the same time. Callers use `@master`, so they switched whichever perfekt version they install:
+
+- The shared CI workflow tests on Node 26 by default, so its check reads `CI / Verify / Node 26`. Update a branch protection rule that requires `CI / Verify / Node 24`. A repo that still needs another version passes `node-versions`, such as `'["24"]'`.
+- The commitlint, release and publish workflows run on Node 26 and take no version input. The release workflow installs corepack itself, since Node 26 no longer ships it.
+
 # Upgrading from perfekt 3
 
 perfekt 4 replaces commitlint with the built-in [`perfekt lint`](documentation.md#lint), reads only JSON configs, and installs as one file with no dependencies.

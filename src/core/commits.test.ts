@@ -29,6 +29,10 @@ describe('commits', () => {
     ).toBe(true)
   })
 
+  it('should keep workflow_call on the reusable title workflow', () => {
+    expect(reusableWorkflow).toMatch(/^on:\s*\n\s*workflow_call:/m)
+  })
+
   it.each([
     [undefined, undefined],
     ['main', 'branches: [main]'],

@@ -146,7 +146,7 @@ Options:
 
 Usage: `perfekt setup commits [options]`
 
-Writes `.github/workflows/commitlint.yml`, which lints pull request titles by calling the shared `lekterable/perfekt/.github/workflows/commitlint.yml@master` workflow. That workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 26, so it installs nothing and title rules change everywhere at once. The `pull_request` filter uses the detected default branch when git exposes one.
+Writes `.github/workflows/commitlint.yml`, which lints pull request titles by calling the shared `lekterable/perfekt/.github/workflows/commitlint.yml@master` workflow. That workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 26, so it installs nothing and title rules change everywhere at once. The `pull_request` filter uses the detected default branch when git exposes one. It runs on `opened`, `edited` and `reopened`, so a push to the pull request does not lint the title again. The shared job skips only `synchronize`, so a caller that waits for `ready_for_review` still lints the title.
 
 When you squash-merge, the pull request title becomes the commit, so this covers what lands on the default branch. A trailing `(#N)` from GitHub squash is allowed.
 

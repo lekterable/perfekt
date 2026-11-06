@@ -17,7 +17,7 @@ export const getCommitsWorkflow = (branch?: string) => {
 
 on:
   pull_request:${branchLine}
-    types: [opened, edited, reopened, synchronize]
+    types: [opened, edited, reopened]
 
 jobs:
   conventional-commits:

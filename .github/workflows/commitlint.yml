@@ -5,11 +5,13 @@ on:
 
   pull_request:
     branches: [master]
-    types: [opened, edited, reopened, synchronize]
+    types: [opened, edited, reopened]
 
 jobs:
   pr-title:
     name: PR title
+    # workflow_call does not inherit caller on.types, so skip synchronize here too.
+    if: contains(fromJSON('["opened","edited","reopened"]'), github.event.action)
     runs-on: ubuntu-latest
     permissions:
       contents: read

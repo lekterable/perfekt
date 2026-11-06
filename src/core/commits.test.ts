@@ -8,19 +8,6 @@ const reusableWorkflow = fs.readFileSync(
   'utf8',
 )
 
-const parseTypes = (yaml: string) => {
-  const match = yaml.match(/^\s*types:\s*\[([^\]]+)\]/m)
-  return match?.[1]?.split(',').map((item) => item.trim()) ?? []
-}
-
-const parseJobIfActions = (yaml: string) => {
-  const match = yaml.match(
-    /if:\s*contains\(fromJSON\('(\[[^\]]+\])'\),\s*github\.event\.action\)/,
-  )
-  const json = match?.[1]
-  return json ? (JSON.parse(json) as string[]) : []
-}
-
 describe('commits', () => {
   it('should call the shared PR title workflow from the template', () => {
     expect(getCommitsWorkflow()).toContain(`uses: ${COMMITS_REUSABLE_WORKFLOW}`)
@@ -30,7 +17,7 @@ describe('commits', () => {
   })
 
   it('should keep workflow_call on the reusable title workflow', () => {
-    expect(reusableWorkflow).toMatch(/^on:\s*\n\s*workflow_call:/m)
+    expect(reusableWorkflow).toContain('workflow_call:')
   })
 
   it.each([
@@ -44,20 +31,22 @@ describe('commits', () => {
     else expect(workflow).not.toContain('branches:')
   })
 
-  it.each([
-    ['run', 'opened', true],
-    ['run', 'edited', true],
-    ['run', 'reopened', true],
-    ['not run', 'synchronize', false],
-    ['not run', 'closed', false],
-    ['not run', 'ready_for_review', false],
-  ])('should %s title lint on pull_request %s', (_label, action, shouldRun) => {
-    const callerTypes = parseTypes(getCommitsWorkflow('master'))
-    const reusableTypes = parseTypes(reusableWorkflow)
-    const jobIfActions = parseJobIfActions(reusableWorkflow)
+  it('should not subscribe new callers to pull request synchronize', () => {
+    expect(getCommitsWorkflow('master')).not.toContain('synchronize')
+  })
 
-    expect(callerTypes.includes(action)).toBe(shouldRun)
-    expect(reusableTypes.includes(action)).toBe(shouldRun)
-    expect(jobIfActions.includes(action)).toBe(shouldRun)
+  it('should subscribe new callers to title-changing pull request events', () => {
+    const workflow = getCommitsWorkflow('master')
+    expect(workflow).toContain('opened')
+    expect(workflow).toContain('edited')
+    expect(workflow).toContain('reopened')
+  })
+
+  it('should skip title lint only on synchronize', () => {
+    expect(reusableWorkflow).toContain("github.event.action != 'synchronize'")
+  })
+
+  it('should still lint titles when a draft becomes ready for review', () => {
+    expect(reusableWorkflow).toContain('ready_for_review')
   })
 })

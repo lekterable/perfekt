@@ -5,12 +5,12 @@ on:
 
   pull_request:
     branches: [master]
-    types: [opened, edited, reopened]
+    types: [opened, edited, reopened, ready_for_review]
 
 jobs:
   pr-title:
     name: PR title
-    if: contains(fromJSON('["opened","edited","reopened"]'), github.event.action)
+    if: github.event_name == 'pull_request' && github.event.action != 'synchronize'
     runs-on: ubuntu-latest
     permissions:
       contents: read

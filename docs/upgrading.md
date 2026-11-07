@@ -1,11 +1,17 @@
-# Upgrading from perfekt 4
+# Upgrading to perfekt 4.4
 
-perfekt 5 needs Node 26 or later. Run it on Node 26 (`.nvmrc`, `engines.node`, your local install).
+perfekt 4.4 needs Node 26 or later. Run it on Node 26 (`.nvmrc`, `engines.node`, your local install).
 
 The shared workflows moved to Node 26 at the same time. Callers use `@master`, so they switched whichever perfekt version they install:
 
 - The shared CI workflow tests on Node 26 by default, so its check reads `CI / Verify / Node 26`. Update a branch protection rule that requires `CI / Verify / Node 24`. A repo that still needs another version passes `node-versions`, such as `'["24"]'`.
 - The commitlint, release and publish workflows run on Node 26 and take no version input. The release workflow installs corepack itself, since Node 26 no longer ships it.
+
+The shared CI workflow also spends fewer Actions minutes:
+
+- It starts no job for a draft pull request. Open pull requests as drafts and mark them ready once; `ready_for_review` must be in your caller's `types`.
+- It lints the pull request title in the same job. Next to it, narrow your commitlint caller to `types: [edited]`. The shared commitlint job now also skips drafts and edits that leave the title as it was.
+- Run CI on pull requests only. [CI](tooling.md#ci) has the caller to copy.
 
 # Upgrading from perfekt 3
 

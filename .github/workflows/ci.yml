@@ -1,14 +1,22 @@
 name: CI
 
 # Shared CI for Node repos. Each step runs only when package.json has that script, so a repo without
-# `typecheck` (plain JS) or `build` simply skips it:
+# `typecheck` (plain JS) or `build` simply skips it. Callers keep their own triggers
+# (docs/tooling.md#ci):
 #
+#   on:
+#     pull_request:
+#       types: [opened, synchronize, reopened, ready_for_review]
 #   jobs:
 #     verify:
 #       name: Verify
 #       uses: lekterable/perfekt/.github/workflows/ci.yml@master
 #
-# perfekt runs it on itself too, on the same Node version, and uploads coverage.
+# Draft pull requests start no job, and on a pull request the title is linted here too, so a
+# separate commitlint run is only needed when the title is edited later.
+#
+# perfekt runs it on itself too, on the same Node version, and uploads coverage. Its own pushes to
+# master still run, because perfekt is public (no billed minutes) and coverage needs a base.
 
 on:
   workflow_call:
@@ -27,10 +35,19 @@ on:
 
   pull_request:
     branches: [master]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - CHANGELOG.md
+      - TODO.md
+      - AGENTS.md
+      - CLAUDE.md
+      - LICENSE
 
 jobs:
   check:
     name: Node ${{ matrix.node }}
+    # Drafts start no job; mark the pull request ready to run CI once.
+    if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -52,6 +69,27 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: pnpm
+      # The squash-merge commit is the PR title, so lint it in this job instead of a second one.
+      # Callers lint with perfekt's master rules, as the commitlint workflow does; perfekt's own
+      # pull requests lint with their own. lint.ts imports nothing, so Node runs it as is.
+      - name: PR title
+        if: github.event_name == 'pull_request' && matrix.node == fromJSON(inputs.node-versions || '["26"]')[0]
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          OWN: ${{ github.repository == 'lekterable/perfekt' }}
+        run: |
+          rules="$GITHUB_WORKSPACE/src/core/lint.ts"
+          if [ "$OWN" != true ]; then
+            rules="$RUNNER_TEMP/lint.ts"
+            curl -fsSL --retry 3 https://raw.githubusercontent.com/lekterable/perfekt/master/src/core/lint.ts -o "$rules"
+          fi
+          RULES="$rules" node --no-warnings --input-type=module -e '
+            const { formatLint, lintMessage } = await import(process.env.RULES)
+            const title = process.env.PR_TITLE
+            const result = lintMessage(title)
+            console.log(formatLint(title, result))
+            process.exitCode = result.valid ? 0 : 1
+          '
       - if: inputs.bun
         uses: oven-sh/setup-bun@v2
       - run: pnpm install

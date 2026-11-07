@@ -3,14 +3,22 @@ name: Commitlint
 on:
   workflow_call:
 
+  # perfekt's own CI lints the title on every run, so this only catches a later title edit.
   pull_request:
     branches: [master]
-    types: [opened, edited, reopened, ready_for_review]
+    types: [edited]
 
 jobs:
   pr-title:
     name: PR title
-    if: github.event_name == 'pull_request' && github.event.action != 'synchronize'
+    # Skips pushes (synchronize), drafts and edits that leave the title as it was, such as a body
+    # edit. A caller that also runs the shared CI only needs `types: [edited]`; one without it
+    # keeps opened and reopened too.
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.action != 'synchronize' &&
+      !github.event.pull_request.draft &&
+      (github.event.action != 'edited' || github.event.changes.title.from != null)
     runs-on: ubuntu-latest
     permissions:
       contents: read

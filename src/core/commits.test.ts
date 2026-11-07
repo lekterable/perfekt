@@ -42,11 +42,13 @@ describe('commits', () => {
     expect(workflow).toContain('reopened')
   })
 
-  it('should skip title lint only on synchronize', () => {
-    expect(reusableWorkflow).toContain("github.event.action != 'synchronize'")
-  })
-
-  it('should still lint titles when a draft becomes ready for review', () => {
-    expect(reusableWorkflow).toContain('ready_for_review')
+  it.each([
+    ["github.event.action != 'synchronize'"],
+    ['!github.event.pull_request.draft'],
+    [
+      "github.event.action != 'edited' || github.event.changes.title.from != null",
+    ],
+  ])('should skip title lint unless %s', (condition) => {
+    expect(reusableWorkflow).toContain(condition)
   })
 })

@@ -45,12 +45,25 @@ It needs TypeScript 5.8 or newer for `erasableSyntaxOnly`. A repo that runs on N
 
 ## CI
 
-Call the shared CI workflow. It installs with pnpm and runs `lint`, `typecheck`, `test` and `build`, skipping any script your `package.json` doesn't have:
+Call the shared CI workflow. It installs with pnpm and runs `lint`, `typecheck`, `test` and `build`, skipping any script your `package.json` doesn't have. On a pull request it lints the title in the same job, and it starts no job for a draft:
 
 ```yaml
+name: CI
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - '**/*.md'
+      - docs/**
+      - LICENSE
+
 jobs:
   verify:
     name: Verify
+    permissions:
+      contents: read
     uses: lekterable/perfekt/.github/workflows/ci.yml@master
     # with:
     #   node-versions: '["24"]'
@@ -58,6 +71,12 @@ jobs:
 ```
 
 It needs a `packageManager` field in `package.json` for the pnpm version. Its checks read `CI / Verify / Node 26`, one per Node version (26 unless you pass `node-versions`).
+
+The triggers stay in your caller, so each repo decides when CI runs. To keep Actions minutes low:
+
+- Run on pull requests only. A merge to the default branch runs the same code the pull request already checked.
+- Open pull requests as drafts and mark them ready once. Drafts start no job, and a new push cancels the run for the older one.
+- Ignore paths that can't break the build. Leave out `**/*.md` where Markdown is what the repo checks.
 
 `perfekt ci` runs the same steps on your machine, plus [`perfekt lint`](documentation.md#lint) on the branch's commits. See [`ci`](documentation.md#ci).
 
@@ -78,9 +97,14 @@ Add it as a `verify` script, so `pnpm verify` runs everything CI runs. Keep `lin
 
 ## Pull request titles
 
-When you squash-merge, the pull request title becomes the commit, so lint titles with the shared workflow:
+When you squash-merge, the pull request title becomes the commit, so lint titles with the shared workflow. The shared CI already lints the title on every run, so next to it the commitlint caller only needs to catch a title edited later:
 
 ```yaml
+on:
+  pull_request:
+    branches: [master]
+    types: [edited]
+
 jobs:
   conventional-commits:
     name: Conventional Commits
@@ -89,7 +113,7 @@ jobs:
     uses: lekterable/perfekt/.github/workflows/commitlint.yml@master
 ```
 
-Its check reads `Commitlint / Conventional Commits / PR title`. `perfekt setup commits` writes that caller for you. The workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 26, so it installs nothing and rule changes reach every repo at once.
+It skips drafts and edits that leave the title as it was. A repo without the shared CI keeps `types: [opened, edited, reopened]`, which is what `perfekt setup commits` writes. Its check reads `Commitlint / Conventional Commits / PR title`. The workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 26, so it installs nothing and rule changes reach every repo at once.
 
 ## Releases
 

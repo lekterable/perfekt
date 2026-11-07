@@ -11,7 +11,7 @@ The shared CI workflow also spends fewer Actions minutes:
 
 - It starts no job for a draft pull request. Open pull requests as drafts and mark them ready once; `ready_for_review` must be in your caller's `types`.
 - It lints the pull request title in the same job. Next to it, narrow your commitlint caller to `types: [edited]`. The shared commitlint job now also skips drafts and edits that leave the title as it was.
-- Run CI on pull requests only. [CI](tooling.md#ci) has the caller to copy.
+- Run CI on pull requests only. [CI](tooling.md#ci) has the caller to copy, or run [`perfekt setup ci`](documentation.md#setup-ci) to write it, then `perfekt setup commits --force` to narrow commitlint.
 
 # Upgrading from perfekt 3
 

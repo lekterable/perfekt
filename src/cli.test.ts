@@ -266,6 +266,22 @@ describe('cli', () => {
       )
     })
 
+    it('should run the setup ci command', async () => {
+      const perfekt = createPerfektDouble()
+
+      await createProgram(perfekt, '3.0.0').parseAsync([
+        'node',
+        'perfekt',
+        'setup',
+        'ci',
+      ])
+
+      expect(perfekt.setupCi).toHaveBeenCalledWith({ force: false })
+      expect(stdoutSpy).toHaveBeenCalledWith(
+        expect.stringContaining('🚦 CI setup'),
+      )
+    })
+
     it('should run the setup commits command', async () => {
       const perfekt = createPerfektDouble()
 

@@ -68,11 +68,19 @@ describe('setup-commits', () => {
       true,
     ],
     ['has its own CI', 'runs-on: ubuntu-latest', false],
+    [
+      "calls another repo's ci.yml",
+      'uses: someone/else/.github/workflows/ci.yml@main',
+      false,
+    ],
   ])(
-    'should lint only title edits when the repo CI %s',
+    'should pick the title events when the repo CI %s',
     async (_label, ci, withCi) => {
       fsMock.existsSync.mockImplementation((file) => file === CI_WORKFLOW_PATH)
-      fsMock.readFileSync.mockReturnValue(ci)
+      fsMock.readFileSync.mockImplementation((file) => {
+        if (file === CI_WORKFLOW_PATH) return ci
+        throw new Error(`unexpected read of ${String(file)}`)
+      })
 
       await setupCommits()
 

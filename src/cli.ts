@@ -192,8 +192,12 @@ const printSetupCiSummary = (result: SetupCiResult) => {
     ['Default branch', result.defaultBranch ?? 'not detected'],
   ])
 
+  const skipped = result.files.some((file) => file.status === 'skipped')
+
   process.stdout.write(
-    '\n  It runs on pull requests only and skips drafts: open them as drafts and mark them ready once.\n',
+    skipped
+      ? '\n  Kept the existing workflow: pass --force to overwrite it.\n'
+      : '\n  It runs on pull requests only and skips drafts: open them as drafts and mark them ready once.\n',
   )
 }
 
@@ -442,6 +446,17 @@ export const createProgram = (
     )
     .option('--force', 'overwrite existing files')
     .option('--json', 'print the command result as JSON')
+    .addHelpText(
+      'after',
+      `
+Runs setup ci, commits, hooks, lint and scripts in that order, so the PR title
+workflow sees the CI caller. Leaves existing files alone unless --force, and exits 0.
+
+Examples:
+  perfekt setup                       # in a new repo
+  perfekt setup --force               # rewrite every file it owns
+  perfekt setup --json                # files written or skipped, per step`,
+    )
     .action(async (options: { force?: boolean; json?: boolean }) => {
       const force = Boolean(options.force)
       // CI first, so the PR title workflow sees it and only lints later title edits
@@ -489,6 +504,18 @@ export const createProgram = (
     )
     .option('--force', 'overwrite an existing workflow')
     .option('--json', 'print the command result as JSON')
+    .addHelpText(
+      'after',
+      `
+Writes .github/workflows/ci.yml, calling lekterable/perfekt/.github/workflows/ci.yml@master,
+which needs a packageManager field in package.json. Skips an existing file unless --force,
+and exits 0. Run it before setup commits, so the PR title workflow lints title edits only.
+
+Examples:
+  perfekt setup ci
+  perfekt setup ci --force            # overwrite an existing ci.yml
+  perfekt setup ci --json             # { success, command, files, defaultBranch }`,
+    )
     .action(async (options: SetupCiOptions & { json?: boolean }) => {
       const result = await perfekt.setupCi({ force: Boolean(options.force) })
 

@@ -29,11 +29,11 @@ describe('commits', () => {
     [undefined, undefined],
     ['main', 'branches: [main]'],
     ['bad branch', undefined],
-  ])('should pin the template for branch %j to %j', (branch, line) => {
-    const workflow = getCommitsWorkflow(branch)
-
-    if (line) expect(workflow).toContain(line)
-    else expect(workflow).not.toContain('branches:')
+  ])('should pin both templates for branch %j to %j', (branch, line) => {
+    ;[getCommitsWorkflow(branch), getCiWorkflow(branch)].forEach((workflow) => {
+      if (line) expect(workflow).toContain(line)
+      else expect(workflow).not.toContain('branches:')
+    })
   })
 
   it('should not subscribe new callers to pull request synchronize', () => {
@@ -63,6 +63,8 @@ describe('commits', () => {
     expect(workflow).toContain(
       `group: \${{ github.workflow }}-\${{ github.ref }}`,
     )
+    expect(workflow).toContain('cancel-in-progress: true')
+    expect(workflow).toContain('contents: read')
     expect(workflow).not.toContain('push:')
   })
 

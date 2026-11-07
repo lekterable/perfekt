@@ -148,7 +148,7 @@ Usage: `perfekt setup ci [options]`
 
 Writes `.github/workflows/ci.yml`, which calls the shared `lekterable/perfekt/.github/workflows/ci.yml@master` workflow on pull requests only (`opened`, `synchronize`, `reopened` and `ready_for_review`), with Markdown, `docs/` and `LICENSE` changes ignored. A new push cancels the older run. The shared job starts nothing for a draft and lints the pull request title, so open pull requests as drafts and mark them ready once. The `pull_request` filter uses the detected default branch when git exposes one. See [CI](tooling.md#ci) for what to change, such as `paths-ignore` in a repo where Markdown is what it checks.
 
-An existing workflow is left alone unless you pass `--force`.
+The shared job installs with pnpm, so `package.json` needs a `packageManager` field. An existing workflow is left alone unless you pass `--force`.
 
 Options:
 
@@ -156,7 +156,7 @@ Options:
 
 `--force` - overwrite the workflow if it already exists
 
-`--json` - print the command result as JSON instead of human-readable output
+`--json` - print `{ success, command, files, defaultBranch }`
 
 ## `setup commits`
 
@@ -166,7 +166,7 @@ Writes `.github/workflows/commitlint.yml`, which lints pull request titles by ca
 
 When you squash-merge, the pull request title becomes the commit, so this covers what lands on the default branch. A trailing `(#N)` from GitHub squash is allowed.
 
-An existing workflow is left alone unless you pass `--force`.
+The shared job installs with pnpm, so `package.json` needs a `packageManager` field. An existing workflow is left alone unless you pass `--force`.
 
 Options:
 
@@ -174,7 +174,7 @@ Options:
 
 `--force` - overwrite the workflow if it already exists
 
-`--json` - print the command result as JSON instead of human-readable output
+`--json` - print `{ success, command, files, defaultBranch }`
 
 ## `setup hooks`
 

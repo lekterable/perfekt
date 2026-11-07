@@ -17,10 +17,6 @@ export const CI_REUSABLE_WORKFLOW =
 const getBranchLine = (branch?: string) =>
   branch && isSafeBranchName(branch) ? `\n    branches: [${branch}]` : ''
 
-/**
- * The CI caller: pull requests only, so a merge re-runs nothing; drafts start no job in the shared
- * workflow, so ready_for_review starts the first run; a new push cancels the older run.
- */
 export const getCiWorkflow = (branch?: string) => `name: CI
 
 # Pull requests only: a merge to the default branch re-runs code the PR already

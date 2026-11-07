@@ -4,16 +4,18 @@ import type { SetupCommitsOptions, SetupCommitsResult } from '~types'
 import { fileExists, writeFile } from '~utils'
 import exec from '~utils/misc/exec'
 import {
+  CI_REUSABLE_WORKFLOW,
   CI_WORKFLOW_PATH,
   COMMITS_WORKFLOW_PATH,
   getCommitsWorkflow,
   isSafeBranchName,
 } from './commits'
 
-const SHARED_CI = 'lekterable/perfekt/.github/workflows/ci.yml@'
+// Any ref of the shared CI counts, not only @master
+const SHARED_CI = `${CI_REUSABLE_WORKFLOW.split('@')[0]}@`
 
 /** Whether the repo's CI calls perfekt's shared CI, which lints the PR title on every run. */
-export const callsSharedCi = () => {
+const callsSharedCi = () => {
   try {
     return fs.readFileSync(CI_WORKFLOW_PATH, 'utf8').includes(SHARED_CI)
   } catch {

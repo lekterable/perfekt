@@ -19,7 +19,7 @@ import type {
 } from '~types'
 import { Config, Perfekt } from './core'
 import { type CiResult, type CiStep, ci } from './core/ci'
-import { SQUASH_MERGE_NOTE } from './core/commits'
+import { CI_WORKFLOW_PATH, SQUASH_MERGE_NOTE } from './core/commits'
 import { loadConfig } from './core/config/load'
 import initialize from './core/initialize'
 import { cleanMessage, formatLint, lintMessage } from './core/lint'
@@ -192,13 +192,14 @@ const printSetupCiSummary = (result: SetupCiResult) => {
     ['Default branch', result.defaultBranch ?? 'not detected'],
   ])
 
-  const skipped = result.files.some((file) => file.status === 'skipped')
+  const kept = result.files.find((file) => file.status === 'skipped')
+  const note = !kept
+    ? 'It runs on pull requests only and skips drafts: open them as drafts and mark them ready once.'
+    : kept.path === CI_WORKFLOW_PATH
+      ? 'Kept the existing workflow: pass --force to overwrite it.'
+      : `Kept it, since it already calls the shared CI: pass --force to write ${CI_WORKFLOW_PATH} as well.`
 
-  process.stdout.write(
-    skipped
-      ? '\n  Kept the existing workflow: pass --force to overwrite it.\n'
-      : '\n  It runs on pull requests only and skips drafts: open them as drafts and mark them ready once.\n',
-  )
+  process.stdout.write(`\n  ${note}\n`)
 }
 
 const printSetupCommitsSummary = (result: SetupCommitsResult) => {

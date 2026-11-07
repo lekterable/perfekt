@@ -76,6 +76,12 @@ describe('setup-commits', () => {
       `    # ${SHARED}@master`,
       false,
     ],
+    [
+      'only mentions the shared CI in a trailing comment',
+      'ci.yml',
+      `on: push # was ${SHARED}@master`,
+      false,
+    ],
   ])(
     'should pick the title events when the repo CI %s',
     async (_label, name, ci, withCi) => {
@@ -85,8 +91,8 @@ describe('setup-commits', () => {
         'notes.txt',
       ] as unknown as ReturnType<typeof fs.readdirSync>)
       fsMock.readFileSync.mockImplementation((path) => {
-        if (path === file) return ci
-        throw new Error(`unexpected read of ${String(path)}`)
+        // notes.txt calls the shared CI too, so only the .yml/.yaml filter keeps it out
+        return path === file ? ci : `${SHARED}@master`
       })
 
       await setupCommits()

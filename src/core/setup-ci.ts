@@ -13,9 +13,10 @@ const setupCi = async (
   options: SetupCiOptions = {},
 ): Promise<SetupCiResult> => {
   const defaultBranch = getDefaultBranch()
-  const existing = fileExists(CI_WORKFLOW_PATH)
-    ? CI_WORKFLOW_PATH
-    : findSharedCiWorkflow()
+  // A caller of the shared CI wins over a ci.yml that doesn't call it, so --force can't add a second
+  const existing =
+    findSharedCiWorkflow() ??
+    (fileExists(CI_WORKFLOW_PATH) ? CI_WORKFLOW_PATH : undefined)
 
   if (!options.force && existing) {
     return {

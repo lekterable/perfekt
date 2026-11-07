@@ -286,7 +286,7 @@ describe('cli', () => {
       ['.github/workflows/ci.yml', 'pass --force to overwrite it'],
       [
         '.github/workflows/ci.yaml',
-        'pass --force to write .github/workflows/ci.yml as well',
+        '--force writes .github/workflows/ci.yml next to it, so CI would run twice',
       ],
     ])(
       'should say what --force does when setup ci keeps %s',

@@ -197,7 +197,7 @@ const printSetupCiSummary = (result: SetupCiResult) => {
     ? 'It runs on pull requests only and skips drafts: open them as drafts and mark them ready once.'
     : kept.path === CI_WORKFLOW_PATH
       ? 'Kept the existing workflow: pass --force to overwrite it.'
-      : `Kept it, since it already calls the shared CI: pass --force to write ${CI_WORKFLOW_PATH} as well.`
+      : `Kept it, since it already calls the shared CI. --force writes ${CI_WORKFLOW_PATH} next to it, so CI would run twice: remove one of them.`
 
   process.stdout.write(`\n  ${note}\n`)
 }
@@ -503,7 +503,10 @@ Examples:
     .description(
       "add a GitHub Action that runs perfekt's shared CI on pull requests that are ready for review",
     )
-    .option('--force', 'overwrite an existing workflow')
+    .option(
+      '--force',
+      'write ci.yml even if it exists or another workflow calls the shared CI',
+    )
     .option('--json', 'print the command result as JSON')
     .addHelpText(
       'after',
@@ -515,7 +518,7 @@ Run it before setup commits, so the PR title workflow lints title edits only.
 
 Examples:
   perfekt setup ci
-  perfekt setup ci --force            # overwrite an existing ci.yml
+  perfekt setup ci --force            # write ci.yml even if a workflow is kept
   perfekt setup ci --json             # { success, command, files, defaultBranch }`,
     )
     .action(async (options: SetupCiOptions & { json?: boolean }) => {
@@ -540,9 +543,9 @@ Examples:
       'after',
       `
 Writes .github/workflows/commitlint.yml. It lints title edits only (types: [edited]) when a
-workflow in .github/workflows calls perfekt's shared CI (a commented-out line doesn't count),
-which lints the title on every run, and [opened, edited, reopened] otherwise. Leaves an existing commitlint.yml alone unless
---force. Exits 0, or 1 on an error.
+workflow in .github/workflows calls perfekt's shared CI (a YAML comment doesn't count),
+which lints the title on every run, and [opened, edited, reopened] otherwise. Leaves an
+existing commitlint.yml alone unless --force. Exits 0, or 1 on an error.
 
 Examples:
   perfekt setup commits

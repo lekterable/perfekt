@@ -154,7 +154,7 @@ Options:
 
 `-h, --help` - display help for command
 
-`--force` - overwrite the workflow if it already exists
+`--force` - write `ci.yml` even if it exists or another workflow calls the shared CI (CI then runs twice, so remove the other one)
 
 `--json` - print `{ success, command, files, defaultBranch }`
 
@@ -162,7 +162,7 @@ Options:
 
 Usage: `perfekt setup commits [options]`
 
-Writes `.github/workflows/commitlint.yml`, which lints pull request titles by calling the shared `lekterable/perfekt/.github/workflows/commitlint.yml@master` workflow. That workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 26, so it installs nothing and title rules change everywhere at once. The `pull_request` filter uses the detected default branch when git exposes one. It runs on `opened`, `edited` and `reopened`, so a push to the pull request does not lint the title again. When a workflow in `.github/workflows` already calls the shared CI, which lints the title on every run, it runs on `edited` only. A commented-out line doesn't count. The shared job skips pushes, drafts and edits that leave the title as it was.
+Writes `.github/workflows/commitlint.yml`, which lints pull request titles by calling the shared `lekterable/perfekt/.github/workflows/commitlint.yml@master` workflow. That workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 26, so it installs nothing and title rules change everywhere at once. The `pull_request` filter uses the detected default branch when git exposes one. It runs on `opened`, `edited` and `reopened`, so a push to the pull request does not lint the title again. When a workflow in `.github/workflows` already calls the shared CI, which lints the title on every run, it runs on `edited` only. A YAML comment, on its own line or after code, doesn't count. The shared job skips pushes, drafts and edits that leave the title as it was.
 
 When you squash-merge, the pull request title becomes the commit, so this covers what lands on the default branch. A trailing `(#N)` from GitHub squash is allowed.
 

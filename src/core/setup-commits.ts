@@ -36,15 +36,13 @@ const listWorkflows = () => {
 
 /**
  * The workflow that calls perfekt's shared CI, which lints the PR title on every run: any file
- * name, any ref, and only on a line that isn't a comment.
+ * name, any ref, and only outside a YAML comment.
  */
 export const findSharedCiWorkflow = () =>
   listWorkflows().find((file) =>
     readWorkflow(file)
       .split('\n')
-      .some(
-        (line) => !line.trimStart().startsWith('#') && line.includes(SHARED_CI),
-      ),
+      .some((line) => line.replace(/(^|\s)#.*$/, '').includes(SHARED_CI)),
   )
 
 const readGitLine = (command: string) => {

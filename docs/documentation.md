@@ -148,7 +148,7 @@ Usage: `perfekt setup ci [options]`
 
 Writes `.github/workflows/ci.yml`, which calls the shared `lekterable/perfekt/.github/workflows/ci.yml@master` workflow on pull requests only (`opened`, `synchronize`, `reopened` and `ready_for_review`), with no `paths-ignore`, so every pull request gets its title linted and reports `Verify`. A new push cancels the older run. The shared job starts nothing for a draft and lints the pull request title, so open pull requests as drafts and mark them ready once. The `pull_request` filter uses the detected default branch when git exposes one. See [CI](tooling.md#ci) for the caller and the inputs it takes.
 
-The shared job installs with pnpm, so `package.json` needs a `packageManager` field. An existing workflow is left alone unless you pass `--force`.
+The shared job installs with pnpm, so `package.json` needs a `packageManager` field. An existing `ci.yml`, or any workflow that already calls the shared CI (such as `ci.yaml`), is left alone unless you pass `--force`, so CI never runs twice.
 
 Options:
 
@@ -162,7 +162,7 @@ Options:
 
 Usage: `perfekt setup commits [options]`
 
-Writes `.github/workflows/commitlint.yml`, which lints pull request titles by calling the shared `lekterable/perfekt/.github/workflows/commitlint.yml@master` workflow. That workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 26, so it installs nothing and title rules change everywhere at once. The `pull_request` filter uses the detected default branch when git exposes one. It runs on `opened`, `edited` and `reopened`, so a push to the pull request does not lint the title again. When `.github/workflows/ci.yml` already calls the shared CI, which lints the title on every run, it runs on `edited` only. The shared job skips pushes, drafts and edits that leave the title as it was.
+Writes `.github/workflows/commitlint.yml`, which lints pull request titles by calling the shared `lekterable/perfekt/.github/workflows/commitlint.yml@master` workflow. That workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 26, so it installs nothing and title rules change everywhere at once. The `pull_request` filter uses the detected default branch when git exposes one. It runs on `opened`, `edited` and `reopened`, so a push to the pull request does not lint the title again. When a workflow in `.github/workflows` already calls the shared CI, which lints the title on every run, it runs on `edited` only. A commented-out line doesn't count. The shared job skips pushes, drafts and edits that leave the title as it was.
 
 When you squash-merge, the pull request title becomes the commit, so this covers what lands on the default branch. A trailing `(#N)` from GitHub squash is allowed.
 

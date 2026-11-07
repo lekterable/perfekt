@@ -3,17 +3,23 @@ import path from 'node:path'
 import type { SetupCiOptions, SetupCiResult } from '~types'
 import { fileExists, writeFile } from '~utils'
 import { CI_WORKFLOW_PATH, getCiWorkflow } from './commits'
-import { getDefaultBranch } from './setup-commits'
+import { findSharedCiWorkflow, getDefaultBranch } from './setup-commits'
 
-/** Writes the CI caller for perfekt's shared CI workflow; an existing one is kept unless force is set. */
+/**
+ * Writes the CI caller for perfekt's shared CI workflow. Unless force is set it keeps an existing
+ * ci.yml, and any other workflow that already calls the shared CI, so CI never runs twice.
+ */
 const setupCi = async (
   options: SetupCiOptions = {},
 ): Promise<SetupCiResult> => {
   const defaultBranch = getDefaultBranch()
+  const existing = fileExists(CI_WORKFLOW_PATH)
+    ? CI_WORKFLOW_PATH
+    : findSharedCiWorkflow()
 
-  if (!options.force && fileExists(CI_WORKFLOW_PATH)) {
+  if (!options.force && existing) {
     return {
-      files: [{ path: CI_WORKFLOW_PATH, status: 'skipped' }],
+      files: [{ path: existing, status: 'skipped' }],
       defaultBranch,
     }
   }

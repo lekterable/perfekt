@@ -508,9 +508,9 @@ Examples:
       'after',
       `
 Writes .github/workflows/ci.yml, calling lekterable/perfekt/.github/workflows/ci.yml@master,
-which needs a packageManager field in package.json. Leaves an existing ci.yml alone unless
---force. Exits 0, or 1 on an error. Run it before setup commits, so the PR title workflow
-lints title edits only.
+which needs a packageManager field in package.json. Leaves an existing ci.yml, or any
+workflow that already calls the shared CI, alone unless --force. Exits 0, or 1 on an error.
+Run it before setup commits, so the PR title workflow lints title edits only.
 
 Examples:
   perfekt setup ci
@@ -538,9 +538,9 @@ Examples:
     .addHelpText(
       'after',
       `
-Writes .github/workflows/commitlint.yml. It lints title edits only (types: [edited]) when
-.github/workflows/ci.yml calls perfekt's shared CI, which lints the title on every run,
-and [opened, edited, reopened] otherwise. Leaves an existing commitlint.yml alone unless
+Writes .github/workflows/commitlint.yml. It lints title edits only (types: [edited]) when a
+workflow in .github/workflows calls perfekt's shared CI (a commented-out line doesn't count),
+which lints the title on every run, and [opened, edited, reopened] otherwise. Leaves an existing commitlint.yml alone unless
 --force. Exits 0, or 1 on an error.
 
 Examples:

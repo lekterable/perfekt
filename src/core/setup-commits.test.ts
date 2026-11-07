@@ -2,11 +2,7 @@ import fs from 'node:fs'
 import type { MockInstance } from 'vitest'
 import exec from '~utils/misc/exec'
 import * as writeFile from '../utils/misc/write-file'
-import {
-  CI_WORKFLOW_PATH,
-  COMMITS_WORKFLOW_PATH,
-  getCommitsWorkflow,
-} from './commits'
+import { COMMITS_WORKFLOW_PATH, getCommitsWorkflow } from './commits'
 import setupCommits, { getDefaultBranch } from './setup-commits'
 
 vi.mock('node:fs')
@@ -61,25 +57,36 @@ describe('setup-commits', () => {
     })
   })
 
+  const SHARED = 'uses: lekterable/perfekt/.github/workflows/ci.yml'
+
   it.each([
-    [
-      'calls the shared CI',
-      'uses: lekterable/perfekt/.github/workflows/ci.yml@master',
-      true,
-    ],
-    ['has its own CI', 'runs-on: ubuntu-latest', false],
+    ['calls the shared CI', 'ci.yml', `${SHARED}@master`, true],
+    ['calls the shared CI at a tag', 'ci.yml', `${SHARED}@v4`, true],
+    ['calls the shared CI from ci.yaml', 'ci.yaml', `${SHARED}@master`, true],
+    ['has its own CI', 'ci.yml', 'runs-on: ubuntu-latest', false],
     [
       "calls another repo's ci.yml",
+      'ci.yml',
       'uses: someone/else/.github/workflows/ci.yml@main',
+      false,
+    ],
+    [
+      'only mentions the shared CI in a comment',
+      'ci.yml',
+      `    # ${SHARED}@master`,
       false,
     ],
   ])(
     'should pick the title events when the repo CI %s',
-    async (_label, ci, withCi) => {
-      fsMock.existsSync.mockImplementation((file) => file === CI_WORKFLOW_PATH)
-      fsMock.readFileSync.mockImplementation((file) => {
-        if (file === CI_WORKFLOW_PATH) return ci
-        throw new Error(`unexpected read of ${String(file)}`)
+    async (_label, name, ci, withCi) => {
+      const file = `.github/workflows/${name}`
+      fsMock.readdirSync.mockReturnValue([
+        name,
+        'notes.txt',
+      ] as unknown as ReturnType<typeof fs.readdirSync>)
+      fsMock.readFileSync.mockImplementation((path) => {
+        if (path === file) return ci
+        throw new Error(`unexpected read of ${String(path)}`)
       })
 
       await setupCommits()

@@ -113,7 +113,7 @@ jobs:
     uses: lekterable/perfekt/.github/workflows/commitlint.yml@master
 ```
 
-It skips drafts and edits that leave the title as it was. [`perfekt setup commits`](documentation.md#setup-commits) writes `types: [edited]` when `.github/workflows/ci.yml` calls the shared CI, and `types: [opened, edited, reopened]` otherwise. Its check reads `Commitlint / Conventional Commits / PR title`. The workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 26, so it installs nothing and rule changes reach every repo at once.
+It skips drafts and edits that leave the title as it was. [`perfekt setup commits`](documentation.md#setup-commits) writes `types: [edited]` when a workflow in `.github/workflows` calls the shared CI, and `types: [opened, edited, reopened]` otherwise. Its check reads `Commitlint / Conventional Commits / PR title`. The workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 26, so it installs nothing and rule changes reach every repo at once.
 
 ## Releases
 

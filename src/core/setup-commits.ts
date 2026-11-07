@@ -5,7 +5,6 @@ import { fileExists, writeFile } from '~utils'
 import exec from '~utils/misc/exec'
 import {
   CI_REUSABLE_WORKFLOW,
-  CI_WORKFLOW_PATH,
   COMMITS_WORKFLOW_PATH,
   getCommitsWorkflow,
   isSafeBranchName,
@@ -14,14 +13,39 @@ import {
 // Any ref of the shared CI counts, not only @master
 const SHARED_CI = `${CI_REUSABLE_WORKFLOW.split('@')[0]}@`
 
-/** Whether the repo's CI calls perfekt's shared CI, which lints the PR title on every run. */
-const callsSharedCi = () => {
+const WORKFLOWS_DIRECTORY = '.github/workflows'
+
+const readWorkflow = (file: string) => {
   try {
-    return fs.readFileSync(CI_WORKFLOW_PATH, 'utf8').includes(SHARED_CI)
+    return fs.readFileSync(file, 'utf8')
   } catch {
-    return false
+    return ''
   }
 }
+
+const listWorkflows = () => {
+  try {
+    return fs
+      .readdirSync(WORKFLOWS_DIRECTORY)
+      .filter((name) => /\.ya?ml$/.test(name))
+      .map((name) => path.join(WORKFLOWS_DIRECTORY, name))
+  } catch {
+    return []
+  }
+}
+
+/**
+ * The workflow that calls perfekt's shared CI, which lints the PR title on every run: any file
+ * name, any ref, and only on a line that isn't a comment.
+ */
+export const findSharedCiWorkflow = () =>
+  listWorkflows().find((file) =>
+    readWorkflow(file)
+      .split('\n')
+      .some(
+        (line) => !line.trimStart().startsWith('#') && line.includes(SHARED_CI),
+      ),
+  )
 
 const readGitLine = (command: string) => {
   try {
@@ -71,7 +95,9 @@ const setupCommits = async (
   fs.mkdirSync(path.dirname(COMMITS_WORKFLOW_PATH), { recursive: true })
   await writeFile(
     COMMITS_WORKFLOW_PATH,
-    getCommitsWorkflow(defaultBranch, { withCi: callsSharedCi() }),
+    getCommitsWorkflow(defaultBranch, {
+      withCi: findSharedCiWorkflow() !== undefined,
+    }),
   )
 
   return {

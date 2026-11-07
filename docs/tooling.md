@@ -72,7 +72,7 @@ jobs:
 
 It needs a `packageManager` field in `package.json` for the pnpm version. Its checks read `CI / Verify / Node 26`, one per Node version (26 unless you pass `node-versions`).
 
-The triggers stay in your caller, so each repo decides when CI runs. To keep Actions minutes low:
+`perfekt setup ci` writes this caller for you. The triggers stay in your caller, so each repo decides when CI runs. To keep Actions minutes low:
 
 - Run on pull requests only. A merge to the default branch runs the same code the pull request already checked.
 - Open pull requests as drafts and mark them ready once. Drafts start no job, and a new push cancels the run for the older one.
@@ -165,7 +165,7 @@ publish:
   if: needs.release.outputs.released == 'true'
   runs-on: ubuntu-latest
   steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         ref: ${{ needs.release.outputs.version }}
     # set up your package manager, build and publish

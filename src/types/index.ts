@@ -24,6 +24,8 @@ export type ReleaseOptions = { from?: string; dryRun?: boolean }
 
 export type SetupCommitsOptions = { force?: boolean }
 
+export type SetupCiOptions = { force?: boolean }
+
 export type SetupFileResult = {
   path: string
   status: 'written' | 'skipped'
@@ -33,6 +35,8 @@ export type SetupCommitsResult = {
   files: SetupFileResult[]
   defaultBranch: string | undefined
 }
+
+export type SetupCiResult = SetupCommitsResult
 
 export type SetupLintOptions = {
   force?: boolean

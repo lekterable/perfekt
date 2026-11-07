@@ -32,11 +32,12 @@ To only see the changelog, run `perfekt changelog`. See [`release`](documentatio
 
 perfekt groups the changelog and picks versions from commit types, so check messages with [`perfekt lint`](documentation.md#lint):
 
+- `perfekt setup ci` adds a GitHub Action that runs the shared CI on pull requests that are ready for review, and lints their titles.
 - `perfekt setup commits` adds a GitHub Action that lints pull request titles, which become the commits when you squash-merge.
 - `perfekt setup hooks` adds a `commit-msg` hook that lints each local commit.
 - `perfekt setup lint` adds the shared Biome config for code, see [shared tooling](tooling.md#biome).
 - `perfekt setup scripts` adds the standard `lint`, `format`, `typecheck` and `verify` scripts to `package.json`.
-- `perfekt setup` does all four.
+- `perfekt setup` does all five.
 
 ## Check before you push
 

@@ -4,10 +4,22 @@ import type { SetupCommitsOptions, SetupCommitsResult } from '~types'
 import { fileExists, writeFile } from '~utils'
 import exec from '~utils/misc/exec'
 import {
+  CI_WORKFLOW_PATH,
   COMMITS_WORKFLOW_PATH,
   getCommitsWorkflow,
   isSafeBranchName,
 } from './commits'
+
+const SHARED_CI = 'lekterable/perfekt/.github/workflows/ci.yml@'
+
+/** Whether the repo's CI calls perfekt's shared CI, which lints the PR title on every run. */
+export const callsSharedCi = () => {
+  try {
+    return fs.readFileSync(CI_WORKFLOW_PATH, 'utf8').includes(SHARED_CI)
+  } catch {
+    return false
+  }
+}
 
 const readGitLine = (command: string) => {
   try {
@@ -55,7 +67,10 @@ const setupCommits = async (
   }
 
   fs.mkdirSync(path.dirname(COMMITS_WORKFLOW_PATH), { recursive: true })
-  await writeFile(COMMITS_WORKFLOW_PATH, getCommitsWorkflow(defaultBranch))
+  await writeFile(
+    COMMITS_WORKFLOW_PATH,
+    getCommitsWorkflow(defaultBranch, { withCi: callsSharedCi() }),
+  )
 
   return {
     files: [{ path: COMMITS_WORKFLOW_PATH, status: 'written' }],

@@ -1,6 +1,11 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { COMMITS_REUSABLE_WORKFLOW, getCommitsWorkflow } from './commits'
+import {
+  CI_REUSABLE_WORKFLOW,
+  COMMITS_REUSABLE_WORKFLOW,
+  getCiWorkflow,
+  getCommitsWorkflow,
+} from './commits'
 
 const repoRoot = path.resolve(__dirname, '../..')
 const reusableWorkflow = fs.readFileSync(
@@ -40,6 +45,25 @@ describe('commits', () => {
     expect(workflow).toContain('opened')
     expect(workflow).toContain('edited')
     expect(workflow).toContain('reopened')
+  })
+
+  it('should subscribe only title edits next to the shared CI', () => {
+    expect(getCommitsWorkflow('master', { withCi: true })).toContain(
+      'types: [edited]',
+    )
+  })
+
+  it('should run the shared CI on ready pull requests only', () => {
+    const workflow = getCiWorkflow('master')
+
+    expect(workflow).toContain(`uses: ${CI_REUSABLE_WORKFLOW}`)
+    expect(workflow).toContain(
+      'types: [opened, synchronize, reopened, ready_for_review]',
+    )
+    expect(workflow).toContain(
+      `group: \${{ github.workflow }}-\${{ github.ref }}`,
+    )
+    expect(workflow).not.toContain('push:')
   })
 
   it.each([

@@ -28,7 +28,7 @@ jobs:
       group: commitlint-${{ github.repository }}-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           repository: lekterable/perfekt
           # perfekt's own PRs lint against their own rules; callers use master
@@ -37,7 +37,7 @@ jobs:
           sparse-checkout: src/core/lint.ts
           sparse-checkout-cone-mode: false
       # Node 26 runs the TypeScript rules directly, so there is nothing to install.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 26
       - name: Lint PR title

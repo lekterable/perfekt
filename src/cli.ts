@@ -7,6 +7,8 @@ import type {
   ChangelogResult,
   ReleaseOptions,
   ReleaseResult,
+  SetupCiOptions,
+  SetupCiResult,
   SetupCommitsOptions,
   SetupCommitsResult,
   SetupHooksOptions,
@@ -21,6 +23,7 @@ import { SQUASH_MERGE_NOTE } from './core/commits'
 import { loadConfig } from './core/config/load'
 import initialize from './core/initialize'
 import { cleanMessage, formatLint, lintMessage } from './core/lint'
+import setupCi from './core/setup-ci'
 import setupCommits from './core/setup-commits'
 import setupHooks from './core/setup-hooks'
 import setupLint from './core/setup-lint'
@@ -31,6 +34,7 @@ type ReleaseCommandOptions = ReleaseOptions & { json?: boolean }
 
 type PerfektCLI = {
   init: () => Promise<string>
+  setupCi: (options: SetupCiOptions) => Promise<SetupCiResult>
   setupCommits: (options: SetupCommitsOptions) => Promise<SetupCommitsResult>
   setupHooks: (options: SetupHooksOptions) => SetupHooksResult
   setupLint: (options: { force?: boolean }) => SetupLintResult
@@ -141,6 +145,7 @@ export const createPerfekt = (overrides = loadConfig()) => {
 // Only changelog and release read the config, so the other commands work with a broken one.
 const createCommands = (): PerfektCLI => ({
   init: initialize,
+  setupCi,
   setupCommits,
   setupHooks,
   setupLint: (options) =>
@@ -174,6 +179,22 @@ const formatDetailBlock = (
   ]
 
   writer(`${lines.join('\n')}\n`)
+}
+
+const printSetupCiSummary = (result: SetupCiResult) => {
+  formatDetailBlock('🚦 CI setup', [
+    ...result.files.map(
+      (file): DetailRow => [
+        file.status === 'written' ? 'Written' : 'Skipped',
+        file.path,
+      ],
+    ),
+    ['Default branch', result.defaultBranch ?? 'not detected'],
+  ])
+
+  process.stdout.write(
+    '\n  It runs on pull requests only and skips drafts: open them as drafts and mark them ready once.\n',
+  )
 }
 
 const printSetupCommitsSummary = (result: SetupCommitsResult) => {
@@ -417,12 +438,14 @@ export const createProgram = (
   const setup = program
     .command('setup')
     .description(
-      'add the PR title workflow, the commit hook, the shared Biome config and the standard scripts',
+      'add the CI and PR title workflows, the commit hook, the shared Biome config and the standard scripts',
     )
     .option('--force', 'overwrite existing files')
     .option('--json', 'print the command result as JSON')
     .action(async (options: { force?: boolean; json?: boolean }) => {
       const force = Boolean(options.force)
+      // CI first, so the PR title workflow sees it and only lints later title edits
+      const ciWorkflow = await perfekt.setupCi({ force })
       const commits = await perfekt.setupCommits({ force })
       const hooks = perfekt.setupHooks({ force, major })
       const lint = perfekt.setupLint({ force })
@@ -431,11 +454,13 @@ export const createProgram = (
       if (options.json) {
         writeJson(
           createSetupResponse({
+            ...ciWorkflow,
             ...commits,
             ...hooks,
             ...lint,
             ...scripts,
             files: [
+              ...ciWorkflow.files,
               ...commits.files,
               ...hooks.files,
               ...lint.files,
@@ -446,6 +471,8 @@ export const createProgram = (
         return
       }
 
+      printSetupCiSummary(ciWorkflow)
+      process.stdout.write('\n')
       printSetupCommitsSummary(commits)
       process.stdout.write('\n')
       printSetupHooksSummary(hooks)
@@ -453,6 +480,24 @@ export const createProgram = (
       printSetupLintSummary(lint)
       process.stdout.write('\n')
       printSetupScriptsSummary(scripts)
+    })
+
+  setup
+    .command('ci')
+    .description(
+      "add a GitHub Action that runs perfekt's shared CI on pull requests that are ready for review",
+    )
+    .option('--force', 'overwrite an existing workflow')
+    .option('--json', 'print the command result as JSON')
+    .action(async (options: SetupCiOptions & { json?: boolean }) => {
+      const result = await perfekt.setupCi({ force: Boolean(options.force) })
+
+      if (options.json) {
+        writeJson(createSetupResponse(result))
+        return
+      }
+
+      printSetupCiSummary(result)
     })
 
   setup

@@ -2,7 +2,11 @@ import fs from 'node:fs'
 import type { MockInstance } from 'vitest'
 import exec from '~utils/misc/exec'
 import * as writeFile from '../utils/misc/write-file'
-import { COMMITS_WORKFLOW_PATH, getCommitsWorkflow } from './commits'
+import {
+  CI_WORKFLOW_PATH,
+  COMMITS_WORKFLOW_PATH,
+  getCommitsWorkflow,
+} from './commits'
 import setupCommits, { getDefaultBranch } from './setup-commits'
 
 vi.mock('node:fs')
@@ -56,6 +60,28 @@ describe('setup-commits', () => {
       defaultBranch: 'main',
     })
   })
+
+  it.each([
+    [
+      'calls the shared CI',
+      'uses: lekterable/perfekt/.github/workflows/ci.yml@master',
+      true,
+    ],
+    ['has its own CI', 'runs-on: ubuntu-latest', false],
+  ])(
+    'should lint only title edits when the repo CI %s',
+    async (_label, ci, withCi) => {
+      fsMock.existsSync.mockImplementation((file) => file === CI_WORKFLOW_PATH)
+      fsMock.readFileSync.mockReturnValue(ci)
+
+      await setupCommits()
+
+      expect(writeFileSpy).toHaveBeenCalledWith(
+        COMMITS_WORKFLOW_PATH,
+        getCommitsWorkflow('main', { withCi }),
+      )
+    },
+  )
 
   it('should skip an existing workflow unless force is set', async () => {
     fsMock.existsSync.mockReturnValue(true)

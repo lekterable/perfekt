@@ -80,6 +80,10 @@ const createSetupCommitsResult = () => ({
 
 const createPerfektDouble = () => ({
   init: vi.fn().mockResolvedValue('perfekt.json'),
+  setupCi: vi.fn().mockResolvedValue({
+    files: [{ path: '.github/workflows/ci.yml', status: 'written' as const }],
+    defaultBranch: 'main',
+  }),
   setupCommits: vi.fn().mockResolvedValue(createSetupCommitsResult()),
   setupHooks: vi.fn().mockReturnValue({
     files: [{ path: '.githooks/commit-msg', status: 'written' as const }],
@@ -215,7 +219,11 @@ describe('cli', () => {
         '--json',
       ])
 
+      expect(perfekt.setupCi).toHaveBeenCalledWith({ force: false })
       expect(perfekt.setupCommits).toHaveBeenCalledWith({ force: false })
+      expect(perfekt.setupCi.mock.invocationCallOrder[0]).toBeLessThan(
+        perfekt.setupCommits.mock.invocationCallOrder[0] ?? 0,
+      )
       expect(perfekt.setupHooks).toHaveBeenCalledWith({
         force: false,
         major: '4',
@@ -225,6 +233,7 @@ describe('cli', () => {
       expect(lastJson(stdoutSpy)).toMatchObject({
         command: 'setup',
         files: [
+          { path: '.github/workflows/ci.yml', status: 'written' },
           { path: '.github/workflows/commitlint.yml', status: 'written' },
           { path: '.githooks/commit-msg', status: 'written' },
           { path: 'biome.json', status: 'written' },
@@ -286,6 +295,12 @@ describe('cli', () => {
         ['setup', 'commits', '--json'],
         'setupCommits' as const,
         [{ force: false }],
+      ],
+      [
+        'setup',
+        ['setup', 'ci', '--force', '--json'],
+        'setupCi' as const,
+        [{ force: true }],
       ],
       [
         'setup',

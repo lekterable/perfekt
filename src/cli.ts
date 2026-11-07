@@ -450,12 +450,12 @@ export const createProgram = (
       'after',
       `
 Runs setup ci, commits, hooks, lint and scripts in that order, so the PR title
-workflow sees the CI caller. Leaves existing files alone unless --force, and exits 0.
+workflow sees the CI caller. Leaves existing files alone unless --force. Exits 0, or 1 on an error.
 
 Examples:
   perfekt setup                       # in a new repo
   perfekt setup --force               # rewrite every file it owns
-  perfekt setup --json                # files written or skipped, per step`,
+  perfekt setup --json                # one files list, plus defaultBranch, hooksPath, installCommand, scripts`,
     )
     .action(async (options: { force?: boolean; json?: boolean }) => {
       const force = Boolean(options.force)
@@ -508,8 +508,9 @@ Examples:
       'after',
       `
 Writes .github/workflows/ci.yml, calling lekterable/perfekt/.github/workflows/ci.yml@master,
-which needs a packageManager field in package.json. Skips an existing file unless --force,
-and exits 0. Run it before setup commits, so the PR title workflow lints title edits only.
+which needs a packageManager field in package.json. Leaves an existing ci.yml alone unless
+--force. Exits 0, or 1 on an error. Run it before setup commits, so the PR title workflow
+lints title edits only.
 
 Examples:
   perfekt setup ci
@@ -534,6 +535,19 @@ Examples:
     )
     .option('--force', 'overwrite an existing workflow')
     .option('--json', 'print the command result as JSON')
+    .addHelpText(
+      'after',
+      `
+Writes .github/workflows/commitlint.yml. It lints title edits only (types: [edited]) when
+.github/workflows/ci.yml calls perfekt's shared CI, which lints the title on every run,
+and [opened, edited, reopened] otherwise. Leaves an existing commitlint.yml alone unless
+--force. Exits 0, or 1 on an error.
+
+Examples:
+  perfekt setup commits
+  perfekt setup commits --force       # narrow an existing workflow after setup ci
+  perfekt setup commits --json        # { success, command, files, defaultBranch }`,
+    )
     .action(async (options: SetupCommitsOptions & { json?: boolean }) => {
       const { json = false, ...setupOptions } = options
       const result = await perfekt.setupCommits({

@@ -282,6 +282,25 @@ describe('cli', () => {
       )
     })
 
+    it('should point to --force when setup ci keeps an existing workflow', async () => {
+      const perfekt = createPerfektDouble()
+      perfekt.setupCi.mockResolvedValue({
+        files: [{ path: '.github/workflows/ci.yml', status: 'skipped' }],
+        defaultBranch: 'master',
+      })
+
+      await createProgram(perfekt, '3.0.0').parseAsync([
+        'node',
+        'perfekt',
+        'setup',
+        'ci',
+      ])
+
+      expect(stdoutSpy).toHaveBeenCalledWith(
+        expect.stringContaining('pass --force to overwrite it'),
+      )
+    })
+
     it('should run the setup commits command', async () => {
       const perfekt = createPerfektDouble()
 

@@ -146,7 +146,7 @@ Options:
 
 Usage: `perfekt setup ci [options]`
 
-Writes `.github/workflows/ci.yml`, which calls the shared `lekterable/perfekt/.github/workflows/ci.yml@master` workflow on pull requests only (`opened`, `synchronize`, `reopened` and `ready_for_review`), with Markdown, `docs/` and `LICENSE` changes ignored. A new push cancels the older run. The shared job starts nothing for a draft and lints the pull request title, so open pull requests as drafts and mark them ready once. The `pull_request` filter uses the detected default branch when git exposes one. See [CI](tooling.md#ci) for what to change, such as `paths-ignore` in a repo where Markdown is what it checks.
+Writes `.github/workflows/ci.yml`, which calls the shared `lekterable/perfekt/.github/workflows/ci.yml@master` workflow on pull requests only (`opened`, `synchronize`, `reopened` and `ready_for_review`), with no `paths-ignore`, so every pull request gets its title linted and reports `Verify`. A new push cancels the older run. The shared job starts nothing for a draft and lints the pull request title, so open pull requests as drafts and mark them ready once. The `pull_request` filter uses the detected default branch when git exposes one. See [CI](tooling.md#ci) for the caller and the inputs it takes.
 
 The shared job installs with pnpm, so `package.json` needs a `packageManager` field. An existing workflow is left alone unless you pass `--force`.
 

@@ -36,12 +36,6 @@ on:
   pull_request:
     branches: [master]
     types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore:
-      - CHANGELOG.md
-      - TODO.md
-      - AGENTS.md
-      - CLAUDE.md
-      - LICENSE
 
 jobs:
   check:

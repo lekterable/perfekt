@@ -25,10 +25,6 @@ export const getCiWorkflow = (branch?: string) => `name: CI
 on:
   pull_request:${getBranchLine(branch)}
     types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore:
-      - '**/*.md'
-      - docs/**
-      - LICENSE
 
 concurrency:
   group: \${{ github.workflow }}-\${{ github.ref }}

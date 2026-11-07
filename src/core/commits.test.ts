@@ -66,6 +66,8 @@ describe('commits', () => {
     expect(workflow).toContain('cancel-in-progress: true')
     expect(workflow).toContain('contents: read')
     expect(workflow).not.toContain('push:')
+    // a filtered-out pull request would get no title lint and no Verify check
+    expect(workflow).not.toContain('paths-ignore')
   })
 
   it.each([

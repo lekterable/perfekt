@@ -54,10 +54,6 @@ on:
   pull_request:
     branches: [master]
     types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore:
-      - '**/*.md'
-      - docs/**
-      - LICENSE
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -80,7 +76,7 @@ It needs a `packageManager` field in `package.json` for the pnpm version. Its ch
 
 - Run on pull requests only. A merge to the default branch runs the same code the pull request already checked.
 - Open pull requests as drafts and mark them ready once. Drafts start no job, and a new push cancels the run for the older one.
-- Ignore paths that can't break the build. Leave out `**/*.md` where Markdown is what the repo checks.
+- Skip `paths-ignore`. A pull request it filters out gets no run, so its title goes unlinted next to a commitlint caller on `edited` only, and a required `Verify` check never reports.
 
 `perfekt ci` runs the same steps on your machine, plus [`perfekt lint`](documentation.md#lint) on the branch's commits. See [`ci`](documentation.md#ci).
 

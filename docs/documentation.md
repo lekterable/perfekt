@@ -166,7 +166,7 @@ Writes `.github/workflows/commitlint.yml`, which lints pull request titles by ca
 
 When you squash-merge, the pull request title becomes the commit, so this covers what lands on the default branch. A trailing `(#N)` from GitHub squash is allowed.
 
-The shared job installs with pnpm, so `package.json` needs a `packageManager` field. An existing workflow is left alone unless you pass `--force`.
+An existing workflow is left alone unless you pass `--force`.
 
 Options:
 

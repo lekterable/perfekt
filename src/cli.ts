@@ -455,7 +455,7 @@ workflow sees the CI caller. Leaves existing files alone unless --force. Exits 0
 Examples:
   perfekt setup                       # in a new repo
   perfekt setup --force               # rewrite every file it owns
-  perfekt setup --json                # one files list, plus defaultBranch, hooksPath, installCommand, scripts`,
+  perfekt setup --json                # { success, command, files, defaultBranch, hooksPath, clonesNeed, installCommand, scripts }`,
     )
     .action(async (options: { force?: boolean; json?: boolean }) => {
       const force = Boolean(options.force)

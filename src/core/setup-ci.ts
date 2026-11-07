@@ -5,7 +5,7 @@ import { fileExists, writeFile } from '~utils'
 import { CI_WORKFLOW_PATH, getCiWorkflow } from './commits'
 import { getDefaultBranch } from './setup-commits'
 
-/** Writes the CI caller for perfekt's shared CI workflow, unless one exists or force is set. */
+/** Writes the CI caller for perfekt's shared CI workflow; an existing one is kept unless force is set. */
 const setupCi = async (
   options: SetupCiOptions = {},
 ): Promise<SetupCiResult> => {

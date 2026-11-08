@@ -7,7 +7,7 @@ import { findSharedCiWorkflows, getDefaultBranch } from './setup-commits'
 
 /**
  * Writes the CI caller for perfekt's shared CI workflow. Unless force is set it keeps an existing
- * ci.yml, and any other workflow that already calls the shared CI, so CI never runs twice. It
+ * ci.yml, and any other workflow that already calls the shared CI, so CI runs only once. It
  * reports each kept file, so the summary can say what --force would overwrite or duplicate.
  */
 const setupCi = async (
@@ -32,7 +32,7 @@ const setupCi = async (
   fs.mkdirSync(path.dirname(CI_WORKFLOW_PATH), { recursive: true })
   await writeFile(CI_WORKFLOW_PATH, getCiWorkflow(defaultBranch))
 
-  // Other callers stay as they were, so they are reported and the summary can warn that CI runs twice
+  // Other callers stay, and are listed so the summary can warn that CI runs more than once
   return {
     files: [
       { path: CI_WORKFLOW_PATH, status: 'written' },

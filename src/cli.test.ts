@@ -289,11 +289,15 @@ describe('cli', () => {
       [['.github/workflows/ci.yml'], 'pass --force to overwrite it'],
       [
         ['.github/workflows/ci.yaml'],
-        '--force writes .github/workflows/ci.yml too, so CI then runs twice',
+        '--force writes .github/workflows/ci.yml too, so CI then runs more than once',
       ],
       [
         ['.github/workflows/ci.yml', '.github/workflows/ci.yaml'],
-        '--force overwrites .github/workflows/ci.yml, so CI then runs twice',
+        '--force overwrites .github/workflows/ci.yml, so CI then runs more than once',
+      ],
+      [
+        ['.github/workflows/ci.yaml', '.github/workflows/test.yml'],
+        'Kept them, since they already call the shared CI',
       ],
     ])(
       'should say what --force does when setup ci keeps %j',
@@ -315,7 +319,7 @@ describe('cli', () => {
       },
     )
 
-    it('should warn that CI runs twice after --force writes next to another caller', async () => {
+    it('should warn that CI runs more than once after --force writes next to another caller', async () => {
       const perfekt = createPerfektDouble()
       perfekt.setupCi.mockResolvedValue({
         files: [
@@ -335,7 +339,7 @@ describe('cli', () => {
 
       expect(stdoutSpy).toHaveBeenCalledWith(
         expect.stringContaining(
-          'Wrote .github/workflows/ci.yml next to a workflow that already calls the shared CI',
+          'Wrote .github/workflows/ci.yml, but the skipped workflows above already call the shared CI',
         ),
       )
     })

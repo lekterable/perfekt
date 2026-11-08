@@ -199,17 +199,18 @@ const printSetupCiSummary = (result: SetupCiResult) => {
   const keptCi = kept.includes(CI_WORKFLOW_PATH)
   const keptCaller = kept.some((file) => file !== CI_WORKFLOW_PATH)
   const wrote = result.files.some((file) => file.status === 'written')
-  const twice = 'so CI then runs twice: remove one of them.'
+  // Worded for one or more other callers, since every one is listed above
+  const more = 'so CI then runs more than once: keep only one caller.'
   const note =
     kept.length === 0
       ? 'It runs on pull requests only and skips drafts: open them as drafts and mark them ready once.'
       : wrote
-        ? `Wrote ${CI_WORKFLOW_PATH} next to a workflow that already calls the shared CI, ${twice}`
+        ? `Wrote ${CI_WORKFLOW_PATH}, but the skipped workflows above already call the shared CI, ${more}`
         : !keptCaller
           ? 'Kept the existing workflow: pass --force to overwrite it.'
           : keptCi
-            ? `Kept both, since one already calls the shared CI. --force overwrites ${CI_WORKFLOW_PATH}, ${twice}`
-            : `Kept it, since it already calls the shared CI. --force writes ${CI_WORKFLOW_PATH} too, ${twice}`
+            ? `Kept them all, since the shared CI is already called. --force overwrites ${CI_WORKFLOW_PATH}, ${more}`
+            : `Kept them, since they already call the shared CI. --force writes ${CI_WORKFLOW_PATH} too, ${more}`
 
   process.stdout.write(`\n  ${note}\n`)
 }
@@ -475,7 +476,7 @@ next to another workflow that calls the shared CI (remove one of them). Exits 0,
 Examples:
   perfekt setup                       # in a new repo
   perfekt setup --force               # rewrite every file it owns
-  perfekt setup --json                # { success, command, files, defaultBranch, editsOnly?, hooksPath, clonesNeed, installCommand, scripts }`,
+  perfekt setup --json                # { success, command, files, defaultBranch, editsOnly, hooksPath, clonesNeed, installCommand, scripts }`,
     )
     .action(async (options: { force?: boolean; json?: boolean }) => {
       const force = Boolean(options.force)
@@ -524,7 +525,7 @@ Examples:
     )
     .option(
       '--force',
-      'write ci.yml even if it exists or another workflow calls the shared CI (then CI runs twice)',
+      'write ci.yml even if it exists or another workflow calls the shared CI (then CI runs more than once)',
     )
     .option('--json', 'print the command result as JSON')
     .addHelpText(
@@ -535,7 +536,7 @@ which needs a packageManager field in package.json. Leaves an existing ci.yml, o
 workflow that already calls the shared CI, alone unless --force. Exits 0, or 1 on an error.
 Run it before setup commits, so the PR title workflow lints title edits only. In the files
 list, a skipped ci.yml is what --force overwrites, and any other skipped path already calls
-the shared CI, so --force adds ci.yml beside it and CI then runs twice.
+the shared CI, so --force adds ci.yml beside it and CI then runs more than once.
 
 Examples:
   perfekt setup ci

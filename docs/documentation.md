@@ -138,7 +138,7 @@ Options:
 
 `-h, --help` - display help for command
 
-`--force` - overwrite the workflows, the hook, the Biome config and the standard scripts if they already exist. `ci.yml` is written even when another workflow calls the shared CI, so CI then runs twice: remove one of them
+`--force` - overwrite the workflows, the hook, the Biome config and the standard scripts if they already exist. `ci.yml` is written even when another workflow calls the shared CI, so CI then runs more than once: remove one of them
 
 `--json` - print `{ success, command, files, defaultBranch, editsOnly, hooksPath, clonesNeed, installCommand, scripts }`, with the files of every step (`editsOnly` only when the PR title workflow is written)
 
@@ -148,13 +148,13 @@ Usage: `perfekt setup ci [options]`
 
 Writes `.github/workflows/ci.yml`, which calls the shared `lekterable/perfekt/.github/workflows/ci.yml@master` workflow on pull requests only (`opened`, `synchronize`, `reopened` and `ready_for_review`), with no `paths-ignore`, so every pull request gets its title linted and reports `Verify`. A new push cancels the older run. The shared job starts nothing for a draft and lints the pull request title, so open pull requests as drafts and mark them ready once. The `pull_request` filter uses the detected default branch when git exposes one. See [CI](tooling.md#ci) for the caller and the inputs it takes.
 
-The shared job installs with pnpm, so `package.json` needs a `packageManager` field. An existing `ci.yml`, or any workflow that already calls the shared CI (such as `ci.yaml`), is left alone unless you pass `--force`, so CI never runs twice.
+The shared job installs with pnpm, so `package.json` needs a `packageManager` field. An existing `ci.yml`, or any workflow that already calls the shared CI (such as `ci.yaml`), is left alone unless you pass `--force`, so CI never runs more than once.
 
 Options:
 
 `-h, --help` - display help for command
 
-`--force` - write `ci.yml` even if it exists or another workflow calls the shared CI (in that case CI then runs twice, so remove one of them)
+`--force` - write `ci.yml` even if it exists or another workflow calls the shared CI (in that case CI then runs more than once, so remove one of them)
 
 `--json` - print `{ success, command, files, defaultBranch }`. A skipped `ci.yml` is what `--force` overwrites; any other skipped path already calls the shared CI, and `--force` writes `ci.yml` beside it
 

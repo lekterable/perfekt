@@ -1,3 +1,15 @@
+# 4.4.0
+
+## Features
+
+- add setup ci and bump workflow actions (#46) [8b8b5cb7](https://github.com/lekterable/perfekt/commit/8b8b5cb7dc7404717a7415906b96c8762e42245f)
+- skip drafts and lint the PR title in shared CI (#45) [6c78311e](https://github.com/lekterable/perfekt/commit/6c78311efeadc9b61758840c09d9f5bd29893a64)
+- require node 26 and run shared CI on it (#39) [aa68fb45](https://github.com/lekterable/perfekt/commit/aa68fb458ad50a9cea44fd03f8c7003658b026e1)
+
+## Fixes
+
+- skip commitlint on pull request synchronize (#43) [033165a9](https://github.com/lekterable/perfekt/commit/033165a9c813fdd19c83d54f50650b24b696a739)
+
 # 4.3.0
 
 ## Features

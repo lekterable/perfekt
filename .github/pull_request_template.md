@@ -18,7 +18,7 @@
 <details>
 <summary>Request</summary>
 
-<!-- The prompts that asked for this, verbatim, with a one-line **Agent:** paraphrase between them. In a public repo, one line of paraphrase instead. "Not in this session." when you don't have them; never secrets or private data. -->
+<!-- The prompts that asked for this, verbatim, each as a `>` quote (a `>` on every line, blank ones too, so a multi-line prompt stays one quote), with a one-line **Agent:** paraphrase between them. In a public repo, one `>` line of paraphrase instead. "Not in this session." when you don't have them; never secrets or private data. -->
 </details>
 
 <!-- `ready` writes ## Ready below. -->

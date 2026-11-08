@@ -11,7 +11,7 @@
   release then needs no direct push to the default branch or a tag push from a local clone.
 - [ ] Prerelease mode: `perfekt pre enter beta` / `perfekt pre exit`, versions like `5.0.0-beta.0`,
   published under the matching npm dist-tag.
-- [ ] Snapshot versions: `perfekt release --snapshot canary` gives a throwaway version with a date or
+- [ ] Snapshot versions: `perfekt release new --snapshot canary` gives a throwaway version with a date or
   sha (`4.5.0-canary.<sha>`) for trying a change in another repo, without a release commit or tag.
 
 ## Monorepos

@@ -1,0 +1,141 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+# TypeScript Guidelines
+
+**General TypeScript coding standards and function declaration patterns.**
+
+## **Function Declarations**
+
+- **Use arrow functions over function declarations** throughout the codebase
+- **Apply to all function types** - utilities, event handlers, helpers
+
+```ts
+// ✅ DO: Arrow functions
+const handleClick = () => {
+  /* logic */
+}
+
+const processData = (data: string[]) => data.map((item) => item.trim())
+
+const calculateTotal = (items: number[]) =>
+  items.reduce((sum, item) => sum + item, 0)
+
+// ❌ DON'T: Function declarations
+function handleClick() {
+  /* logic */
+}
+
+function processData(data: string[]) {
+  return data.map((item) => item.trim())
+}
+
+function calculateTotal(items: number[]) {
+  return items.reduce((sum, item) => sum + item, 0)
+}
+```
+
+## **Type Definitions**
+
+- **Use clear, descriptive type names**
+- **Prefer type over interface** for simple object shapes
+- **Use interface for extensible object definitions**
+
+```ts
+// ✅ DO: Clear type definitions
+type UserRole = 'admin' | 'user' | 'moderator'
+
+type ApiResponse<T> = {
+  data: T
+  status: number
+  message: string
+}
+
+interface User {
+  id: string
+  name: string
+  email: string
+  role: UserRole
+}
+
+// ❌ DON'T: Unclear or inconsistent typing
+type U = { n: string; e: string }
+
+interface Response {
+  d: any
+  s: number
+}
+```
+
+## **Early Return Pattern (Guard Clauses)**
+
+- **Use early returns for validation and error cases** - Prefer guard clauses over nested if statements
+- **Return early for edge cases** - Reduces nesting and improves readability
+- **Keep the main logic at the top level** - Makes the "happy path" more obvious
+
+```ts
+// ✅ DO: Early returns (guard clauses)
+const processUser = async (userId: string | null) => {
+  if (!userId) {
+    return { error: 'User ID is required' }
+  }
+
+  const user = await getUser(userId)
+
+  if (!user) {
+    return { error: 'User not found' }
+  }
+
+  // Main logic continues here without deep nesting
+  return { data: user }
+}
+
+// ❌ DON'T: Nested ifs (arrow code/pyramid of doom)
+const processUser = async (userId: string | null) => {
+  if (userId) {
+    const user = await getUser(userId)
+    if (user) {
+      // Main logic deeply nested
+      return { data: user }
+    } else {
+      return { error: 'User not found' }
+    }
+  } else {
+    return { error: 'User ID is required' }
+  }
+}
+```
+
+## **Error Handling**
+
+- **Use arrow functions for error handlers**
+- **Provide meaningful error messages**
+- **Handle errors consistently**
+
+```ts
+// ✅ DO: Consistent error handling
+const handleApiError = (error: Error) => {
+  console.error('API Error:', error.message)
+  return { success: false, message: error.message }
+}
+
+const safeParseJson = (jsonString: string) => {
+  try {
+    return { success: true, data: JSON.parse(jsonString) }
+  } catch (error) {
+    return handleApiError(error as Error)
+  }
+}
+
+// ❌ DON'T: Inconsistent error handling
+function handleError(e: any) {
+  throw e
+}
+
+const parseJson = (str: string) => JSON.parse(str) // No error handling
+```
+
+**Follow these patterns for consistent, maintainable TypeScript code.**

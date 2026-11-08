@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "syncedFiles": {
+    ".cursor/rules/cursor-rules.mdc": "2026-11-08T23:01:25.793Z",
+    ".cursor/rules/formatting-guidelines.mdc": "2026-11-08T23:01:25.793Z",
+    ".cursor/rules/react-guidelines.mdc": "2026-11-08T23:01:25.793Z",
+    ".cursor/rules/self-improve.mdc": "2026-11-08T23:01:25.793Z",
+    ".cursor/rules/turborepo.mdc": "2026-11-08T23:01:25.793Z",
+    ".cursor/rules/typescript-guidelines.mdc": "2026-11-08T23:01:25.793Z",
+    "blocks/code-conventions.md": "2026-11-08T23:01:25.793Z"
+  },
+  "fileHashes": {
+    ".cursor/rules/cursor-rules.mdc": "fa71846db07e1c42dc6c51871d782134602c6087dde92ce8f486809421820445",
+    ".cursor/rules/formatting-guidelines.mdc": "c7fc33523a8817ad583d135a73a1f1f8c3b9dceb0b688105e4f1e6fbfc1185d0",
+    ".cursor/rules/react-guidelines.mdc": "9e80586e5cbc375f58c13dfe1595e9647997a88f1503339587f3dee4dccef36e",
+    ".cursor/rules/self-improve.mdc": "90160a8209151d093c7510d37feb5a35efd5dd0890ca6e3cfd83caa1768fa7d0",
+    ".cursor/rules/turborepo.mdc": "cfe0c2a877debdcb7f23fc380f97cc7a04a8df69c9ca8cedfe12d5e7d37ee77b",
+    ".cursor/rules/typescript-guidelines.mdc": "0d6aa1cc71cdb062b9eb23db1a16de85653c20ee4745a0d5597d790b3b694746",
+    "blocks/code-conventions.md": "8e4f03f3dc541a3f1cce6ff607f533aba36fa6937169732260a41dc46234fd8d"
+  },
+  "doctor": {
+    "initialized": false
+  }
+}

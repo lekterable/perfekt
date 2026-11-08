@@ -1,6 +1,11 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { COMMITS_REUSABLE_WORKFLOW, getCommitsWorkflow } from './commits'
+import {
+  CI_REUSABLE_WORKFLOW,
+  COMMITS_REUSABLE_WORKFLOW,
+  getCiWorkflow,
+  getCommitsWorkflow,
+} from './commits'
 
 const repoRoot = path.resolve(__dirname, '../..')
 const reusableWorkflow = fs.readFileSync(
@@ -24,11 +29,11 @@ describe('commits', () => {
     [undefined, undefined],
     ['main', 'branches: [main]'],
     ['bad branch', undefined],
-  ])('should pin the template for branch %j to %j', (branch, line) => {
-    const workflow = getCommitsWorkflow(branch)
-
-    if (line) expect(workflow).toContain(line)
-    else expect(workflow).not.toContain('branches:')
+  ])('should pin both templates for branch %j to %j', (branch, line) => {
+    ;[getCommitsWorkflow(branch), getCiWorkflow(branch)].forEach((workflow) => {
+      if (line) expect(workflow).toContain(line)
+      else expect(workflow).not.toContain('branches:')
+    })
   })
 
   it('should not subscribe new callers to pull request synchronize', () => {
@@ -40,6 +45,31 @@ describe('commits', () => {
     expect(workflow).toContain('opened')
     expect(workflow).toContain('edited')
     expect(workflow).toContain('reopened')
+  })
+
+  it('should subscribe only title edits next to the shared CI', () => {
+    expect(getCommitsWorkflow('master', { withCi: true })).toContain(
+      'types: [edited]',
+    )
+  })
+
+  it('should run the shared CI on ready pull requests only', () => {
+    const workflow = getCiWorkflow('master')
+
+    expect(workflow).toContain(`uses: ${CI_REUSABLE_WORKFLOW}`)
+    // required checks match on the job name: CI / Verify / Node 26
+    expect(workflow).toContain('name: Verify')
+    expect(workflow).toContain(
+      'types: [opened, synchronize, reopened, ready_for_review]',
+    )
+    expect(workflow).toContain(
+      `group: \${{ github.workflow }}-\${{ github.ref }}`,
+    )
+    expect(workflow).toContain('cancel-in-progress: true')
+    expect(workflow).toContain('contents: read')
+    expect(workflow).not.toContain('push:')
+    // a filtered-out pull request would get no title lint and no Verify check
+    expect(workflow).not.toContain('paths-ignore')
   })
 
   it.each([

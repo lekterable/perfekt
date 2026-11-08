@@ -80,6 +80,10 @@ const createSetupCommitsResult = () => ({
 
 const createPerfektDouble = () => ({
   init: vi.fn().mockResolvedValue('perfekt.json'),
+  setupCi: vi.fn().mockResolvedValue({
+    files: [{ path: '.github/workflows/ci.yml', status: 'written' as const }],
+    defaultBranch: 'main',
+  }),
   setupCommits: vi.fn().mockResolvedValue(createSetupCommitsResult()),
   setupHooks: vi.fn().mockReturnValue({
     files: [{ path: '.githooks/commit-msg', status: 'written' as const }],
@@ -215,7 +219,11 @@ describe('cli', () => {
         '--json',
       ])
 
+      expect(perfekt.setupCi).toHaveBeenCalledWith({ force: false })
       expect(perfekt.setupCommits).toHaveBeenCalledWith({ force: false })
+      expect(perfekt.setupCi.mock.invocationCallOrder[0]).toBeLessThan(
+        perfekt.setupCommits.mock.invocationCallOrder[0] ?? 0,
+      )
       expect(perfekt.setupHooks).toHaveBeenCalledWith({
         force: false,
         major: '4',
@@ -225,6 +233,7 @@ describe('cli', () => {
       expect(lastJson(stdoutSpy)).toMatchObject({
         command: 'setup',
         files: [
+          { path: '.github/workflows/ci.yml', status: 'written' },
           { path: '.github/workflows/commitlint.yml', status: 'written' },
           { path: '.githooks/commit-msg', status: 'written' },
           { path: 'biome.json', status: 'written' },
@@ -257,6 +266,107 @@ describe('cli', () => {
       )
     })
 
+    it('should run the setup ci command', async () => {
+      const perfekt = createPerfektDouble()
+
+      await createProgram(perfekt, '3.0.0').parseAsync([
+        'node',
+        'perfekt',
+        'setup',
+        'ci',
+      ])
+
+      expect(perfekt.setupCi).toHaveBeenCalledWith({ force: false })
+      const output = stdoutSpy.mock.calls.map(([text]) => String(text)).join('')
+
+      expect(output).toContain('🚦 CI setup')
+      expect(output).toMatch(/Written:\s+\.github\/workflows\/ci\.yml/)
+      expect(output).toContain('Default branch')
+      expect(output).toContain('It runs on pull requests only')
+    })
+
+    it.each([
+      [['.github/workflows/ci.yml'], 'pass --force to overwrite it'],
+      [
+        ['.github/workflows/ci.yaml'],
+        '--force writes .github/workflows/ci.yml too, so CI then runs more than once',
+      ],
+      [
+        ['.github/workflows/ci.yml', '.github/workflows/ci.yaml'],
+        '--force overwrites .github/workflows/ci.yml, so CI then runs more than once',
+      ],
+      [
+        ['.github/workflows/ci.yaml', '.github/workflows/test.yml'],
+        'Kept the workflows above, since they already call the shared CI',
+      ],
+    ])(
+      'should say what --force does when setup ci keeps %j',
+      async (paths, hint) => {
+        const perfekt = createPerfektDouble()
+        perfekt.setupCi.mockResolvedValue({
+          files: paths.map((path) => ({ path, status: 'skipped' as const })),
+          defaultBranch: 'master',
+        })
+
+        await createProgram(perfekt, '3.0.0').parseAsync([
+          'node',
+          'perfekt',
+          'setup',
+          'ci',
+        ])
+
+        expect(stdoutSpy).toHaveBeenCalledWith(expect.stringContaining(hint))
+      },
+    )
+
+    it('should warn that CI runs more than once after --force writes next to another caller', async () => {
+      const perfekt = createPerfektDouble()
+      perfekt.setupCi.mockResolvedValue({
+        files: [
+          { path: '.github/workflows/ci.yml', status: 'written' },
+          { path: '.github/workflows/ci.yaml', status: 'skipped' },
+        ],
+        defaultBranch: 'master',
+      })
+
+      await createProgram(perfekt, '3.0.0').parseAsync([
+        'node',
+        'perfekt',
+        'setup',
+        'ci',
+        '--force',
+      ])
+
+      expect(stdoutSpy).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Wrote .github/workflows/ci.yml, but the skipped workflows above already call the shared CI',
+        ),
+      )
+    })
+
+    it.each([true, false])(
+      'should say the PR title workflow lints edits only when editsOnly is %s',
+      async (editsOnly) => {
+        const perfekt = createPerfektDouble()
+        perfekt.setupCommits.mockResolvedValue({
+          ...createSetupCommitsResult(),
+          editsOnly,
+        })
+
+        await createProgram(perfekt, '3.0.0').parseAsync([
+          'node',
+          'perfekt',
+          'setup',
+          'commits',
+        ])
+
+        const output = stdoutSpy.mock.calls
+          .map(([text]) => String(text))
+          .join('')
+        expect(output.includes('lints title edits only')).toBe(editsOnly)
+      },
+    )
+
     it('should run the setup commits command', async () => {
       const perfekt = createPerfektDouble()
 
@@ -286,6 +396,12 @@ describe('cli', () => {
         ['setup', 'commits', '--json'],
         'setupCommits' as const,
         [{ force: false }],
+      ],
+      [
+        'setup',
+        ['setup', 'ci', '--force', '--json'],
+        'setupCi' as const,
+        [{ force: true }],
       ],
       [
         'setup',

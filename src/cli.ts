@@ -7,6 +7,8 @@ import type {
   ChangelogResult,
   ReleaseOptions,
   ReleaseResult,
+  SetupCiOptions,
+  SetupCiResult,
   SetupCommitsOptions,
   SetupCommitsResult,
   SetupHooksOptions,
@@ -17,10 +19,11 @@ import type {
 } from '~types'
 import { Config, Perfekt } from './core'
 import { type CiResult, type CiStep, ci } from './core/ci'
-import { SQUASH_MERGE_NOTE } from './core/commits'
+import { CI_WORKFLOW_PATH, SQUASH_MERGE_NOTE } from './core/commits'
 import { loadConfig } from './core/config/load'
 import initialize from './core/initialize'
 import { cleanMessage, formatLint, lintMessage } from './core/lint'
+import setupCi from './core/setup-ci'
 import setupCommits from './core/setup-commits'
 import setupHooks from './core/setup-hooks'
 import setupLint from './core/setup-lint'
@@ -31,6 +34,7 @@ type ReleaseCommandOptions = ReleaseOptions & { json?: boolean }
 
 type PerfektCLI = {
   init: () => Promise<string>
+  setupCi: (options: SetupCiOptions) => Promise<SetupCiResult>
   setupCommits: (options: SetupCommitsOptions) => Promise<SetupCommitsResult>
   setupHooks: (options: SetupHooksOptions) => SetupHooksResult
   setupLint: (options: { force?: boolean }) => SetupLintResult
@@ -62,6 +66,7 @@ type JsonResponse =
       command: 'setup'
       files: SetupCommitsResult['files']
       defaultBranch?: SetupCommitsResult['defaultBranch']
+      editsOnly?: SetupCommitsResult['editsOnly']
       hooksPath?: SetupHooksResult['hooksPath']
       clonesNeed?: SetupHooksResult['clonesNeed']
       installCommand?: SetupLintResult['installCommand']
@@ -141,6 +146,7 @@ export const createPerfekt = (overrides = loadConfig()) => {
 // Only changelog and release read the config, so the other commands work with a broken one.
 const createCommands = (): PerfektCLI => ({
   init: initialize,
+  setupCi,
   setupCommits,
   setupHooks,
   setupLint: (options) =>
@@ -176,6 +182,40 @@ const formatDetailBlock = (
   writer(`${lines.join('\n')}\n`)
 }
 
+const printSetupCiSummary = (result: SetupCiResult) => {
+  formatDetailBlock('🚦 CI setup', [
+    ...result.files.map(
+      (file): DetailRow => [
+        file.status === 'written' ? 'Written' : 'Skipped',
+        file.path,
+      ],
+    ),
+    ['Default branch', result.defaultBranch ?? 'not detected'],
+  ])
+
+  const kept = result.files
+    .filter((file) => file.status === 'skipped')
+    .map((file) => file.path)
+  const keptCi = kept.includes(CI_WORKFLOW_PATH)
+  const keptCaller = kept.some((file) => file !== CI_WORKFLOW_PATH)
+  const wrote = result.files.some((file) => file.status === 'written')
+  // Worded for one or more other callers, since every one is listed above
+  const runsMoreThanOnce =
+    'so CI then runs more than once: keep only one caller.'
+  const note =
+    kept.length === 0
+      ? 'It runs on pull requests only and skips drafts: open them as drafts and mark them ready once.'
+      : wrote
+        ? `Wrote ${CI_WORKFLOW_PATH}, but the skipped workflows above already call the shared CI, ${runsMoreThanOnce}`
+        : !keptCaller
+          ? 'Kept the existing workflow: pass --force to overwrite it.'
+          : keptCi
+            ? `Kept them all, since the shared CI is already called. --force overwrites ${CI_WORKFLOW_PATH}, ${runsMoreThanOnce}`
+            : `Kept the workflows above, since they already call the shared CI. --force writes ${CI_WORKFLOW_PATH} too, ${runsMoreThanOnce}`
+
+  process.stdout.write(`\n  ${note}\n`)
+}
+
 const printSetupCommitsSummary = (result: SetupCommitsResult) => {
   const written = result.files
     .filter((file) => file.status === 'written')
@@ -189,6 +229,12 @@ const printSetupCommitsSummary = (result: SetupCommitsResult) => {
     ['Skipped', skipped.join(', ') || 'none'],
     ['Default branch', result.defaultBranch ?? 'not detected'],
   ])
+
+  if (result.editsOnly) {
+    process.stdout.write(
+      '\n  It lints title edits only, since the shared CI lints the title on every run.\n',
+    )
+  }
 
   process.stdout.write(`\n  ${SQUASH_MERGE_NOTE}\n`)
 }
@@ -417,12 +463,26 @@ export const createProgram = (
   const setup = program
     .command('setup')
     .description(
-      'add the PR title workflow, the commit hook, the shared Biome config and the standard scripts',
+      'add the CI and PR title workflows, the commit hook, the shared Biome config and the standard scripts',
     )
     .option('--force', 'overwrite existing files')
     .option('--json', 'print the command result as JSON')
+    .addHelpText(
+      'after',
+      `
+Runs setup ci, commits, hooks, lint and scripts in that order, so the PR title
+workflow sees the CI caller. Leaves existing files alone unless --force, which also writes ci.yml
+next to another workflow that calls the shared CI (keep only one caller). Exits 0, or 1 on an error.
+
+Examples:
+  perfekt setup                       # in a new repo
+  perfekt setup --force               # rewrite every file it owns
+  perfekt setup --json                # { success, command, files, defaultBranch, editsOnly, hooksPath, clonesNeed, installCommand, scripts }`,
+    )
     .action(async (options: { force?: boolean; json?: boolean }) => {
       const force = Boolean(options.force)
+      // CI first, so the PR title workflow sees it and only lints later title edits
+      const ciWorkflow = await perfekt.setupCi({ force })
       const commits = await perfekt.setupCommits({ force })
       const hooks = perfekt.setupHooks({ force, major })
       const lint = perfekt.setupLint({ force })
@@ -431,11 +491,13 @@ export const createProgram = (
       if (options.json) {
         writeJson(
           createSetupResponse({
+            ...ciWorkflow,
             ...commits,
             ...hooks,
             ...lint,
             ...scripts,
             files: [
+              ...ciWorkflow.files,
               ...commits.files,
               ...hooks.files,
               ...lint.files,
@@ -446,6 +508,8 @@ export const createProgram = (
         return
       }
 
+      printSetupCiSummary(ciWorkflow)
+      process.stdout.write('\n')
       printSetupCommitsSummary(commits)
       process.stdout.write('\n')
       printSetupHooksSummary(hooks)
@@ -456,12 +520,61 @@ export const createProgram = (
     })
 
   setup
+    .command('ci')
+    .description(
+      "add a GitHub Action that runs perfekt's shared CI on pull requests that are ready for review",
+    )
+    .option(
+      '--force',
+      'write ci.yml even if it exists or another workflow calls the shared CI (then CI runs more than once)',
+    )
+    .option('--json', 'print the command result as JSON')
+    .addHelpText(
+      'after',
+      `
+Writes .github/workflows/ci.yml, calling lekterable/perfekt/.github/workflows/ci.yml@master,
+which needs a packageManager field in package.json. Leaves an existing ci.yml, or any
+workflow that already calls the shared CI, alone unless --force. Exits 0, or 1 on an error.
+Run it before setup commits, so the PR title workflow lints title edits only. In the files
+list, a skipped ci.yml is what --force overwrites, and any other skipped path already calls
+the shared CI, so --force writes ci.yml beside it and CI then runs more than once.
+
+Examples:
+  perfekt setup ci
+  perfekt setup ci --force            # write ci.yml even if a workflow is kept
+  perfekt setup ci --json             # { success, command, files, defaultBranch }`,
+    )
+    .action(async (options: SetupCiOptions & { json?: boolean }) => {
+      const result = await perfekt.setupCi({ force: Boolean(options.force) })
+
+      if (options.json) {
+        writeJson(createSetupResponse(result))
+        return
+      }
+
+      printSetupCiSummary(result)
+    })
+
+  setup
     .command('commits')
     .description(
       'add a GitHub Action that lints pull request titles with perfekt lint',
     )
     .option('--force', 'overwrite an existing workflow')
     .option('--json', 'print the command result as JSON')
+    .addHelpText(
+      'after',
+      `
+Writes .github/workflows/commitlint.yml. It lints title edits only (types: [edited]) when a
+workflow in .github/workflows calls perfekt's shared CI (a YAML comment doesn't count),
+which lints the title on every run, and [opened, edited, reopened] otherwise. Leaves an
+existing commitlint.yml alone unless --force. Exits 0, or 1 on an error.
+
+Examples:
+  perfekt setup commits
+  perfekt setup commits --force       # narrow an existing workflow after setup ci
+  perfekt setup commits --json        # { success, command, files, defaultBranch, editsOnly }`,
+    )
     .action(async (options: SetupCommitsOptions & { json?: boolean }) => {
       const { json = false, ...setupOptions } = options
       const result = await perfekt.setupCommits({

@@ -132,21 +132,37 @@ Exit codes: `0` when every step passes or is skipped, `1` on the first failure.
 
 Usage: `perfekt setup [options]`
 
-Runs [`setup commits`](#setup-commits), [`setup hooks`](#setup-hooks), [`setup lint`](#setup-lint) and [`setup scripts`](#setup-scripts).
+Runs [`setup ci`](#setup-ci), [`setup commits`](#setup-commits), [`setup hooks`](#setup-hooks), [`setup lint`](#setup-lint) and [`setup scripts`](#setup-scripts). It writes the CI caller first, so the PR title workflow only lints later title edits.
 
 Options:
 
 `-h, --help` - display help for command
 
-`--force` - overwrite the workflow, the hook, the Biome config and the standard scripts if they already exist
+`--force` - overwrite the workflows, the hook, the Biome config and the standard scripts if they already exist. `ci.yml` is written even when another workflow calls the shared CI, so CI then runs more than once: keep only one caller
 
-`--json` - print `{ success, command, files, defaultBranch, hooksPath, clonesNeed, installCommand, scripts }`, with the files of every step
+`--json` - print `{ success, command, files, defaultBranch, editsOnly, hooksPath, clonesNeed, installCommand, scripts }`, with the files of every step (`editsOnly` only when the PR title workflow is written)
+
+## `setup ci`
+
+Usage: `perfekt setup ci [options]`
+
+Writes `.github/workflows/ci.yml`, which calls the shared `lekterable/perfekt/.github/workflows/ci.yml@master` workflow on pull requests only (`opened`, `synchronize`, `reopened` and `ready_for_review`), with no `paths-ignore`, so every pull request gets its title linted and reports `Verify`. A new push cancels the older run. The shared job starts nothing for a draft and lints the pull request title, so open pull requests as drafts and mark them ready once. The `pull_request` filter uses the detected default branch when git exposes one. See [CI](tooling.md#ci) for the caller and the inputs it takes.
+
+The shared job installs with pnpm, so `package.json` needs a `packageManager` field. An existing `ci.yml`, or any workflow that already calls the shared CI (such as `ci.yaml`), is left alone unless you pass `--force`, so CI never runs more than once.
+
+Options:
+
+`-h, --help` - display help for command
+
+`--force` - write `ci.yml` even if it exists or another workflow calls the shared CI (in that case CI then runs more than once, so keep only one caller)
+
+`--json` - print `{ success, command, files, defaultBranch }`. A skipped `ci.yml` is what `--force` overwrites; any other skipped path already calls the shared CI, and `--force` writes `ci.yml` beside it
 
 ## `setup commits`
 
 Usage: `perfekt setup commits [options]`
 
-Writes `.github/workflows/commitlint.yml`, which lints pull request titles by calling the shared `lekterable/perfekt/.github/workflows/commitlint.yml@master` workflow. That workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 26, so it installs nothing and title rules change everywhere at once. The `pull_request` filter uses the detected default branch when git exposes one. It runs on `opened`, `edited` and `reopened`, so a push to the pull request does not lint the title again. The shared job skips only `synchronize`, so a caller that waits for `ready_for_review` still lints the title.
+Writes `.github/workflows/commitlint.yml`, which lints pull request titles by calling the shared `lekterable/perfekt/.github/workflows/commitlint.yml@master` workflow. That workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 26, so it installs nothing and title rules change everywhere at once. The `pull_request` filter uses the detected default branch when git exposes one. It runs on `opened`, `edited` and `reopened`, so a push to the pull request does not lint the title again. When a workflow in `.github/workflows` already calls the shared CI, which lints the title on every run, it runs on `edited` only. A YAML comment, on its own line or after code, doesn't count. The shared job skips pushes, drafts and edits that leave the title as it was.
 
 When you squash-merge, the pull request title becomes the commit, so this covers what lands on the default branch. A trailing `(#N)` from GitHub squash is allowed.
 
@@ -158,7 +174,7 @@ Options:
 
 `--force` - overwrite the workflow if it already exists
 
-`--json` - print the command result as JSON instead of human-readable output
+`--json` - print `{ success, command, files, defaultBranch, editsOnly }`, where `editsOnly` (set when the workflow is written) is `true` when it lints title edits only
 
 ## `setup hooks`
 

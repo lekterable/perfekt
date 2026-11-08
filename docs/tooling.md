@@ -54,10 +54,10 @@ on:
   pull_request:
     branches: [master]
     types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore:
-      - '**/*.md'
-      - docs/**
-      - LICENSE
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   verify:
@@ -72,11 +72,11 @@ jobs:
 
 It needs a `packageManager` field in `package.json` for the pnpm version. Its checks read `CI / Verify / Node 26`, one per Node version (26 unless you pass `node-versions`).
 
-The triggers stay in your caller, so each repo decides when CI runs. To keep Actions minutes low:
+`perfekt setup ci` writes this caller for you. The triggers stay in your caller, so each repo decides when CI runs. To keep Actions minutes low:
 
 - Run on pull requests only. A merge to the default branch runs the same code the pull request already checked.
 - Open pull requests as drafts and mark them ready once. Drafts start no job, and a new push cancels the run for the older one.
-- Ignore paths that can't break the build. Leave out `**/*.md` where Markdown is what the repo checks.
+- Skip `paths-ignore`. A pull request it filters out gets no run, so its title goes unlinted next to a commitlint caller on `edited` only, and a required `Verify` check never reports.
 
 `perfekt ci` runs the same steps on your machine, plus [`perfekt lint`](documentation.md#lint) on the branch's commits. See [`ci`](documentation.md#ci).
 
@@ -113,7 +113,7 @@ jobs:
     uses: lekterable/perfekt/.github/workflows/commitlint.yml@master
 ```
 
-It skips drafts and edits that leave the title as it was. A repo without the shared CI keeps `types: [opened, edited, reopened]`, which is what `perfekt setup commits` writes. Its check reads `Commitlint / Conventional Commits / PR title`. The workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 26, so it installs nothing and rule changes reach every repo at once.
+It skips drafts and edits that leave the title as it was. [`perfekt setup commits`](documentation.md#setup-commits) writes `types: [edited]` when a workflow in `.github/workflows` calls the shared CI, and `types: [opened, edited, reopened]` otherwise. Its check reads `Commitlint / Conventional Commits / PR title`. The workflow runs `perfekt lint`'s rules straight from perfekt's `master` with Node 26, so it installs nothing and rule changes reach every repo at once.
 
 ## Releases
 
@@ -165,7 +165,7 @@ publish:
   if: needs.release.outputs.released == 'true'
   runs-on: ubuntu-latest
   steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         ref: ${{ needs.release.outputs.version }}
     # set up your package manager, build and publish

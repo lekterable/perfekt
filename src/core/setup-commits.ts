@@ -4,10 +4,49 @@ import type { SetupCommitsOptions, SetupCommitsResult } from '~types'
 import { fileExists, writeFile } from '~utils'
 import exec from '~utils/misc/exec'
 import {
+  CI_REUSABLE_WORKFLOW,
   COMMITS_WORKFLOW_PATH,
   getCommitsWorkflow,
   isSafeBranchName,
 } from './commits'
+
+// Any ref of the shared CI counts, not only @master
+const SHARED_CI = `${CI_REUSABLE_WORKFLOW.split('@')[0]}@`
+
+const WORKFLOWS_DIRECTORY = '.github/workflows'
+
+const readWorkflow = (file: string) => {
+  try {
+    return fs.readFileSync(file, 'utf8')
+  } catch {
+    return ''
+  }
+}
+
+const listWorkflows = () => {
+  try {
+    return (
+      fs
+        .readdirSync(WORKFLOWS_DIRECTORY)
+        .filter((name) => /\.ya?ml$/.test(name))
+        // posix, so the path matches CI_WORKFLOW_PATH on Windows too
+        .map((name) => path.posix.join(WORKFLOWS_DIRECTORY, name))
+    )
+  } catch {
+    return []
+  }
+}
+
+/**
+ * The workflows that call perfekt's shared CI, which lints the PR title on every run: any file
+ * name, any ref, and only outside a YAML comment.
+ */
+export const findSharedCiWorkflows = () =>
+  listWorkflows().filter((file) =>
+    readWorkflow(file)
+      .split(/\r?\n/)
+      .some((line) => line.replace(/(^|\s)#.*$/, '').includes(SHARED_CI)),
+  )
 
 const readGitLine = (command: string) => {
   try {
@@ -54,12 +93,18 @@ const setupCommits = async (
     }
   }
 
+  const editsOnly = findSharedCiWorkflows().length > 0
+
   fs.mkdirSync(path.dirname(COMMITS_WORKFLOW_PATH), { recursive: true })
-  await writeFile(COMMITS_WORKFLOW_PATH, getCommitsWorkflow(defaultBranch))
+  await writeFile(
+    COMMITS_WORKFLOW_PATH,
+    getCommitsWorkflow(defaultBranch, { withCi: editsOnly }),
+  )
 
   return {
     files: [{ path: COMMITS_WORKFLOW_PATH, status: 'written' }],
     defaultBranch,
+    editsOnly,
   }
 }
 

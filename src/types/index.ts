@@ -24,14 +24,21 @@ export type ReleaseOptions = { from?: string; dryRun?: boolean }
 
 export type SetupCommitsOptions = { force?: boolean }
 
+export type SetupCiOptions = { force?: boolean }
+
 export type SetupFileResult = {
   path: string
   status: 'written' | 'skipped'
 }
 
-export type SetupCommitsResult = {
+export type SetupCiResult = {
   files: SetupFileResult[]
   defaultBranch: string | undefined
+}
+
+export type SetupCommitsResult = SetupCiResult & {
+  /** Set when the workflow was written: true when it lints title edits only, next to the shared CI */
+  editsOnly?: boolean
 }
 
 export type SetupLintOptions = {

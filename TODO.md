@@ -29,8 +29,8 @@ stay the fast path. Single-package repos keep working as they do now.
   `perfekt change`, consumed by the release, with `perfekt change status --check` for CI. Optional
   next to commit inference, for when a commit scope is ambiguous.
 - [ ] Internal dependency ranges: bump local `workspace:` and version ranges in dependents when a
-  dependency releases (`updateInternalDependencies`), with a changelog line for dependency-only
-  releases.
+  dependency releases (a config option, like Changesets' `updateInternalDependencies`), with a
+  changelog line for dependency-only releases.
 - [ ] Fixed and linked groups: packages that always share one version, or move together.
 - [ ] Ignored and private packages: listed by discovery but never released or published.
 - [ ] Import from Changesets: read `.changeset/*.md` and map its config, warning on what doesn't map.

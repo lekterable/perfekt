@@ -277,9 +277,12 @@ describe('cli', () => {
       ])
 
       expect(perfekt.setupCi).toHaveBeenCalledWith({ force: false })
-      expect(stdoutSpy).toHaveBeenCalledWith(
-        expect.stringContaining('🚦 CI setup'),
-      )
+      const output = stdoutSpy.mock.calls.map(([text]) => String(text)).join('')
+
+      expect(output).toContain('🚦 CI setup')
+      expect(output).toMatch(/Written:\s+\.github\/workflows\/ci\.yml/)
+      expect(output).toContain('Default branch')
+      expect(output).toContain('It runs on pull requests only')
     })
 
     it.each([

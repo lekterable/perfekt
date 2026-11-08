@@ -36,8 +36,17 @@ describe('setup-ci', () => {
 
   it('should skip an existing CI workflow unless force is set', async () => {
     fsMock.existsSync.mockReturnValue(true)
+    // ci.yml itself calls the shared CI, so it is listed once
+    fsMock.readdirSync.mockReturnValue(['ci.yml'] as unknown as ReturnType<
+      typeof fs.readdirSync
+    >)
+    fsMock.readFileSync.mockReturnValue(
+      'uses: lekterable/perfekt/.github/workflows/ci.yml@master',
+    )
 
-    expect((await setupCi()).files[0]?.status).toBe('skipped')
+    expect((await setupCi()).files).toEqual([
+      { path: CI_WORKFLOW_PATH, status: 'skipped' },
+    ])
     expect(writeFileSpy).not.toHaveBeenCalled()
     expect((await setupCi({ force: true })).files[0]?.status).toBe('written')
   })

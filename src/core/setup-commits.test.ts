@@ -60,7 +60,12 @@ describe('setup-commits', () => {
   const SHARED = 'uses: lekterable/perfekt/.github/workflows/ci.yml'
 
   it.each([
-    ['calls the shared CI', 'ci.yml', `${SHARED}@master`, true],
+    [
+      'calls the shared CI',
+      'ci.yml',
+      `on: pull_request\njobs:\n  verify:\n    ${SHARED}@master\n`,
+      true,
+    ],
     ['calls the shared CI at a tag', 'ci.yml', `${SHARED}@v4`, true],
     ['calls the shared CI from ci.yaml', 'ci.yaml', `${SHARED}@master`, true],
     [

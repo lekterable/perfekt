@@ -57,6 +57,8 @@ describe('commits', () => {
     const workflow = getCiWorkflow('master')
 
     expect(workflow).toContain(`uses: ${CI_REUSABLE_WORKFLOW}`)
+    // required checks match on the job name: CI / Verify / Node 26
+    expect(workflow).toContain('name: Verify')
     expect(workflow).toContain(
       'types: [opened, synchronize, reopened, ready_for_review]',
     )

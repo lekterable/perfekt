@@ -297,7 +297,7 @@ describe('cli', () => {
       ],
       [
         ['.github/workflows/ci.yaml', '.github/workflows/test.yml'],
-        'Kept them, since they already call the shared CI',
+        'Kept the workflows above, since they already call the shared CI',
       ],
     ])(
       'should say what --force does when setup ci keeps %j',

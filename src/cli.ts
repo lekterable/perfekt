@@ -200,17 +200,18 @@ const printSetupCiSummary = (result: SetupCiResult) => {
   const keptCaller = kept.some((file) => file !== CI_WORKFLOW_PATH)
   const wrote = result.files.some((file) => file.status === 'written')
   // Worded for one or more other callers, since every one is listed above
-  const more = 'so CI then runs more than once: keep only one caller.'
+  const runsMoreThanOnce =
+    'so CI then runs more than once: keep only one caller.'
   const note =
     kept.length === 0
       ? 'It runs on pull requests only and skips drafts: open them as drafts and mark them ready once.'
       : wrote
-        ? `Wrote ${CI_WORKFLOW_PATH}, but the skipped workflows above already call the shared CI, ${more}`
+        ? `Wrote ${CI_WORKFLOW_PATH}, but the skipped workflows above already call the shared CI, ${runsMoreThanOnce}`
         : !keptCaller
           ? 'Kept the existing workflow: pass --force to overwrite it.'
           : keptCi
-            ? `Kept them all, since the shared CI is already called. --force overwrites ${CI_WORKFLOW_PATH}, ${more}`
-            : `Kept them, since they already call the shared CI. --force writes ${CI_WORKFLOW_PATH} too, ${more}`
+            ? `Kept them all, since the shared CI is already called. --force overwrites ${CI_WORKFLOW_PATH}, ${runsMoreThanOnce}`
+            : `Kept the workflows above, since they already call the shared CI. --force writes ${CI_WORKFLOW_PATH} too, ${runsMoreThanOnce}`
 
   process.stdout.write(`\n  ${note}\n`)
 }
@@ -471,7 +472,7 @@ export const createProgram = (
       `
 Runs setup ci, commits, hooks, lint and scripts in that order, so the PR title
 workflow sees the CI caller. Leaves existing files alone unless --force, which also writes ci.yml
-next to another workflow that calls the shared CI (remove one of them). Exits 0, or 1 on an error.
+next to another workflow that calls the shared CI (keep only one caller). Exits 0, or 1 on an error.
 
 Examples:
   perfekt setup                       # in a new repo

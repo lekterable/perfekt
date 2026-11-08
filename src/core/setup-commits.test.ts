@@ -83,6 +83,12 @@ describe('setup-commits', () => {
       false,
     ],
     [
+      'only mentions the shared CI in a comment with CRLF line endings',
+      'ci.yml',
+      `on: push\r\n    # ${SHARED}@master\r\n`,
+      false,
+    ],
+    [
       'only mentions the shared CI in a trailing comment',
       'ci.yml',
       `on: push # was ${SHARED}@master`,

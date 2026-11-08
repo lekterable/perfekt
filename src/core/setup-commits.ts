@@ -41,7 +41,7 @@ const listWorkflows = () => {
 export const findSharedCiWorkflow = () =>
   listWorkflows().find((file) =>
     readWorkflow(file)
-      .split('\n')
+      .split(/\r?\n/)
       .some((line) => line.replace(/(^|\s)#.*$/, '').includes(SHARED_CI)),
   )
 

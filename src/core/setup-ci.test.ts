@@ -48,7 +48,9 @@ describe('setup-ci', () => {
       { path: CI_WORKFLOW_PATH, status: 'skipped' },
     ])
     expect(writeFileSpy).not.toHaveBeenCalled()
-    expect((await setupCi({ force: true })).files[0]?.status).toBe('written')
+    expect((await setupCi({ force: true })).files).toEqual([
+      { path: CI_WORKFLOW_PATH, status: 'written' },
+    ])
   })
 
   it.each([
@@ -79,4 +81,24 @@ describe('setup-ci', () => {
       ])
     },
   )
+
+  it('should report every other caller of the shared CI, not just the first', async () => {
+    fsMock.existsSync.mockReturnValue(true)
+    fsMock.readdirSync.mockReturnValue([
+      'ci.yml',
+      'test.yml',
+    ] as unknown as ReturnType<typeof fs.readdirSync>)
+    fsMock.readFileSync.mockReturnValue(
+      'uses: lekterable/perfekt/.github/workflows/ci.yml@master',
+    )
+
+    expect((await setupCi()).files).toEqual([
+      { path: CI_WORKFLOW_PATH, status: 'skipped' },
+      { path: '.github/workflows/test.yml', status: 'skipped' },
+    ])
+    expect((await setupCi({ force: true })).files).toEqual([
+      { path: CI_WORKFLOW_PATH, status: 'written' },
+      { path: '.github/workflows/test.yml', status: 'skipped' },
+    ])
+  })
 })

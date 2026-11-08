@@ -340,12 +340,9 @@ describe('cli', () => {
       )
     })
 
-    it.each([
-      [true, true],
-      [false, false],
-    ])(
+    it.each([true, false])(
       'should say the PR title workflow lints edits only when editsOnly is %s',
-      async (editsOnly, shown) => {
+      async (editsOnly) => {
         const perfekt = createPerfektDouble()
         perfekt.setupCommits.mockResolvedValue({
           ...createSetupCommitsResult(),
@@ -362,7 +359,7 @@ describe('cli', () => {
         const output = stdoutSpy.mock.calls
           .map(([text]) => String(text))
           .join('')
-        expect(output.includes('lints title edits only')).toBe(shown)
+        expect(output.includes('lints title edits only')).toBe(editsOnly)
       },
     )
 

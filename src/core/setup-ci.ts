@@ -3,7 +3,7 @@ import path from 'node:path'
 import type { SetupCiOptions, SetupCiResult } from '~types'
 import { fileExists, writeFile } from '~utils'
 import { CI_WORKFLOW_PATH, getCiWorkflow } from './commits'
-import { findSharedCiWorkflow, getDefaultBranch } from './setup-commits'
+import { findSharedCiWorkflows, getDefaultBranch } from './setup-commits'
 
 /**
  * Writes the CI caller for perfekt's shared CI workflow. Unless force is set it keeps an existing
@@ -14,11 +14,11 @@ const setupCi = async (
   options: SetupCiOptions = {},
 ): Promise<SetupCiResult> => {
   const defaultBranch = getDefaultBranch()
-  const caller = findSharedCiWorkflow()
+  const callers = findSharedCiWorkflows()
   const kept = [
     ...new Set([
       ...(fileExists(CI_WORKFLOW_PATH) ? [CI_WORKFLOW_PATH] : []),
-      ...(caller ? [caller] : []),
+      ...callers,
     ]),
   ]
 
@@ -32,13 +32,13 @@ const setupCi = async (
   fs.mkdirSync(path.dirname(CI_WORKFLOW_PATH), { recursive: true })
   await writeFile(CI_WORKFLOW_PATH, getCiWorkflow(defaultBranch))
 
-  // Another caller stays as it was, so it is reported and the summary can warn that CI runs twice
+  // Other callers stay as they were, so they are reported and the summary can warn that CI runs twice
   return {
     files: [
       { path: CI_WORKFLOW_PATH, status: 'written' },
-      ...(caller && caller !== CI_WORKFLOW_PATH
-        ? [{ path: caller, status: 'skipped' as const }]
-        : []),
+      ...callers
+        .filter((file) => file !== CI_WORKFLOW_PATH)
+        .map((file) => ({ path: file, status: 'skipped' }) as const),
     ],
     defaultBranch,
   }

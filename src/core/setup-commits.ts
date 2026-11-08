@@ -38,11 +38,11 @@ const listWorkflows = () => {
 }
 
 /**
- * The workflow that calls perfekt's shared CI, which lints the PR title on every run: any file
+ * The workflows that call perfekt's shared CI, which lints the PR title on every run: any file
  * name, any ref, and only outside a YAML comment.
  */
-export const findSharedCiWorkflow = () =>
-  listWorkflows().find((file) =>
+export const findSharedCiWorkflows = () =>
+  listWorkflows().filter((file) =>
     readWorkflow(file)
       .split(/\r?\n/)
       .some((line) => line.replace(/(^|\s)#.*$/, '').includes(SHARED_CI)),
@@ -93,7 +93,7 @@ const setupCommits = async (
     }
   }
 
-  const editsOnly = findSharedCiWorkflow() !== undefined
+  const editsOnly = findSharedCiWorkflows().length > 0
 
   fs.mkdirSync(path.dirname(COMMITS_WORKFLOW_PATH), { recursive: true })
   await writeFile(

@@ -66,6 +66,7 @@ type JsonResponse =
       command: 'setup'
       files: SetupCommitsResult['files']
       defaultBranch?: SetupCommitsResult['defaultBranch']
+      editsOnly?: SetupCommitsResult['editsOnly']
       hooksPath?: SetupHooksResult['hooksPath']
       clonesNeed?: SetupHooksResult['clonesNeed']
       installCommand?: SetupLintResult['installCommand']
@@ -474,7 +475,7 @@ next to another workflow that calls the shared CI (remove one of them). Exits 0,
 Examples:
   perfekt setup                       # in a new repo
   perfekt setup --force               # rewrite every file it owns
-  perfekt setup --json                # { success, command, files, defaultBranch, editsOnly, hooksPath, clonesNeed, installCommand, scripts }`,
+  perfekt setup --json                # { success, command, files, defaultBranch, editsOnly?, hooksPath, clonesNeed, installCommand, scripts }`,
     )
     .action(async (options: { force?: boolean; json?: boolean }) => {
       const force = Boolean(options.force)

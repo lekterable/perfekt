@@ -54,6 +54,7 @@ describe('setup-commits', () => {
     expect(result).toEqual({
       files: [{ path: COMMITS_WORKFLOW_PATH, status: 'written' }],
       defaultBranch: 'main',
+      editsOnly: false,
     })
   })
 

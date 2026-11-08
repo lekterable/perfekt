@@ -75,6 +75,7 @@ describe('setup-ci', () => {
       expect(writeFileSpy).not.toHaveBeenCalled()
       expect((await setupCi({ force: true })).files).toEqual([
         { path: CI_WORKFLOW_PATH, status: 'written' },
+        { path: '.github/workflows/ci.yaml', status: 'skipped' },
       ])
     },
   )

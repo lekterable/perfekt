@@ -55,7 +55,7 @@ perfekt release new                  # pick the next version from the commits an
 perfekt changelog                    # preview the unreleased changes
 perfekt lint "feat(cli): add x"      # check a message
 perfekt ci                           # check the branch like CI would, before you push
-perfekt setup                        # lint PR titles, commits and code the shared way
+perfekt setup                        # add CI, lint PR titles, commits and code the shared way
 ```
 
 `release new` picks the version from the commit types: `feat` is a minor release, `fix` a patch, and a `!` or `BREAKING CHANGE` a major. You can also pass `major`, `minor`, `patch` or an exact version. Start with [getting started](https://lekterable.github.io/perfekt/#/getting-started), and see the [documentation](https://lekterable.github.io/perfekt/#/documentation) for every option.

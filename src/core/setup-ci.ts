@@ -14,10 +14,11 @@ const setupCi = async (
   options: SetupCiOptions = {},
 ): Promise<SetupCiResult> => {
   const defaultBranch = getDefaultBranch()
+  const caller = findSharedCiWorkflow()
   const kept = [
     ...new Set([
       ...(fileExists(CI_WORKFLOW_PATH) ? [CI_WORKFLOW_PATH] : []),
-      ...[findSharedCiWorkflow()].filter((file) => file !== undefined),
+      ...(caller ? [caller] : []),
     ]),
   ]
 
@@ -31,8 +32,14 @@ const setupCi = async (
   fs.mkdirSync(path.dirname(CI_WORKFLOW_PATH), { recursive: true })
   await writeFile(CI_WORKFLOW_PATH, getCiWorkflow(defaultBranch))
 
+  // Another caller stays as it was, so it is reported and the summary can warn that CI runs twice
   return {
-    files: [{ path: CI_WORKFLOW_PATH, status: 'written' }],
+    files: [
+      { path: CI_WORKFLOW_PATH, status: 'written' },
+      ...(caller && caller !== CI_WORKFLOW_PATH
+        ? [{ path: caller, status: 'skipped' as const }]
+        : []),
+    ],
     defaultBranch,
   }
 }

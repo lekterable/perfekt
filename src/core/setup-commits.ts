@@ -25,10 +25,13 @@ const readWorkflow = (file: string) => {
 
 const listWorkflows = () => {
   try {
-    return fs
-      .readdirSync(WORKFLOWS_DIRECTORY)
-      .filter((name) => /\.ya?ml$/.test(name))
-      .map((name) => path.join(WORKFLOWS_DIRECTORY, name))
+    return (
+      fs
+        .readdirSync(WORKFLOWS_DIRECTORY)
+        .filter((name) => /\.ya?ml$/.test(name))
+        // posix, so the path matches CI_WORKFLOW_PATH on Windows too
+        .map((name) => path.posix.join(WORKFLOWS_DIRECTORY, name))
+    )
   } catch {
     return []
   }
@@ -90,17 +93,18 @@ const setupCommits = async (
     }
   }
 
+  const editsOnly = findSharedCiWorkflow() !== undefined
+
   fs.mkdirSync(path.dirname(COMMITS_WORKFLOW_PATH), { recursive: true })
   await writeFile(
     COMMITS_WORKFLOW_PATH,
-    getCommitsWorkflow(defaultBranch, {
-      withCi: findSharedCiWorkflow() !== undefined,
-    }),
+    getCommitsWorkflow(defaultBranch, { withCi: editsOnly }),
   )
 
   return {
     files: [{ path: COMMITS_WORKFLOW_PATH, status: 'written' }],
     defaultBranch,
+    editsOnly,
   }
 }
 

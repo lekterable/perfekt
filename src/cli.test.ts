@@ -315,6 +315,57 @@ describe('cli', () => {
       },
     )
 
+    it('should warn that CI runs twice after --force writes next to another caller', async () => {
+      const perfekt = createPerfektDouble()
+      perfekt.setupCi.mockResolvedValue({
+        files: [
+          { path: '.github/workflows/ci.yml', status: 'written' },
+          { path: '.github/workflows/ci.yaml', status: 'skipped' },
+        ],
+        defaultBranch: 'master',
+      })
+
+      await createProgram(perfekt, '3.0.0').parseAsync([
+        'node',
+        'perfekt',
+        'setup',
+        'ci',
+        '--force',
+      ])
+
+      expect(stdoutSpy).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Wrote .github/workflows/ci.yml next to a workflow that already calls the shared CI',
+        ),
+      )
+    })
+
+    it.each([
+      [true, true],
+      [false, false],
+    ])(
+      'should say the PR title workflow lints edits only when editsOnly is %s',
+      async (editsOnly, shown) => {
+        const perfekt = createPerfektDouble()
+        perfekt.setupCommits.mockResolvedValue({
+          ...createSetupCommitsResult(),
+          editsOnly,
+        })
+
+        await createProgram(perfekt, '3.0.0').parseAsync([
+          'node',
+          'perfekt',
+          'setup',
+          'commits',
+        ])
+
+        const output = stdoutSpy.mock.calls
+          .map(([text]) => String(text))
+          .join('')
+        expect(output.includes('lints title edits only')).toBe(shown)
+      },
+    )
+
     it('should run the setup commits command', async () => {
       const perfekt = createPerfektDouble()
 

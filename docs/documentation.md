@@ -140,7 +140,7 @@ Options:
 
 `--force` - overwrite the workflows, the hook, the Biome config and the standard scripts if they already exist. `ci.yml` is written even when another workflow calls the shared CI, so CI then runs twice: remove one of them
 
-`--json` - print `{ success, command, files, defaultBranch, hooksPath, clonesNeed, installCommand, scripts }`, with the files of every step
+`--json` - print `{ success, command, files, defaultBranch, editsOnly, hooksPath, clonesNeed, installCommand, scripts }`, with the files of every step
 
 ## `setup ci`
 
@@ -156,7 +156,7 @@ Options:
 
 `--force` - write `ci.yml` even if it exists or another workflow calls the shared CI (in that case CI then runs twice, so remove one of them)
 
-`--json` - print `{ success, command, files, defaultBranch }`
+`--json` - print `{ success, command, files, defaultBranch }`. A skipped `ci.yml` is what `--force` overwrites; any other skipped path already calls the shared CI, and `--force` writes `ci.yml` beside it
 
 ## `setup commits`
 
@@ -174,7 +174,7 @@ Options:
 
 `--force` - overwrite the workflow if it already exists
 
-`--json` - print `{ success, command, files, defaultBranch }`
+`--json` - print `{ success, command, files, defaultBranch, editsOnly }`, where `editsOnly` (set when the workflow is written) is `true` when it lints title edits only
 
 ## `setup hooks`
 

@@ -43,11 +43,15 @@ describe('setup-ci', () => {
   })
 
   it.each([
-    ['no ci.yml', false],
-    ['a ci.yml of its own', true],
+    ['no ci.yml', false, ['.github/workflows/ci.yaml']],
+    [
+      'a ci.yml of its own',
+      true,
+      ['.github/workflows/ci.yml', '.github/workflows/ci.yaml'],
+    ],
   ])(
     'should keep another workflow that already calls the shared CI next to %s',
-    async (_label, ciYmlExists) => {
+    async (_label, ciYmlExists, kept) => {
       fsMock.existsSync.mockReturnValue(ciYmlExists)
       fsMock.readdirSync.mockReturnValue(['ci.yaml'] as unknown as ReturnType<
         typeof fs.readdirSync
@@ -56,9 +60,9 @@ describe('setup-ci', () => {
         'uses: lekterable/perfekt/.github/workflows/ci.yml@master',
       )
 
-      expect((await setupCi()).files).toEqual([
-        { path: '.github/workflows/ci.yaml', status: 'skipped' },
-      ])
+      expect((await setupCi()).files).toEqual(
+        kept.map((path) => ({ path, status: 'skipped' })),
+      )
       expect(writeFileSpy).not.toHaveBeenCalled()
       expect((await setupCi({ force: true })).files).toEqual([
         { path: CI_WORKFLOW_PATH, status: 'written' },

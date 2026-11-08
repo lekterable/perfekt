@@ -192,12 +192,20 @@ const printSetupCiSummary = (result: SetupCiResult) => {
     ['Default branch', result.defaultBranch ?? 'not detected'],
   ])
 
-  const kept = result.files.find((file) => file.status === 'skipped')
-  const note = !kept
-    ? 'It runs on pull requests only and skips drafts: open them as drafts and mark them ready once.'
-    : kept.path === CI_WORKFLOW_PATH
-      ? 'Kept the existing workflow: pass --force to overwrite it.'
-      : `Kept it, since it already calls the shared CI. --force writes ${CI_WORKFLOW_PATH} next to it, so CI would run twice: remove one of them.`
+  const kept = result.files
+    .filter((file) => file.status === 'skipped')
+    .map((file) => file.path)
+  const keptCi = kept.includes(CI_WORKFLOW_PATH)
+  const keptCaller = kept.some((file) => file !== CI_WORKFLOW_PATH)
+  const twice = 'so CI then runs twice: remove one of them.'
+  const note =
+    kept.length === 0
+      ? 'It runs on pull requests only and skips drafts: open them as drafts and mark them ready once.'
+      : !keptCaller
+        ? 'Kept the existing workflow: pass --force to overwrite it.'
+        : keptCi
+          ? `Kept both, since one already calls the shared CI. --force overwrites ${CI_WORKFLOW_PATH}, ${twice}`
+          : `Kept it, since it already calls the shared CI. --force writes ${CI_WORKFLOW_PATH} too, ${twice}`
 
   process.stdout.write(`\n  ${note}\n`)
 }
@@ -451,7 +459,8 @@ export const createProgram = (
       'after',
       `
 Runs setup ci, commits, hooks, lint and scripts in that order, so the PR title
-workflow sees the CI caller. Leaves existing files alone unless --force. Exits 0, or 1 on an error.
+workflow sees the CI caller. Leaves existing files alone unless --force, which also writes ci.yml
+next to another workflow that calls the shared CI (remove one of them). Exits 0, or 1 on an error.
 
 Examples:
   perfekt setup                       # in a new repo

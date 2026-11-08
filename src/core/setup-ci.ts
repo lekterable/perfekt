@@ -7,20 +7,23 @@ import { findSharedCiWorkflow, getDefaultBranch } from './setup-commits'
 
 /**
  * Writes the CI caller for perfekt's shared CI workflow. Unless force is set it keeps an existing
- * ci.yml, and any other workflow that already calls the shared CI, so CI never runs twice.
+ * ci.yml, and any other workflow that already calls the shared CI, so CI never runs twice. It
+ * reports each kept file, so the summary can say what --force would overwrite or duplicate.
  */
 const setupCi = async (
   options: SetupCiOptions = {},
 ): Promise<SetupCiResult> => {
   const defaultBranch = getDefaultBranch()
-  // A caller of the shared CI wins over a ci.yml that doesn't call it, so --force can't add a second
-  const existing =
-    findSharedCiWorkflow() ??
-    (fileExists(CI_WORKFLOW_PATH) ? CI_WORKFLOW_PATH : undefined)
+  const kept = [
+    ...new Set([
+      ...(fileExists(CI_WORKFLOW_PATH) ? [CI_WORKFLOW_PATH] : []),
+      ...[findSharedCiWorkflow()].filter((file) => file !== undefined),
+    ]),
+  ]
 
-  if (!options.force && existing) {
+  if (!options.force && kept.length > 0) {
     return {
-      files: [{ path: existing, status: 'skipped' }],
+      files: kept.map((file) => ({ path: file, status: 'skipped' })),
       defaultBranch,
     }
   }

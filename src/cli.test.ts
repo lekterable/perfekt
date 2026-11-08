@@ -283,17 +283,21 @@ describe('cli', () => {
     })
 
     it.each([
-      ['.github/workflows/ci.yml', 'pass --force to overwrite it'],
+      [['.github/workflows/ci.yml'], 'pass --force to overwrite it'],
       [
-        '.github/workflows/ci.yaml',
-        '--force writes .github/workflows/ci.yml next to it, so CI would run twice',
+        ['.github/workflows/ci.yaml'],
+        '--force writes .github/workflows/ci.yml too, so CI then runs twice',
+      ],
+      [
+        ['.github/workflows/ci.yml', '.github/workflows/ci.yaml'],
+        '--force overwrites .github/workflows/ci.yml, so CI then runs twice',
       ],
     ])(
-      'should say what --force does when setup ci keeps %s',
-      async (path, hint) => {
+      'should say what --force does when setup ci keeps %j',
+      async (paths, hint) => {
         const perfekt = createPerfektDouble()
         perfekt.setupCi.mockResolvedValue({
-          files: [{ path, status: 'skipped' }],
+          files: paths.map((path) => ({ path, status: 'skipped' as const })),
           defaultBranch: 'master',
         })
 

@@ -138,7 +138,7 @@ Options:
 
 `-h, --help` - display help for command
 
-`--force` - overwrite the workflows, the hook, the Biome config and the standard scripts if they already exist
+`--force` - overwrite the workflows, the hook, the Biome config and the standard scripts if they already exist. `ci.yml` is written even when another workflow calls the shared CI, so CI then runs twice: remove one of them
 
 `--json` - print `{ success, command, files, defaultBranch, hooksPath, clonesNeed, installCommand, scripts }`, with the files of every step
 
@@ -154,7 +154,7 @@ Options:
 
 `-h, --help` - display help for command
 
-`--force` - write `ci.yml` even if it exists or another workflow calls the shared CI (CI then runs twice, so remove the other one)
+`--force` - write `ci.yml` even if it exists or another workflow calls the shared CI (in that case CI then runs twice, so remove one of them)
 
 `--json` - print `{ success, command, files, defaultBranch }`
 

@@ -63,6 +63,12 @@ describe('setup-commits', () => {
     ['calls the shared CI', 'ci.yml', `${SHARED}@master`, true],
     ['calls the shared CI at a tag', 'ci.yml', `${SHARED}@v4`, true],
     ['calls the shared CI from ci.yaml', 'ci.yaml', `${SHARED}@master`, true],
+    [
+      'calls the shared CI with a trailing comment',
+      'ci.yml',
+      `${SHARED}@master # pinned`,
+      true,
+    ],
     ['has its own CI', 'ci.yml', 'runs-on: ubuntu-latest', false],
     [
       "calls another repo's ci.yml",

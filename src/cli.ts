@@ -537,7 +537,7 @@ which needs a packageManager field in package.json. Leaves an existing ci.yml, o
 workflow that already calls the shared CI, alone unless --force. Exits 0, or 1 on an error.
 Run it before setup commits, so the PR title workflow lints title edits only. In the files
 list, a skipped ci.yml is what --force overwrites, and any other skipped path already calls
-the shared CI, so --force adds ci.yml beside it and CI then runs more than once.
+the shared CI, so --force writes ci.yml beside it and CI then runs more than once.
 
 Examples:
   perfekt setup ci

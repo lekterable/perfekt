@@ -1,17 +1,9 @@
 {
   "version": 1,
   "syncedFiles": {
-    ".cursor/rules/cursor-rules.mdc": "2026-11-08T23:01:25.793Z",
-    ".cursor/rules/formatting-guidelines.mdc": "2026-11-08T23:01:25.793Z",
-    ".cursor/rules/self-improve.mdc": "2026-11-08T23:01:25.793Z",
-    ".cursor/rules/typescript-guidelines.mdc": "2026-11-08T23:01:25.793Z",
     ".github/pull_request_template.md": "2026-11-08T23:00:49.193Z"
   },
   "fileHashes": {
-    ".cursor/rules/cursor-rules.mdc": "fa71846db07e1c42dc6c51871d782134602c6087dde92ce8f486809421820445",
-    ".cursor/rules/formatting-guidelines.mdc": "c7fc33523a8817ad583d135a73a1f1f8c3b9dceb0b688105e4f1e6fbfc1185d0",
-    ".cursor/rules/self-improve.mdc": "90160a8209151d093c7510d37feb5a35efd5dd0890ca6e3cfd83caa1768fa7d0",
-    ".cursor/rules/typescript-guidelines.mdc": "0d6aa1cc71cdb062b9eb23db1a16de85653c20ee4745a0d5597d790b3b694746",
     ".github/pull_request_template.md": "b9c1b75ad431dee76f57d5eb34b35d1005c0088db4a37be721ef3c48beff8010"
   },
   "doctor": {

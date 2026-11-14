@@ -1,8 +1,10 @@
 // Bans one-letter names: `person`, not `p`; `(left, right)`, not `(a, b)`; `index`, not `i`.
-// Covers variables, parameters, destructured names and catch bindings. Type parameters (`T`) and `_` stay allowed.
+// Covers variables, parameters, destructured names and catch bindings. Type parameters (`T`), `_` and imports
+// (`import { z } from 'zod'`, `import * as R from 'remeda'`, which keep a library's own convention) stay allowed.
 language js
 
 JsIdentifierBinding() as $name where {
   $name <: r"^[A-Za-z]$",
+  $name <: not within JsImport(),
   register_diagnostic(span=$name, message="Spell the name out (`person`, not `p`; `(left, right)`, not `(a, b)`; `index`, not `i`).")
 }

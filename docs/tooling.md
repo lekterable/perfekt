@@ -29,6 +29,8 @@ Every rule is an error, never a warning, so `biome check` either passes clean or
 
 When you adopt the config, expect `biome check` to flag existing function declarations, function expressions, loops, `null` types, one-letter names, real waits in tests and test titles. `biome check --write` fixes the function expressions; the rest need a rename or a rewrite (`const name = () => {}`, a loop turned into `map`/`reduce`, `T | null` turned into `T | undefined`, or a wait swapped for fake timers or the awaited event).
 
+The test-file rules sit in an `overrides` entry for `**/*.test.*` and `**/tests/**`, and Biome replaces a rule's options in an override instead of merging them. So if your own `biome.json` sets `noRestrictedImports` or `noRestrictedGlobals`, your entries stop applying in test files: repeat them in your own override for those paths, together with perfekt's (the `setTimeout` and `setInterval` globals, `timers/promises`, `node:timers/promises` and the default `react` import).
+
 Biome resolves plugin paths from your project root, so the config points at `./node_modules/perfekt/biome/`. That works with pnpm, npm and Yarn's `node-modules` linker when `biome.json` sits next to the `node_modules` that has `perfekt`. Yarn Plug'n'Play has no `node_modules`, so the plugins can't load there.
 
 ## TypeScript

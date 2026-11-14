@@ -1,5 +1,9 @@
 # TODO
 
+## Next
+
+<!-- Approved to build. Only Kornel's yes adds an item here, with an indented "Done when:" line; it covers building, never merging. -->
+
 ## Releases and publishing
 
 - [ ] `perfekt publish`: publish the package version that isn't on the registry yet, so a release cut

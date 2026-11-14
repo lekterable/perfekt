@@ -226,7 +226,10 @@
   "overrides": [
     {
       "includes": ["**/*.test.*", "**/tests/**"],
-      "plugins": ["./node_modules/perfekt/biome/should.grit"],
+      "plugins": [
+        "./node_modules/perfekt/biome/should.grit",
+        "./node_modules/perfekt/biome/wait.grit"
+      ],
       "linter": {
         "rules": {
           "style": {

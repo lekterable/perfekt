@@ -69,6 +69,18 @@ describe('biome plugins', () => {
       "import { vi } from 'vitest'\nvi.useFakeTimers()\nsetTimeout(() => {}, 10)\n",
       [],
     ],
+    [
+      'setTimeout under node:test context mock timers',
+      'context.test.ts',
+      "it('should tick', (context) => {\n  context.mock.timers.enable()\n  setTimeout(() => {}, 10)\n})\n",
+      [],
+    ],
+    [
+      'sleep and timers/promises under fake timers',
+      'mixed.test.ts',
+      "import { setTimeout as wait } from 'node:timers/promises'\nimport { vi } from 'vitest'\nvi.useFakeTimers()\nawait wait(1)\nawait sleep(1)\n",
+      [1, 5],
+    ],
     ['setTimeout outside tests', 'src.ts', 'setTimeout(() => {}, 10)\n', []],
     [
       'a wait inside a template string',

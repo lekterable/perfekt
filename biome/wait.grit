@@ -1,0 +1,17 @@
+// Bans real waits in tests: a test that sleeps is slow and flaky.
+// Await the event itself (a process exit, a render, a promise) or use fake timers
+// (vi.useFakeTimers, mock.timers, Effect's TestClock). Applies to test files only.
+// Code inside template strings (a fake script a test writes to disk) is not checked.
+language js
+
+or {
+  `setTimeout($...)`,
+  `setInterval($...)`,
+  `sleep($...)`,
+  `delay($...)`,
+  JsModuleSource() as $source where {
+    $source <: r"^['\"][a-z:]*timers/promises['\"]"
+  }
+} as $wait where {
+  register_diagnostic(span=$wait, message="Don't wait on real time in a test. Await the event itself (process exit, render, promise) or use fake timers.")
+}

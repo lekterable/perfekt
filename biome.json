@@ -3,7 +3,8 @@
   "plugins": [
     "./node_modules/perfekt/biome/arrow.grit",
     "./node_modules/perfekt/biome/loop.grit",
-    "./node_modules/perfekt/biome/null.grit"
+    "./node_modules/perfekt/biome/null.grit",
+    "./node_modules/perfekt/biome/name.grit"
   ],
   "vcs": {
     "enabled": true,
@@ -225,7 +226,10 @@
   "overrides": [
     {
       "includes": ["**/*.test.*", "**/tests/**"],
-      "plugins": ["./node_modules/perfekt/biome/should.grit"],
+      "plugins": [
+        "./node_modules/perfekt/biome/should.grit",
+        "./node_modules/perfekt/biome/wait.grit"
+      ],
       "linter": {
         "rules": {
           "style": {

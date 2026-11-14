@@ -11,33 +11,32 @@ afterAll(() => {
   dirs.forEach((dir) => fs.rmSync(dir, { recursive: true, force: true }))
 })
 
+// Lints one file in a scratch repo that extends the shipped `perfekt/biome`, the
+// way a consumer does, and returns the lines the house rules under test flag.
 const lint = (file: string, content: string) => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'perfekt-plugins-'))
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'perfekt-biome-'))
   dirs.push(dir)
+  fs.mkdirSync(path.join(dir, 'node_modules'))
+  fs.symlinkSync(root, path.join(dir, 'node_modules/perfekt'), 'dir')
   fs.writeFileSync(
     path.join(dir, 'biome.json'),
-    JSON.stringify({
-      linter: { rules: { recommended: false } },
-      plugins: [path.join(root, 'biome/name.grit')],
-      overrides: [
-        {
-          includes: ['**/*.test.*'],
-          plugins: [path.join(root, 'biome/wait.grit')],
-        },
-      ],
-    }),
+    JSON.stringify({ extends: ['perfekt/biome'], vcs: { enabled: false } }),
   )
   fs.writeFileSync(path.join(dir, file), content)
-  const result = spawnSync(biome, ['lint', '--max-diagnostics=50', file], {
+  const result = spawnSync(biome, ['lint', '--max-diagnostics=100', file], {
     cwd: dir,
     encoding: 'utf8',
   })
+  const output = `${result.stdout}${result.stderr}`
+  expect(output).not.toMatch(/Failed to load|configuration resulted in errors/i)
   return [
-    ...`${result.stdout}${result.stderr}`.matchAll(/:(\d+):\d+ plugin/g),
+    ...output.matchAll(
+      /:(\d+):\d+ (?:plugin|lint\/style\/noRestricted(?:Globals|Imports))/g,
+    ),
   ].map((match) => Number(match[1]))
 }
 
-describe('biome plugins', () => {
+describe('perfekt/biome', () => {
   it.each([
     [
       'a one-letter variable, parameter and catch binding',
@@ -60,33 +59,15 @@ describe('biome plugins', () => {
     [
       'real waits in a test',
       'wait.test.ts',
-      "import { setTimeout as wait } from 'node:timers/promises'\nsetTimeout(() => {}, 10)\nawait wait(1)\n",
-      [1, 2],
-    ],
-    [
-      'setTimeout under fake timers in a test',
-      'fake.test.ts',
-      "import { vi } from 'vitest'\nvi.useFakeTimers()\nsetTimeout(() => {}, 10)\n",
-      [],
-    ],
-    [
-      'setTimeout under node:test context mock timers',
-      'context.test.ts',
-      "it('should tick', (context) => {\n  context.mock.timers.enable()\n  setTimeout(() => {}, 10)\n})\n",
-      [],
-    ],
-    [
-      'sleep and timers/promises under fake timers',
-      'mixed.test.ts',
-      "import { setTimeout as wait } from 'node:timers/promises'\nimport { vi } from 'vitest'\nvi.useFakeTimers()\nawait wait(1)\nawait sleep(1)\n",
-      [1, 5],
+      "import { setTimeout as wait } from 'node:timers/promises'\nsetTimeout(() => {}, 10)\nsetInterval(() => {}, 10)\nawait wait(1)\n",
+      [1, 2, 3],
     ],
     ['setTimeout outside tests', 'src.ts', 'setTimeout(() => {}, 10)\n', []],
     [
-      'a wait inside a template string',
-      'script.test.ts',
-      'export const script = `setTimeout(() => {}, 10)`\n',
-      [],
+      "the default React import, which tests still can't use",
+      'view.test.tsx',
+      "import React from 'react'\nexport const view = React\n",
+      [1],
     ],
   ])('should flag the expected lines for %s', (_, file, content, lines) => {
     expect(lint(file, content)).toEqual(lines)

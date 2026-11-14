@@ -2,7 +2,8 @@
 // Await the event itself (a process exit, a render, a promise) or use fake timers
 // (vi.useFakeTimers, mock.timers, Effect's TestClock). Applies to test files only.
 // A file that turns on fake timers (`vi.useFakeTimers()`, `jest.useFakeTimers()`, `mock.timers.enable()`, `context.mock.timers.enable()`)
-// may call setTimeout and setInterval anywhere in it; sleep, delay and timers/promises still wait and stay flagged.
+// may call setTimeout and setInterval anywhere in it; sleep, delay and timers/promises stay flagged, since the rule
+// can't tell whether they run on the faked clock.
 // Code inside template strings (a fake script a test writes to disk) is not checked.
 language js
 

@@ -31,6 +31,7 @@
     "./biome/should.grit": "./biome/should.grit",
     "./biome/loop.grit": "./biome/loop.grit",
     "./biome/null.grit": "./biome/null.grit",
+    "./biome/name.grit": "./biome/name.grit",
     "./tsconfig": "./tsconfig.base.json",
     "./package.json": "./package.json"
   },

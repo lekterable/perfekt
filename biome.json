@@ -3,7 +3,8 @@
   "plugins": [
     "./node_modules/perfekt/biome/arrow.grit",
     "./node_modules/perfekt/biome/loop.grit",
-    "./node_modules/perfekt/biome/null.grit"
+    "./node_modules/perfekt/biome/null.grit",
+    "./node_modules/perfekt/biome/name.grit"
   ],
   "vcs": {
     "enabled": true,
@@ -229,7 +230,29 @@
       "linter": {
         "rules": {
           "style": {
-            "noNonNullAssertion": "off"
+            "noNonNullAssertion": "off",
+            "noRestrictedGlobals": {
+              "level": "error",
+              "options": {
+                "deniedGlobals": {
+                  "setTimeout": "Don't wait on real time in a test: use fake timers (vi.useFakeTimers() with vi.advanceTimersByTime()) or wait for the event itself (vi.waitFor()).",
+                  "setInterval": "Don't wait on real time in a test: use fake timers (vi.useFakeTimers() with vi.advanceTimersByTime()) or wait for the event itself (vi.waitFor())."
+                }
+              }
+            },
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "react": {
+                    "importNames": ["default"],
+                    "message": "There is no need to import 'React' as it's now globally available with 'jsxRuntime' option and use our custom components."
+                  },
+                  "node:timers/promises": "Don't wait on real time in a test: use fake timers (vi.useFakeTimers() with vi.advanceTimersByTime()) or wait for the event itself (vi.waitFor()).",
+                  "timers/promises": "Don't wait on real time in a test: use fake timers (vi.useFakeTimers() with vi.advanceTimersByTime()) or wait for the event itself (vi.waitFor())."
+                }
+              }
+            }
           }
         }
       }

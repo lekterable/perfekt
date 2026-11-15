@@ -52,3 +52,14 @@ stay the fast path. Single-package repos keep working as they do now.
   preset is in perfekt, `docs/tooling.md` documents it, and the Renovate app is installed with each
   repo extending the preset. (Was issue #30; the Mend app runs on Mend's servers, not Actions minutes,
   so check its pricing before installing.)
+- [ ] Roll out the one-letter-name and real-wait rules (#51) once a perfekt release ships them: in
+  each repo that extends `perfekt/biome`, rename one-letter names before taking the new version (the
+  first count was 324 in 87 files across eight repos, fewer now that imports are allowed), and replace
+  real waits in tests with fake timers or the awaited event. A poller for state another process owns
+  gets a `biome-ignore` with its reason; add it with the version bump, since an earlier one is an
+  unused suppression.
+- [ ] Wait rules, follow-ups from #51's review: a test-runner-neutral message (node:test repos use
+  `mock.timers`, not `vi.useFakeTimers()`); ban `node:timers` and `timers` imports too; test rows for a
+  bare `timers/promises` import and an uppercase one-letter name; the name rule flags
+  `import x = require(...)`, which should count as an import; a type-only `typeof setTimeout` in a test
+  is flagged and needs a `biome-ignore`.

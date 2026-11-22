@@ -64,6 +64,36 @@ describe('perfekt/biome', () => {
     ],
     ['setTimeout outside tests', 'src.ts', 'setTimeout(() => {}, 10)\n', []],
     [
+      'an uppercase one-letter value',
+      'src.ts',
+      'const T = 1\nexport const pick = <U,>(value: U) => [value, T]\n',
+      [1],
+    ],
+    [
+      'a one-letter `import = require()`',
+      'src.ts',
+      "import z = require('zod')\nexport const schema = z\n",
+      [],
+    ],
+    [
+      'every timers import in a test',
+      'timers.test.ts',
+      "import 'timers/promises'\nimport { setTimeout as later } from 'node:timers'\nimport legacy = require('timers')\nexport const both = [later, legacy]\n",
+      [1, 2, 3],
+    ],
+    [
+      'a type-only `typeof setTimeout` in a test',
+      'types.test.ts',
+      'type Timer = typeof setTimeout\ntype Handle = typeof globalThis.setTimeout\nexport type Both = Timer | Handle\n',
+      [1],
+    ],
+    [
+      'a doubled "should" in test titles',
+      'title.test.ts',
+      "it('should should reject', () => 1)\nit('should not not reject', () => 1)\ntest.each([1])(`should not should %s`, () => 1)\nit.only('should should pass', () => 1)\nit('should not reject', () => 1)\nit('should shoulder the load', () => 1)\n",
+      [1, 2, 3, 4],
+    ],
+    [
       "the default React import, which tests still can't use",
       'view.test.tsx',
       "import React from 'react'\nexport const view = React\n",

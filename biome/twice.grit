@@ -1,0 +1,22 @@
+// Test titles say "should" once: `it('should should reject')` and `it('should not not reject')` are typos.
+// Covers the same calls as should.grit: it/test and their modifiers (.only, .skip, .todo, .each).
+language js
+
+`$test($title, $...)` where {
+  $test <: or {
+    `it`,
+    `test`,
+    `it.$_`,
+    `test.$_`,
+    `it.each($_)`,
+    `test.each($_)`,
+    `it.$_.each($_)`,
+    `test.$_.each($_)`
+  },
+  $title <: or {
+    JsStringLiteralExpression(),
+    JsTemplateExpression()
+  },
+  $title <: r"^['\"`]should\s+(?:should|not\s+(?:should|not))\b[\s\S]*",
+  register_diagnostic(span=$title, message="Say 'should' or 'should not' once at the start of the test title, e.g. it('should reject an expired token').")
+}

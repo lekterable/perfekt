@@ -53,9 +53,8 @@ stay the fast path. Single-package repos keep working as they do now.
   repo extending the preset. (Was issue #30; the Mend app runs on Mend's servers, not Actions minutes,
   so check its pricing before installing.)
 - [ ] Roll out the one-letter-name, real-wait and doubled-"should" rules (#51 and its follow-ups) once
-  a perfekt release ships them: in
-  each repo that extends `perfekt/biome`, rename one-letter names before taking the new version (the
-  first count was 324 in 87 files across eight repos, fewer now that imports are allowed), and replace
-  real waits in tests with fake timers or the awaited event. A poller for state another process owns
-  gets a `biome-ignore` with its reason; add it with the version bump, since an earlier one is an
-  unused suppression.
+  a perfekt release ships them: in each repo that extends `perfekt/biome`, rename one-letter names
+  before taking the new version (the first count was 324 in 87 files across eight repos, fewer now
+  that imports are allowed), and replace real waits in tests with fake timers or the awaited event.
+  A poller for state another process owns gets a `biome-ignore` with its reason; add it with the
+  version bump, since an earlier one is an unused suppression.

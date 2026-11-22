@@ -1,7 +1,6 @@
 // Bans one-letter names: `person`, not `p`; `(left, right)`, not `(a, b)`; `index`, not `i`.
-// Covers variables, parameters, destructured names and catch bindings, in either case (`T` as a value too). Type
-// parameters (`T`), `_` and imports (`import { z } from 'zod'`, `import * as R from 'remeda'`, `import z = require('zod')`,
-// which keep a library's own convention) stay allowed.
+// Covers variables, parameters, destructured names and catch bindings, in either case. Type parameters, `_` and imports
+// (`import { z } from 'zod'`, `import * as R from 'remeda'`, `import z = require('zod')`) stay allowed.
 language js
 
 JsIdentifierBinding() as $name where {

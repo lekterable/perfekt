@@ -238,8 +238,8 @@
               "level": "error",
               "options": {
                 "deniedGlobals": {
-                  "setTimeout": "Don't wait on real time in a test: use your test runner's fake timers (vi.useFakeTimers() in Vitest, mock.timers.enable() in node:test) or await the event itself.",
-                  "setInterval": "Don't wait on real time in a test: use your test runner's fake timers (vi.useFakeTimers() in Vitest, mock.timers.enable() in node:test) or await the event itself."
+                  "setTimeout": "Don't wait on real time in a test: use your test runner's fake timers (vi.useFakeTimers() in Vitest, mock.timers.enable() in node:test) or await the event itself. For a type, write typeof globalThis.setTimeout.",
+                  "setInterval": "Don't wait on real time in a test: use your test runner's fake timers (vi.useFakeTimers() in Vitest, mock.timers.enable() in node:test) or await the event itself. For a type, write typeof globalThis.setInterval."
                 }
               }
             },

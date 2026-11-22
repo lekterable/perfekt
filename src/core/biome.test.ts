@@ -90,8 +90,8 @@ describe('perfekt/biome', () => {
     [
       'a doubled "should" in test titles',
       'title.test.ts',
-      "it('should should reject', () => 1)\nit('should not not reject', () => 1)\ntest.each([1])(`should not should %s`, () => 1)\nit('should not reject', () => 1)\nit('should shoulder the load', () => 1)\n",
-      [1, 2, 3],
+      "it('should should reject', () => 1)\nit('should not not reject', () => 1)\ntest.each([1])(`should not should %s`, () => 1)\nit.only('should should pass', () => 1)\nit('should not reject', () => 1)\nit('should shoulder the load', () => 1)\n",
+      [1, 2, 3, 4],
     ],
     [
       "the default React import, which tests still can't use",

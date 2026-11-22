@@ -226,7 +226,10 @@
   "overrides": [
     {
       "includes": ["**/*.test.*", "**/tests/**"],
-      "plugins": ["./node_modules/perfekt/biome/should.grit"],
+      "plugins": [
+        "./node_modules/perfekt/biome/should.grit",
+        "./node_modules/perfekt/biome/twice.grit"
+      ],
       "linter": {
         "rules": {
           "style": {
@@ -235,8 +238,8 @@
               "level": "error",
               "options": {
                 "deniedGlobals": {
-                  "setTimeout": "Don't wait on real time in a test: use fake timers (vi.useFakeTimers() with vi.advanceTimersByTime()) or wait for the event itself (vi.waitFor()).",
-                  "setInterval": "Don't wait on real time in a test: use fake timers (vi.useFakeTimers() with vi.advanceTimersByTime()) or wait for the event itself (vi.waitFor())."
+                  "setTimeout": "Don't wait on real time in a test: use your test runner's fake timers (vi.useFakeTimers() in Vitest, mock.timers.enable() in node:test) or await the event itself.",
+                  "setInterval": "Don't wait on real time in a test: use your test runner's fake timers (vi.useFakeTimers() in Vitest, mock.timers.enable() in node:test) or await the event itself."
                 }
               }
             },
@@ -248,8 +251,10 @@
                     "importNames": ["default"],
                     "message": "There is no need to import 'React' as it's now globally available with 'jsxRuntime' option and use our custom components."
                   },
-                  "node:timers/promises": "Don't wait on real time in a test: use fake timers (vi.useFakeTimers() with vi.advanceTimersByTime()) or wait for the event itself (vi.waitFor()).",
-                  "timers/promises": "Don't wait on real time in a test: use fake timers (vi.useFakeTimers() with vi.advanceTimersByTime()) or wait for the event itself (vi.waitFor())."
+                  "node:timers": "Don't wait on real time in a test: use your test runner's fake timers (vi.useFakeTimers() in Vitest, mock.timers.enable() in node:test) or await the event itself.",
+                  "timers": "Don't wait on real time in a test: use your test runner's fake timers (vi.useFakeTimers() in Vitest, mock.timers.enable() in node:test) or await the event itself.",
+                  "node:timers/promises": "Don't wait on real time in a test: use your test runner's fake timers (vi.useFakeTimers() in Vitest, mock.timers.enable() in node:test) or await the event itself.",
+                  "timers/promises": "Don't wait on real time in a test: use your test runner's fake timers (vi.useFakeTimers() in Vitest, mock.timers.enable() in node:test) or await the event itself."
                 }
               }
             }

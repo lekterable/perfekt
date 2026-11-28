@@ -68,6 +68,16 @@ describe('Commit', () => {
         message: 'keep the session',
       },
     ],
+    [
+      'e1f3a5c7b9d1e3f5a7c9b1d3e5f7a9c1b3d5e7f9 Revert "feat: add retries"',
+      {
+        isConventional: false,
+        type: undefined,
+        scope: undefined,
+        isBreaking: undefined,
+        message: 'Revert "feat: add retries"',
+      },
+    ],
   ])('should parse %j', (line, expected) => {
     const commit = new Commit(line)
 

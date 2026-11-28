@@ -1,3 +1,5 @@
+import { NOTE } from './lint'
+
 class Commit {
   #commit: string
   #hash: string
@@ -41,7 +43,8 @@ class Commit {
     this.#message = groups.message
     this.#isConventional = true
     this.#isBreaking =
-      Boolean(groups.isBreaking) || /^BREAKING[ -]CHANGE: /m.test(body)
+      Boolean(groups.isBreaking) ||
+      body.split('\n').some((line) => NOTE.test(line))
     this.#type = groups.type
     this.#scope = groups.scope ?? undefined
   }

@@ -34,6 +34,31 @@ The test-file rules sit in an `overrides` entry for `**/*.test.*` and `**/tests/
 
 Biome resolves plugin paths from your project root, so the config points at `./node_modules/perfekt/biome/`. That works with pnpm, npm and Yarn's `node-modules` linker when `biome.json` sits next to the `node_modules` that has `perfekt`. Yarn Plug'n'Play has no `node_modules`, so the plugins can't load there.
 
+## Code conventions and their checks
+
+The code conventions block that repos carry in `AGENTS.md` (synced by [Synapse](https://github.com/lekterable/synapse-ai)) is the rule text; this table says what enforces each rule. A rule enforced only by review is a gap: when review keeps flagging the same thing, it is a candidate for a new plugin or test here. `src/core/rules.test.ts` fails when a rule in the block has no row, a row matches no rule, or a row names a plugin or rule that doesn't exist.
+
+| Rule starts with | Enforced by |
+| --- | --- |
+| TypeScript first | `style/useConsistentTypeDefinitions`, review |
+| Write arrow functions only | `complexity/useArrowFunction`, `biome/arrow.grit` |
+| Write declarative code | `biome/loop.grit`, review |
+| Spell names out | `biome/name.grit` |
+| Use small direct exports | review |
+| Use pnpm | review |
+| Use a library where custom code is risky | review |
+| Before writing a file | review |
+| Validate outside data | `biome/null.grit`, review |
+| Write our own config and data files as JSON | review |
+| Give every CLI | review |
+| Put tests next to the code | review |
+| Name each case by behaviour | `biome/should.grit`, `biome/twice.grit` |
+| Test only what can realistically break | review |
+| Write one test per behaviour | review |
+| Keep the suite fast | `style/noRestrictedGlobals`, `style/noRestrictedImports`, review |
+| A bug fix adds one regression test | review |
+| Before adding a test | review |
+
 ## TypeScript
 
 `perfekt/tsconfig` is the house compiler config: strict mode plus `noUncheckedIndexedAccess`, `noImplicitOverride`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, ES2023, `verbatimModuleSyntax` so type-only imports stay `import type`, and `erasableSyntaxOnly`, which rules out enums, namespaces and parameter properties so Node and Bun can run the source by stripping types. It assumes a bundler or runtime that reads TypeScript (`"moduleResolution": "bundler"`). It leaves out `include`, `types`, `jsx` and output settings, which belong to each repo:

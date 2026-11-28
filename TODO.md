@@ -57,6 +57,8 @@ stay the fast path. Single-package repos keep working as they do now.
 - [ ] Roll out the one-letter-name, real-wait and doubled-"should" rules (#51 and its follow-ups) once
   a perfekt release ships them: in each repo that extends `perfekt/biome`, rename one-letter names
   before taking the new version (the first count was 324 in 87 files across eight repos, fewer now
-  that imports are allowed), and replace real waits in tests with fake timers or the awaited event. With `biome/temp.grit`, add the cleanup (or a `biome-ignore` that names who removes the folder) to each test file it flags in that bump.
+  that imports are allowed), and replace real waits in tests with fake timers or the awaited event.
   A poller for state another process owns gets a `biome-ignore` with its reason; add it with the
-  version bump, since an earlier one is an unused suppression.
+  version bump, since an earlier one is an unused suppression. With `biome/temp.grit`, add the
+  cleanup (or a `biome-ignore` that names who removes the folder) to each test file it flags in
+  that bump.

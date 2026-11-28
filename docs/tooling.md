@@ -37,7 +37,7 @@ Biome resolves plugin paths from your project root, so the config points at `./n
 
 ## Code conventions and their checks
 
-The code conventions block that repos carry in `AGENTS.md` (synced by [Synapse](https://github.com/lekterable/synapse-ai)) is the rule text; this table says what enforces each rule. A rule enforced only by review is a gap: when review keeps flagging the same thing, it is a candidate for a new plugin or test here. `src/core/rules.test.ts` fails when a rule in the block has no row, a row matches no rule, or a row names a plugin or rule that doesn't exist.
+The code conventions block that repos carry in `AGENTS.md` (synced by [Synapse](https://github.com/lekterable/synapse-ai)) is the rule text; this table says what enforces each rule. A rule enforced only by review is a gap: when review keeps flagging the same thing, it is a candidate for a new plugin or test here. `src/core/rules.test.ts` fails when a rule in the block has no row, a row matches no rule, or a row names a plugin or rule that doesn't exist or isn't loaded in `biome.json`.
 
 | Rule starts with | Enforced by |
 | --- | --- |

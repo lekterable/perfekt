@@ -57,9 +57,10 @@ describe('code conventions table', () => {
   it.each(table.flatMap((row) => row.checks))(
     'should ship the check %s',
     (check) => {
-      if (check.endsWith('.grit'))
+      if (check.endsWith('.grit')) {
         expect(fs.existsSync(path.join(root, check))).toBe(true)
-      else expect(biome).toContain(`"${check.split('/')[1]}"`)
+        expect(biome).toContain(`./node_modules/perfekt/${check}`)
+      } else expect(biome).toContain(`"${check.split('/')[1]}"`)
     },
   )
 })

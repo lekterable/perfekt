@@ -106,6 +106,12 @@ describe('perfekt/biome', () => {
       [],
     ],
     [
+      'a temp folder a test removes with the promise rmdir',
+      'tidy.test.ts',
+      "import { mkdtemp, rmdir } from 'node:fs/promises'\nconst dir = await mkdtemp('a')\nafterAll(() => rmdir(dir))\n",
+      [],
+    ],
+    [
       "the default React import, which tests still can't use",
       'view.test.tsx',
       "import React from 'react'\nexport const view = React\n",

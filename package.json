@@ -33,6 +33,7 @@
     "./biome/null.grit": "./biome/null.grit",
     "./biome/name.grit": "./biome/name.grit",
     "./biome/twice.grit": "./biome/twice.grit",
+    "./biome/temp.grit": "./biome/temp.grit",
     "./tsconfig": "./tsconfig.base.json",
     "./package.json": "./package.json"
   },

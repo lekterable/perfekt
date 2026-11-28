@@ -6,6 +6,7 @@ Docs: `README.md` (also the docs site homepage), then `docs/` for getting starte
 `demo/` holds the HyperFrames demo video, built from real CLI output: when `setup`, `changelog`, `release` or `ci` output changes, follow `demo/README.md` to capture, update the terminal scene and render again. Its HTML lint exceptions live in `demo/biome.json`, never in the root `biome.json`, which ships as `perfekt/biome`.
 Only `changelog` and `release` load the config (`src/core/config/load.ts`), so `lint`, `ci`, `init` and `setup` keep working when it is broken.
 Before pushing, run `pnpm verify` (it builds, then runs `perfekt ci`: install, commits, lint, typecheck, test and build). perfekt writes `CHANGELOG.md` itself on release, so never edit it by hand.
+When a Synapse sync rewords how a rule in the block below starts, update its row in the code conventions table in `docs/tooling.md`; `src/core/rules.test.ts` fails until you do.
 
 <!-- synapse:code-conventions -->
 ## Code conventions

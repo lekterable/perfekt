@@ -1,5 +1,5 @@
 // Test files remove the temp folders they make: a file that calls `mkdtemp` or `mkdtempSync` must also call
-// `rm`, `rmSync` or `rmdirSync` somewhere (an `after` hook or a `finally`), or each run leaves folders behind.
+// `rm`, `rmSync`, `rmdir` or `rmdirSync` somewhere (an `after` hook or a `finally`), or each run leaves folders behind.
 // It checks the file, not each folder, so it catches a file with no cleanup at all.
 language js
 
@@ -14,11 +14,13 @@ language js
     $remove <: or {
       `rmSync`,
       `rm`,
+      `rmdir`,
       `rmdirSync`,
       `$_.rmSync`,
       `$_.rm`,
+      `$_.rmdir`,
       `$_.rmdirSync`
     }
   },
-  register_diagnostic(span=$call, message="Remove the temp folder this test makes: call rm or rmSync on it in an after hook or a finally.")
+  register_diagnostic(span=$call, message="Remove the temp folder this test makes: call rm or rmSync on it in an after hook or a finally. If a caller removes it, say so in a biome-ignore comment.")
 }

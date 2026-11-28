@@ -1,3 +1,19 @@
+# read breaking footers and any scope in commits (#56)
+
+## Features
+
+- close rule gaps and flag doubled should (#55) [dacef327](https://github.com/lekterable/perfekt/commit/dacef327a799e84bf11cb089cee825e46b6ba74f)
+- ban one-letter names and real waits in tests (#51) [c2b7554a](https://github.com/lekterable/perfekt/commit/c2b7554a0c68aa98905c5a687ae4fc427d0dc4c8)
+
+## Misc
+
+- track the lint rules rollout and review follow-ups (#54) [9ee045f3](https://github.com/lekterable/perfekt/commit/9ee045f349e232b42dd4c242f8146a18166031eb)
+- add a Next section for approved work (#52) [a574a04d](https://github.com/lekterable/perfekt/commit/a574a04d9e1b472a43160f9e1855a81183d77147)
+- drop the retired cursor rules (#50) [de982f55](https://github.com/lekterable/perfekt/commit/de982f555c11600e1f44cf53b4b2e6372aab3f2b)
+- add synapse config (#49) [47b088e0](https://github.com/lekterable/perfekt/commit/47b088e0dc125d6890609221b879320abd1d2b23)
+- paraphrase only where the next prompt reacts (#48) [73bb3b3b](https://github.com/lekterable/perfekt/commit/73bb3b3be29d42af0c316ee2c531709164f4afb7)
+- add a TODO and name the PR template fold Request (#47) [05e1b3cb](https://github.com/lekterable/perfekt/commit/05e1b3cba898941a6cb412b152a0158d4c2e4adc)
+
 # 4.4.0
 
 ## Features

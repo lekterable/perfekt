@@ -24,15 +24,41 @@ The config also enforces the house code conventions:
 | Test titles say "should" once | In the same files, a title that doubles it, such as `'should should reject'`, `'should not not reject'` or `'should not should reject'`, is an error. | GritQL plugin `biome/twice.grit` |
 | No one-letter names | Variables, parameters, destructured names and `catch` bindings need a real name, in either case: `person`, not `p`; `(left, right)`, not `(a, b)`; `index`, not `i`; `const T = 1` too. Type parameters (`T`), `_` and imports (`import { z } from 'zod'`, `import * as R from 'remeda'`, `import z = require('zod')`) are allowed. | GritQL plugin `biome/name.grit` |
 | No real waits in tests | In `**/*.test.*` and `**/tests/**`, the `setTimeout` and `setInterval` globals and `timers` and `timers/promises` imports (with or without `node:`, including `import x = require(...)`) are errors: use your test runner's fake timers (`vi.useFakeTimers()` in Vitest, `mock.timers.enable()` in node:test) or await the event itself (`vi.waitFor()`, a process exit, a promise). A type-only `typeof setTimeout` is flagged too: write `typeof globalThis.setTimeout` instead, as the message says. There is no exemption; a rare real need gets a `// biome-ignore` comment with its reason. | Biome core rules `style/noRestrictedGlobals` and `style/noRestrictedImports` in the test override |
+| Tests remove their temp folders | In the same files, a file that calls `mkdtemp` or `mkdtempSync` must also call `rm`, `rmSync`, `rmdir` or `rmdirSync` (in an `after` hook or a `finally`), or every run leaves folders behind. It checks the file, not each folder; a shared helper whose callers remove the folder says so in a `biome-ignore lint/plugin/temp` comment. | GritQL plugin `biome/temp.grit` |
 | `style/useConsistentTypeDefinitions` | `type` instead of `interface`. | Biome core rule |
 
 Every rule is an error, never a warning, so `biome check` either passes clean or fails CI. Non-null assertions (`value!`) are allowed only in tests. Besides Biome's usual correctness checks, it bans `any` (explicit, implicit and evolving), floating and misused promises, import cycles, undeclared dependencies, unused parameters and empty blocks (a block holding a comment that says why it's empty passes), and asks for `node:` imports and template literals.
 
-When you adopt the config, expect `biome check` to flag existing function declarations, function expressions, loops, `null` types, one-letter names, real waits in tests and test titles. `biome check --write` fixes the function expressions; the rest need a rename or a rewrite (`const name = () => {}`, a loop turned into `map`/`reduce`, `T | null` turned into `T | undefined`, or a wait swapped for fake timers or the awaited event).
+When you adopt the config, expect `biome check` to flag existing function declarations, function expressions, loops, `null` types, one-letter names, real waits in tests, temp folders tests never remove and test titles. `biome check --write` fixes the function expressions; the rest need a rename or a rewrite (`const name = () => {}`, a loop turned into `map`/`reduce`, `T | null` turned into `T | undefined`, or a wait swapped for fake timers or the awaited event).
 
 The test-file rules sit in an `overrides` entry for `**/*.test.*` and `**/tests/**`, and Biome replaces a rule's options in an override instead of merging them. So if your own `biome.json` sets `noRestrictedImports` or `noRestrictedGlobals`, your entries stop applying in test files: repeat them in your own override for those paths, together with perfekt's (the `setTimeout` and `setInterval` globals, `timers`, `node:timers`, `timers/promises`, `node:timers/promises` and the default `react` import).
 
 Biome resolves plugin paths from your project root, so the config points at `./node_modules/perfekt/biome/`. That works with pnpm, npm and Yarn's `node-modules` linker when `biome.json` sits next to the `node_modules` that has `perfekt`. Yarn Plug'n'Play has no `node_modules`, so the plugins can't load there.
+
+## Code conventions and their checks
+
+The code conventions block that repos carry in `AGENTS.md` (synced by [Synapse](https://github.com/lekterable/synapse-ai)) is the rule text; this table says what enforces each rule. A rule enforced only by review is a gap: when review keeps flagging the same thing, it is a candidate for a new plugin or test here. `src/core/rules.test.ts` fails when a rule in the block has no row, a row matches no rule, or a row names a plugin or rule that doesn't exist or isn't loaded in `biome.json`.
+
+| Rule starts with | Enforced by |
+| --- | --- |
+| TypeScript first | `style/useConsistentTypeDefinitions`, review |
+| Write arrow functions only | `complexity/useArrowFunction`, `biome/arrow.grit` |
+| Write declarative code | `biome/loop.grit`, review |
+| Spell names out | `biome/name.grit` |
+| Use small direct exports | review |
+| Use pnpm | review |
+| Use a library where custom code is risky | review |
+| Before writing a file | review |
+| Validate outside data | review |
+| Write our own config and data files as JSON | review |
+| Give every CLI | review |
+| Put tests next to the code | review |
+| Name each case by behaviour | `biome/should.grit`, `biome/twice.grit` |
+| Test only what can realistically break | review |
+| Write one test per behaviour | review |
+| Keep the suite fast | `style/noRestrictedGlobals`, `style/noRestrictedImports`, review |
+| A bug fix adds one regression test | review |
+| Before adding a test | review |
 
 ## TypeScript
 

@@ -94,6 +94,30 @@ describe('perfekt/biome', () => {
       [1, 2, 3, 4],
     ],
     [
+      'a temp folder a test never removes',
+      'temp.test.ts',
+      "import fs from 'node:fs'\nimport { mkdtemp } from 'node:fs/promises'\nexport const dirs = [fs.mkdtempSync('a'), await mkdtemp('b')]\n",
+      [3, 3],
+    ],
+    [
+      'a temp folder a test removes',
+      'clean.test.ts',
+      "import { mkdtempSync, rmSync } from 'node:fs'\nconst dir = mkdtempSync('a')\nafterAll(() => rmSync(dir, { recursive: true }))\n",
+      [],
+    ],
+    [
+      'a temp folder a test removes with the promise rmdir',
+      'tidy.test.ts',
+      "import { mkdtemp, rmdir } from 'node:fs/promises'\nconst dir = await mkdtemp('a')\nafterAll(() => rmdir(dir))\n",
+      [],
+    ],
+    [
+      'a temp folder a test removes through the fs promises namespace',
+      'tidy.test.ts',
+      "import fs from 'node:fs'\nconst dir = await fs.promises.mkdtemp('a')\nafterAll(() => fs.promises.rmdir(dir))\n",
+      [],
+    ],
+    [
       "the default React import, which tests still can't use",
       'view.test.tsx',
       "import React from 'react'\nexport const view = React\n",

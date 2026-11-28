@@ -228,7 +228,8 @@
       "includes": ["**/*.test.*", "**/tests/**"],
       "plugins": [
         "./node_modules/perfekt/biome/should.grit",
-        "./node_modules/perfekt/biome/twice.grit"
+        "./node_modules/perfekt/biome/twice.grit",
+        "./node_modules/perfekt/biome/temp.grit"
       ],
       "linter": {
         "rules": {

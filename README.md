@@ -69,7 +69,7 @@ perfekt reads the commit type to group the changelog and pick the next version, 
 - Types: `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `ci`, `build`, `style`, `perf`, `revert`
 - A subject that starts lower-case with an imperative verb (`add`, not `added`) and has no trailing `.`
 - Header up to 72 characters; subjects over 50 characters get a warning
-- `!` after the type, or a `BREAKING CHANGE:` footer, marks a breaking change
+- `!` after the type, or a `BREAKING CHANGE:` (or `BREAKING-CHANGE:`) footer, marks a breaking change
 
 `perfekt lint` enforces these rules (commitlint's `config-conventional` plus a few house overrides, built in). When you squash-merge, the pull request title becomes the commit, so `perfekt setup commits` lints titles on GitHub, and `perfekt setup hooks` adds a `commit-msg` hook that lints local commits.
 

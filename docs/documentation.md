@@ -32,6 +32,8 @@ Arguments:
 
 `version` - _(required)_ version which will be used while executing the release. You can use `major`, `minor` and `patch` instead of a specific version number to bump it or `new` to make **perfekt** determine the version for you automatically based on the unreleased changes.
 
+`new` reads each commit's subject and body: a `!` after the type, or a `BREAKING CHANGE:` or `BREAKING-CHANGE:` footer line, means a major release. GitHub's default squash message copies the body of every commit on the branch, so a footer from an earlier, already released commit can force a major. Set the repository's default squash message to "Pull request title and description" (Settings, General, Pull Requests), and check the bump with `--dry-run` first.
+
 To release from GitHub Actions instead, see [shared tooling](tooling.md#releases).
 
 ## `changelog`

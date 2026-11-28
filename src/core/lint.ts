@@ -58,7 +58,7 @@ const isVersion = (message: string) =>
   )
 
 const HEADER = /^(\w*)(?:\((.*)\))?!?: (.*)$/
-const NOTE = /^BREAKING[ -]CHANGE: /
+export const NOTE = /^BREAKING[ -]CHANGE: /
 const URL = /\bhttps?:\/\/\S+/
 
 const IMPERATIVE_EXCEPTIONS = new Set([

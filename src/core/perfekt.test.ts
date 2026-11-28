@@ -20,7 +20,7 @@ const mockLog = [
   '4e02179cae1234d7083036024080a3f25fcb52c2 feat: add execute release feature',
   'b2f5901922505efbfb6dd684252e8df0cdffeeb2 tests: add core tests',
   '2ea04355c1e81c5088eeabc6e242fb1ade978524 chore: update dependencies',
-].join('\n')
+].join('\n\x1e\n')
 
 const existingChangelog = `# 1.2.0
 
@@ -95,12 +95,12 @@ describe('Perfekt', () => {
     })
 
     it.each([
-      ['by latest tag', {}, 'git log --format="%H %s" 2.2.2..'],
-      ['from the root', { root: true }, 'git log --format="%H %s"'],
+      ['by latest tag', {}, 'git log --format="%H %s%n%b%x1e" 2.2.2..'],
+      ['from the root', { root: true }, 'git log --format="%H %s%n%b%x1e"'],
       [
         'from an explicit commit',
         { from: '4e02179c' },
-        'git log --format="%H %s" 4e02179c..',
+        'git log --format="%H %s%n%b%x1e" 4e02179c..',
       ],
     ])(
       'should render the changelog %s',
@@ -125,7 +125,7 @@ describe('Perfekt', () => {
             '73f2ecbf494ed97fcf34fce833014241fe74a6b6 chore(release): 1.2.0',
             'a357a61a4197d01201a84b9ae7ed7f447e16c7d7 feat!: make no-commits error more specific',
             '8c56a8d694955eb02d665f9e78a95cd076e8fcf5 Add a new feature',
-          ].join('\n'),
+          ].join('\n\x1e\n'),
         )
 
       const result = await perfekt.changelog(undefined, {}, 'silent')
@@ -183,7 +183,7 @@ describe('Perfekt', () => {
           [
             '29d6eb7f00000000000000000000000000000000 chore: add release script',
             '0408144700000000000000000000000000000000 feat(cli): show last sync dates in project list',
-          ].join('\n'),
+          ].join('\n\x1e\n'),
         )
 
       await perfekt.changelog('1.2.0', {})
@@ -239,7 +239,9 @@ describe('Perfekt', () => {
 
       const result = await perfekt.release('2.2.2', {})
 
-      expect(execMock).toHaveBeenCalledWith('git log --format="%H %s" 1.2.0..')
+      expect(execMock).toHaveBeenCalledWith(
+        'git log --format="%H %s%n%b%x1e" 1.2.0..',
+      )
       expect(fsMock.writeFile.mock.calls[0]?.[1]).toBe(
         `${expectedChangelog}\n${existingChangelog}`,
       )
@@ -306,7 +308,7 @@ describe('Perfekt', () => {
       await perfekt.release('2.2.2', { from: '4e02179c' })
 
       expect(execMock).toHaveBeenCalledWith(
-        'git log --format="%H %s" 4e02179c..',
+        'git log --format="%H %s%n%b%x1e" 4e02179c..',
       )
     })
 

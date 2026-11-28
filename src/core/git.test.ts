@@ -73,20 +73,28 @@ describe('Git', () => {
 
   describe('getCommits', () => {
     it.each([
-      [undefined, 'git log --format="%H %s"', "Couldn't find any commits."],
+      [
+        undefined,
+        'git log --format="%H %s%n%b%x1e"',
+        "Couldn't find any commits.",
+      ],
       [
         '0.1.0',
-        'git log --format="%H %s" 0.1.0..',
+        'git log --format="%H %s%n%b%x1e" 0.1.0..',
         "Couldn't find any commits since `0.1.0`.",
       ],
     ])('should read commits since %j', (from, command, error) => {
       execMock.mockReturnValueOnce(
-        'd0e72481e9b9dc2bed8e495b8943d2d90399db32 feat: replace all placeholder occurrences\n73f2ecbf494ed97fcf34fce833014241fe74a6b6 chore(release): 1.2.0',
+        'd0e72481e9b9dc2bed8e495b8943d2d90399db32 fix: drop the legacy endpoint\n\nBREAKING CHANGE: /v1 is gone\n\x1e\n73f2ecbf494ed97fcf34fce833014241fe74a6b6 chore(release): 1.2.0\n\x1e\n',
       )
 
-      expect(git.getCommits(from).map((commit) => commit.message)).toEqual([
-        'replace all placeholder occurrences',
-        '1.2.0',
+      expect(
+        git
+          .getCommits(from)
+          .map(({ message, isBreaking }) => ({ message, isBreaking })),
+      ).toEqual([
+        { message: 'drop the legacy endpoint', isBreaking: true },
+        { message: '1.2.0', isBreaking: false },
       ])
       expect(execMock).toHaveBeenCalledWith(command)
 

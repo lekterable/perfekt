@@ -13,6 +13,8 @@
 - [ ] Release PR workflow: a reusable workflow that opens or updates a `chore(release)` PR with the
   version bump and changelog, then tags and publishes (through `perfekt publish`) when it merges. A
   release then needs no direct push to the default branch or a tag push from a local clone.
+- [ ] `changelog --json` exits 0 when it fails (`"success": false`, such as `--from` with an unknown
+  commit). Without `--json`, and in `release --json`, the same failure exits 1.
 - [ ] Prerelease mode: `perfekt pre enter beta` / `perfekt pre exit`, versions like `5.0.0-beta.0`,
   published under the matching npm dist-tag.
 - [ ] Snapshot versions: `perfekt release new --snapshot canary` gives a throwaway version with a date or

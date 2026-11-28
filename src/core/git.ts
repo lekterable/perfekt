@@ -117,9 +117,9 @@ class Git {
   }
 
   getCommits(from?: string) {
-    const query = from
-      ? `git log --format="%H %s" ${from}..`
-      : 'git log --format="%H %s"'
+    // %x1e ends each commit, so a body can span lines
+    const format = '--format="%H %s%n%b%x1e"'
+    const query = from ? `git log ${format} ${from}..` : `git log ${format}`
     const log = exec(query)
 
     if (!log) {
@@ -129,9 +129,17 @@ class Git {
       throw new Error(message)
     }
 
-    const commits = log.toString().trimEnd().split('\n')
+    const records = log
+      .toString()
+      .split('\x1e')
+      .map((record) => record.trim())
+      .filter(Boolean)
 
-    return commits.map((commit) => new Commit(commit))
+    return records.map((record) => {
+      const [subject = '', ...body] = record.split('\n')
+
+      return new Commit(subject, body.join('\n'))
+    })
   }
 }
 

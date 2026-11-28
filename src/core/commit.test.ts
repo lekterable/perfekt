@@ -48,6 +48,26 @@ describe('Commit', () => {
         message: 'make no-commits error more specific',
       },
     ],
+    [
+      'b7c1e0d2a4f6e8c0b2d4f6a8c0e2b4d6f8a0c2e4 feat(api-client): add retries',
+      {
+        isConventional: true,
+        type: 'feat',
+        scope: 'api-client',
+        isBreaking: false,
+        message: 'add retries',
+      },
+    ],
+    [
+      'c8d2f1e3b5a7c9e1d3f5b7a9c1e3d5f7b9a1c3e5 fix(web/auth.v2): keep the session',
+      {
+        isConventional: true,
+        type: 'fix',
+        scope: 'web/auth.v2',
+        isBreaking: false,
+        message: 'keep the session',
+      },
+    ],
   ])('should parse %j', (line, expected) => {
     const commit = new Commit(line)
 
@@ -59,5 +79,19 @@ describe('Commit', () => {
       message: commit.message,
     }).toEqual(expected)
     expect(commit.hash).toBe(line.slice(0, 40))
+  })
+
+  it.each([
+    ['BREAKING CHANGE: /v1 is gone', true],
+    ['Closes #12\nBREAKING-CHANGE: /v1 is gone', true],
+    ['Mentions a BREAKING CHANGE: inline', false],
+    ['', false],
+  ])('should read a breaking change footer from %j', (body, isBreaking) => {
+    const commit = new Commit(
+      'a05ed8ff3c1d2e4f5a6b7c8d9e0f1a2b3c4d5e6f fix: drop the legacy endpoint',
+      body,
+    )
+
+    expect(commit.isBreaking).toBe(isBreaking)
   })
 })

@@ -7,7 +7,8 @@ class Commit {
   #type?: string
   #scope?: string
 
-  constructor(commit: string) {
+  // `body` is everything after the subject line; a breaking change footer there counts like `!`
+  constructor(commit: string, body = '') {
     const match = commit.match(/(?<hash>.{40}) (?<title>.*)/)
 
     const hash = match?.groups?.hash
@@ -18,7 +19,7 @@ class Commit {
     this.#commit = commit
 
     const commitDetails = title.match(
-      /(?<type>[\w ]*)(?:\((?<scope>[\w ]*)\))?(?<isBreaking>!)?: (?<message>.*)/,
+      /^(?<type>[\w ]*)(?:\((?<scope>[^()]*)\))?(?<isBreaking>!)?: (?<message>.*)/,
     )
 
     if (!commitDetails) {
@@ -39,7 +40,8 @@ class Commit {
     this.#hash = hash
     this.#message = groups.message
     this.#isConventional = true
-    this.#isBreaking = Boolean(groups.isBreaking)
+    this.#isBreaking =
+      Boolean(groups.isBreaking) || /^BREAKING[ -]CHANGE: /m.test(body)
     this.#type = groups.type
     this.#scope = groups.scope ?? undefined
   }
